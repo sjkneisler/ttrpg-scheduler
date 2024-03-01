@@ -1,6 +1,14 @@
-# Getting Started with Create React App
+
+# TTRPG Scheduler
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+## Getting Started
+
+* Install yarn (`npm i yarn -g`)
+* Install PostgreSQL
+* Run `yarn install`
+* Run `yarn start`!
 
 ## Available Scripts
 
