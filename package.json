@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@prisma/client": "^5.10.2",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -20,9 +21,8 @@
     "react-app-rewired": "^2.2.1",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
-    "sequelize": "^6.37.1",
     "socket.io": "^4.7.4",
-    "typescript": "^4.9.5",
+    "typescript": "^5.3.3",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -32,10 +32,10 @@
     "start": "concurrently \"yarn start:frontend\" \"yarn start:backend\"",
     "start:frontend": "react-app-rewired start",
     "start:backend": "npx ts-node-dev ./server/server.ts",
-    "db:migrate": "npx sequelize-cli db:migrate",
-    "db:init": "npx sequelize-cli db:create",
-    "db:seed": "npx sequelize-cli db:seed:all",
-    "db:up": "yarn db:migrate && yarn db:seed"
+    "db:init": "npx prisma migrate dev --name init",
+    "db:migrate": "npx prisma migrate dev",
+    "db:generate": "npx prisma generate",
+    "db:up": "yarn db:migrate && yarn db:generate"
   },
   "eslintConfig": {
     "extends": [
@@ -59,7 +59,7 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/express": "^4.17.21",
     "nodemon": "^3.1.0",
-    "sequelize-cli": "^6.6.2",
+    "prisma": "^5.10.2",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0"
   }

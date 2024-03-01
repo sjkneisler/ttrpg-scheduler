@@ -1,22 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { ExampleType } from "../../common/types/example";
-import { getExampleData, getTestDbConnection } from "./api/client";
+import { getExampleData, seed } from "./api/client";
+import { Example } from "@prisma/client";
 
 function App() {
-  const [data, setData] = useState<ExampleType[]>([]);
-  const [dbConnection, setDbConnection] = useState<string | null>(null);
+  const [data, setData] = useState<Example[]>([]);
   useEffect(() => {
-    getExampleData()
-      .then((data) => setData(data));
-    getTestDbConnection()
-      .then((data) => setDbConnection(data));
-  }, []);
+    getExampleData().then(setData);
+  }, [])
   return (
     <div className="App">
       {data.map((data) => <div>{data.foo} - {data.bar}</div>)}
-      {dbConnection}
+      <button onClick={() => {
+        seed();
+      }}>Seed</button>
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
