@@ -2,6 +2,8 @@ import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import { ExampleType } from "../common/types/example";
 import cors from "cors";
+import { strictEqual } from "node:assert";
+import { database } from "./database";
 
 dotenv.config();
 
@@ -25,4 +27,16 @@ app.get<{},ExampleType[]>("/exampleData", (req, res) => {
 		foo: "bye",
 		bar: 7,
 	}]);
+})
+
+app.get("/testDbConnection",  async  (req, res) => {
+	try {
+		await database.authenticate();
+		res.status(200).send("DB Connection success!");
+	} catch(e: any) {
+		res.status(500).send(e.message);
+	}
+})
+
+app.get<{}, ExampleType>("/examples", async (req, res) => {
 })

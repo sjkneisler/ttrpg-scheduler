@@ -1,0 +1,9 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "password",
+    "database": "ttrpg_scheduler",
+    "host": "localhost",
+    "dialect": "postgres"
+  }
+}

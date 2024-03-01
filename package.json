@@ -31,7 +31,11 @@
     "eject": "react-app-rewired eject",
     "start": "concurrently \"yarn start:frontend\" \"yarn start:backend\"",
     "start:frontend": "react-app-rewired start",
-    "start:backend": "npx ts-node-dev ./server/server.ts"
+    "start:backend": "npx ts-node-dev ./server/server.ts",
+    "db:migrate": "npx sequelize-cli db:migrate",
+    "db:init": "npx sequelize-cli db:create",
+    "db:seed": "npx sequelize-cli db:seed:all",
+    "db:up": "yarn db:migrate && yarn db:seed"
   },
   "eslintConfig": {
     "extends": [
@@ -55,6 +59,7 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/express": "^4.17.21",
     "nodemon": "^3.1.0",
+    "sequelize-cli": "^6.6.2",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0"
   }

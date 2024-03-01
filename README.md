@@ -8,6 +8,8 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 * Install yarn (`npm i yarn -g`)
 * Install PostgreSQL
 * Run `yarn install`
+* Run `yarn db:init` (only run once)
+* Run `yarn db:up` (run any time a new migration or seed is created)
 * Run `yarn start`!
 
 ## Available Scripts
