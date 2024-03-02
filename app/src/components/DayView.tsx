@@ -2,11 +2,11 @@
 import React, { useContext } from 'react';
 import { css } from '@emotion/react';
 import _ from 'lodash';
-import { DayAvailability } from '../../../common/types/availability-state';
-import { Day } from '../../../common/types/day';
+import {Day, DayAvailability } from '@prisma/client';
 import { getColorFromAvailabilityState } from '../utils/availbility-states';
 import { DragContext } from './DragContext';
 import { getDayText } from '../utils/day';
+import {getNumberForDay} from "../../../common/util/day";
 
 function getBorderForTimeSegment(intervalNum: number): string {
   if (intervalNum === 0) {
@@ -66,7 +66,7 @@ export const DayView: React.FC<{ day: Day, availability: DayAvailability }> = ({
                                         border-color: #000000FF;
                                         border-style: solid;
                                         border-width: ${getBorderForTimeSegment(num)};
-                                        background-color: ${getColorFromAvailabilityState(availability[hourCount * 4 + num])};
+                                        background-color: ${getColorFromAvailabilityState(availability.availability[hourCount * 4 + num])};
                                     `}
                   onMouseMove={(e) => onDrag(e, { day, time: hourCount * 4 + num })}
                   onMouseDown={(e) => onDragStart(e, { day, time: hourCount * 4 + num })}

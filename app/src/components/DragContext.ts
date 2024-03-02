@@ -1,5 +1,5 @@
+import { Day } from '@prisma/client';
 import React from 'react';
-import { Day } from '../../../common/types/day';
 
 export const DragContext = React.createContext<{
   onDragStart:(e: React.MouseEvent, pos: DragPosition) => void;

@@ -1,20 +1,20 @@
-import { Day } from '../../../common/types/day';
+import { Day } from '@prisma/client';
 
 export function getDayText(day: Day): string {
   switch (day) {
-    case Day.Sunday:
+    case Day.SUNDAY:
       return 'Sunday';
-    case Day.Monday:
+    case Day.MONDAY:
       return 'Monday';
-    case Day.Tuesday:
+    case Day.TUESDAY:
       return 'Tuesday';
-    case Day.Wednesday:
+    case Day.WEDNESDAY:
       return 'Wednesday';
-    case Day.Thursday:
+    case Day.THURSDAY:
       return 'Thursday';
-    case Day.Friday:
+    case Day.FRIDAY:
       return 'Friday';
-    case Day.Saturday:
+    case Day.SATURDAY:
       return 'Saturday';
     default:
       throw new Error("shouldn't get here!");

@@ -6,6 +6,7 @@ import {
 } from '@prisma/client';
 import crypto from 'crypto';
 import _ from 'lodash';
+import { StrippedScheduleUser } from '../common/types/user';
 
 dotenv.config();
 
@@ -112,11 +113,21 @@ app.get<{ id: string }, Schedule, {}>('/schedule/:id', async (req, res) => {
     where: {
       id: parseInt(req.params.id, 10),
     },
+    include: {
+      users: {
+        include: {
+          exceptions: true,
+          availability: {
+            include: {
+              days: true,
+            },
+          },
+        },
+      },
+    },
   });
   res.status(200).json(schedule);
 });
-
-export type StrippedScheduleUser = Omit<ScheduleUser, 'passwordSalt' | 'passwordSaltIterations' | 'passwordHash'>;
 
 function stripUser(user: ScheduleUser): StrippedScheduleUser {
   return _.omit(user, 'passwordSalt', 'passwordSaltIterations', 'passwordHash');
@@ -130,6 +141,15 @@ app.put<{
       id: parseInt(req.params.userId, 10),
     },
     data: req.body,
+    include: {
+      availability: {
+        include: {
+          days: true,
+        },
+      },
+      schedule: true,
+      exceptions: true,
+    },
   });
 
   const strippedResult = stripUser(result);
@@ -159,4 +179,16 @@ app.get<{
   const strippedUser = stripUser(user);
 
   res.status(200).json(strippedUser);
+});
+
+app.get<{}, Schedule, {
+  inviteCode: string;
+}>('/scheduleByInviteCode', async (req, res) => {
+  const schedule = await prisma.schedule.findFirstOrThrow({
+    where: {
+      inviteCode: req.body.inviteCode,
+    },
+  });
+
+  res.status(200).json(schedule);
 });

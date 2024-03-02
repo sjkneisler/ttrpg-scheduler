@@ -4,13 +4,21 @@ import { css } from '@emotion/react';
 import { AppBar, Toolbar, Typography } from '@mui/material';
 import './App.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { WeeklyCalendar } from './components/WeekyCalendar';
+import { UserWeeklyCalendar } from './components/UserWeeklyCalendar';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <WeeklyCalendar />,
+    element: <div />,
   },
+  {
+    path: '/schedule/:scheduleId/user/:userId',
+    element: <UserWeeklyCalendar />,
+  },
+  // {
+  //   path: '/schedule/:scheduleId',
+  //   element: (routes, opts) => <WeeklyCalendar type={} />,
+  // },
 ]);
 
 function App() {

@@ -1,4 +1,4 @@
-import { Example } from '@prisma/client';
+import { UserWithIncludes } from '../../../common/types/user';
 
 const API_ROOT = 'http://localhost:3001/';
 
@@ -10,10 +10,6 @@ function getJson<T>(path: string): Promise<T> {
   return get(path).then((res) => res.json());
 }
 
-export function getExampleData(): Promise<Example[]> {
-  return getJson<Example[]>('examples');
-}
-
-export async function seed(): Promise<void> {
-  await get('seed');
+export async function getUser(scheduleId: number, userId: number): Promise<UserWithIncludes> {
+  return getJson(`schedule/${scheduleId}/user/${userId}`);
 }
