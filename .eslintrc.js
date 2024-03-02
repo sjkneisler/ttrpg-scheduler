@@ -33,6 +33,8 @@ module.exports = {
         "react/function-component-definition": "off",
         "react/no-array-index-key": "off",
         "jsx-a11y/no-static-element-interactions": "warn",
+        "max-len": "warn",
+        "jsx-a11y/mouse-events-have-key-events": "warn",
     },
     settings: {
         failOnError: false,

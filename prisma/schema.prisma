@@ -14,3 +14,49 @@ model Example {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Schedule {
+  id Int @id @default(autoincrement())
+  name String
+  inviteCode String // Invite code to make it a bit more secure (should this be a separate table?)
+  users ScheduleUser[]
+}
+
+// A temporary user local to each schedule
+model ScheduleUser {
+  id Int @id @default(autoincrement())
+  schedule Schedule @relation(fields: [scheduleId], references: [id])
+  scheduleId Int @unique
+  availability WeeklyAvailability?
+}
+
+model WeeklyAvailability {
+  id Int @id @default(autoincrement())
+  user ScheduleUser @relation(fields: [userId], references: [id])
+  userId Int @unique
+  days DayAvailability[]
+}
+
+enum Day {
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
+enum Availability {
+  GREEN
+  YELLOW
+  RED
+}
+
+model DayAvailability {
+  id Int @id @default(autoincrement())
+  week WeeklyAvailability @relation(fields: [weekId], references: [id])
+  weekId Int
+  day Day
+  availability Availability[]
+}
