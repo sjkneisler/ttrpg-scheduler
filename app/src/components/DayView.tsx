@@ -8,6 +8,16 @@ import { getColorFromAvailabilityState } from '../utils/availbility-states';
 import { DragContext } from './DragContext';
 import { getDayText } from '../utils/day';
 
+function getBorderForTimeSegment(intervalNum: number): string {
+  if (intervalNum === 0) {
+    return '2px 1px 1px 1px';
+  }
+  if (intervalNum === 3) {
+    return '1px 1px 2px 1px';
+  }
+  return '1px';
+}
+
 export const DayView: React.FC<{ day: Day, availability: DayAvailability }> = ({
   day,
   availability,
@@ -18,7 +28,10 @@ export const DayView: React.FC<{ day: Day, availability: DayAvailability }> = ({
     onDrag,
   } = useContext(DragContext);
   return (
-    <div>
+    <div css={css`
+            //border: 1px solid #000000;
+        `}
+    >
       <div css={css`
                 text-align: center;
                 margin: 10px 0;
@@ -36,7 +49,7 @@ export const DayView: React.FC<{ day: Day, availability: DayAvailability }> = ({
           <div
             key={hourCount}
             css={css`
-                            border: 1px solid #00000055;
+                            //border: 1px solid #00000055;
                             display: flex;
                             flex-direction: column;
                         `}
@@ -49,13 +62,18 @@ export const DayView: React.FC<{ day: Day, availability: DayAvailability }> = ({
                   css={css`
                                         flex: 1 1 auto;
                                         width: 100px;
-                                        height: 8px;
-                                        border: 1px solid #00000055;
+                                        height: 6px;
+                                        border-color: #000000FF;
+                                        border-style: solid;
+                                        border-width: ${getBorderForTimeSegment(num)};
                                         background-color: ${getColorFromAvailabilityState(availability[hourCount * 4 + num])};
                                     `}
-                  onMouseMove={() => onDrag({ day, time: hourCount * 4 + num })}
-                  onMouseDown={() => onDragStart({ day, time: hourCount * 4 + num })}
-                  onMouseUp={() => onDragEnd({ day, time: hourCount * 4 + num })}
+                  onMouseMove={(e) => onDrag(e, { day, time: hourCount * 4 + num })}
+                  onMouseDown={(e) => onDragStart(e, { day, time: hourCount * 4 + num })}
+                  onMouseUp={(e) => onDragEnd(e, { day, time: hourCount * 4 + num })}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                  }}
                 />
               ),
             )}

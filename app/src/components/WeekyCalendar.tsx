@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import _ from 'lodash';
 import { AvailabilityState, WeekAvailability } from '../../../common/types/availability-state';
@@ -7,9 +7,20 @@ import { Day } from '../../../common/types/day';
 import { DayView } from './DayView';
 import { HoursGuide } from './HoursGuide';
 import { DragContext, DragPosition } from './DragContext';
+import { Nullable } from '../../../common/types/nullable';
 
 function generateInitialAvailabilities(): WeekAvailability {
   return _.times(7, () => _.times(96, () => AvailabilityState.GREEN));
+}
+
+function getNewAvailabilityStateValue(initialValue: AvailabilityState, mouseButton: number): AvailabilityState {
+  if (mouseButton === 2) {
+    console.log('test');
+    return AvailabilityState.YELLOW;
+  }
+  return initialValue === AvailabilityState.RED
+    ? AvailabilityState.GREEN
+    : AvailabilityState.RED;
 }
 
 function updateAvailabilityBox(
@@ -37,49 +48,38 @@ function updateAvailabilityBox(
 
 export const WeeklyCalendar: React.FC = () => {
   const [dragging, setDragging] = useState<boolean>(false);
-  const [dragStart, setDragStart] = useState<DragPosition | null>(null);
+  const [dragNewState, setDragNewState] = useState<Nullable<AvailabilityState>>(null);
+  const [dragStart, setDragStart] = useState<Nullable<DragPosition>>(null);
 
   const [states, setStates] = useState(generateInitialAvailabilities());
   const [temporaryStates, setTemporaryStates] = useState(states);
 
-  const onDragStart = (pos: DragPosition) => {
-    console.log('Drag start');
-    console.log(pos);
+  const onDragStart = (e: React.MouseEvent, pos: DragPosition) => {
     setDragging(true);
     setDragStart(pos);
-    // setDragEnd(pos);
     const initialValue = states[pos!.day][pos!.time];
-    const newValue = initialValue === AvailabilityState.RED
-      ? AvailabilityState.GREEN
-      : AvailabilityState.RED;
-    setTemporaryStates(updateAvailabilityBox(states, pos!, pos!, newValue));
+    const newState = getNewAvailabilityStateValue(initialValue, e.button);
+    setDragNewState(newState);
+    setTemporaryStates(updateAvailabilityBox(states, pos!, pos!, newState));
   };
-  const onDragEnd = (pos: DragPosition) => {
-    console.log('Drag end');
-    console.log(pos);
-    setDragging(false);
-    setDragStart(null);
-    // setDragEnd(null);
-    // TODO: Update the availability state here
-    const initialValue = states[dragStart!.day][dragStart!.time];
-    const newValue = initialValue === AvailabilityState.RED
-      ? AvailabilityState.GREEN
-      : AvailabilityState.RED;
-    const newStates = updateAvailabilityBox(states, dragStart!, pos!, newValue);
-    setStates(newStates);
-    setTemporaryStates(newStates);
-  };
-  const onDrag = (pos: DragPosition) => {
-    console.log('Drag');
-    console.log(pos);
+  const onDragEnd = (e: React.MouseEvent, pos: DragPosition) => {
     if (dragging) {
-      const startPos = dragStart || pos;
-      // setDragEnd(pos);
-      const initialValue = states[startPos!.day][startPos!.time];
-      const newValue = initialValue === AvailabilityState.RED
-        ? AvailabilityState.GREEN
-        : AvailabilityState.RED;
-      setTemporaryStates(updateAvailabilityBox(states, startPos!, pos!, newValue));
+      setDragging(false);
+      setDragStart(null);
+      // TODO: Update the availability state here
+      const newStates = updateAvailabilityBox(states, dragStart!, pos!, dragNewState!);
+      setStates(newStates);
+      setTemporaryStates(newStates);
+    }
+    return false;
+  };
+  const onMouseOut = () => {
+    console.log('Stopping drag due to mouse leaving area');
+    setDragging(false);
+  };
+  const onDrag = (e: React.MouseEvent, pos: DragPosition) => {
+    if (dragging) {
+      setTemporaryStates(updateAvailabilityBox(states, dragStart!, pos!, dragNewState!));
     }
   };
 
@@ -87,24 +87,34 @@ export const WeeklyCalendar: React.FC = () => {
     onDragStart,
     onDragEnd,
     onDrag,
-  }), [dragStart, dragging, states]);
+  }), [dragStart, dragging, states, dragNewState]);
 
   return (
     <DragContext.Provider value={dragContextValue}>
-
-      <div css={css`
-                display: flex;
-                flex-direction: row;
-            `}
+      <div
+        css={css`
+                    display: flex;
+                    flex-direction: row;
+                `}
+        onMouseLeave={onMouseOut}
+        // onBlur={onMouseOut}
       >
         <HoursGuide />
-        <DayView day={Day.Sunday} availability={temporaryStates[0]} />
-        <DayView day={Day.Monday} availability={temporaryStates[1]} />
-        <DayView day={Day.Tuesday} availability={temporaryStates[2]} />
-        <DayView day={Day.Wednesday} availability={temporaryStates[3]} />
-        <DayView day={Day.Thursday} availability={temporaryStates[4]} />
-        <DayView day={Day.Friday} availability={temporaryStates[5]} />
-        <DayView day={Day.Saturday} availability={temporaryStates[6]} />
+        <div
+          css={css`
+            display: flex;
+            flex-direction: row;
+            //border: 1px solid #000000;
+          `}
+        >
+          <DayView day={Day.Sunday} availability={temporaryStates[0]} />
+          <DayView day={Day.Monday} availability={temporaryStates[1]} />
+          <DayView day={Day.Tuesday} availability={temporaryStates[2]} />
+          <DayView day={Day.Wednesday} availability={temporaryStates[3]} />
+          <DayView day={Day.Thursday} availability={temporaryStates[4]} />
+          <DayView day={Day.Friday} availability={temporaryStates[5]} />
+          <DayView day={Day.Saturday} availability={temporaryStates[6]} />
+        </div>
         <HoursGuide />
       </div>
     </DragContext.Provider>

@@ -2,9 +2,9 @@ import React from 'react';
 import { Day } from '../../../common/types/day';
 
 export const DragContext = React.createContext<{
-  onDragStart:(pos: DragPosition) => void;
-  onDragEnd: (pos: DragPosition) => void;
-  onDrag: (pos: DragPosition) => void;
+  onDragStart:(e: React.MouseEvent, pos: DragPosition) => void;
+  onDragEnd: (e: React.MouseEvent, pos: DragPosition) => void;
+  onDrag: (e: React.MouseEvent, pos: DragPosition) => void;
 }>({
       onDragStart: () => null,
       onDragEnd: () => null,

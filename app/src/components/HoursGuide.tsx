@@ -13,7 +13,7 @@ export const HoursGuide: React.FC = () => (
     {hourTimes.map((time) => (
       <div
         css={css`
-                    height: 37.71px;
+                    height: 34px;
                 `}
         key={time}
       >
