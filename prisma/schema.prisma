@@ -25,9 +25,24 @@ model Schedule {
 // A temporary user local to each schedule
 model ScheduleUser {
   id Int @id @default(autoincrement())
+  name String
   schedule Schedule @relation(fields: [scheduleId], references: [id])
-  scheduleId Int @unique
+  scheduleId Int
   availability WeeklyAvailability?
+  timezone String?
+  exceptions ScheduleException[]
+  passwordHash String?
+  passwordSalt String?
+  passwordSaltIterations Int?
+}
+
+model ScheduleException {
+  id Int @id @default(autoincrement())
+  user ScheduleUser @relation(fields: [userId], references: [id])
+  userId Int @unique
+  startTime DateTime
+  endTime DateTime
+  availability Availability
 }
 
 model WeeklyAvailability {

@@ -3,7 +3,15 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { AppBar, Toolbar, Typography } from '@mui/material';
 import './App.css';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { WeeklyCalendar } from './components/WeekyCalendar';
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <WeeklyCalendar />,
+  },
+]);
 
 function App() {
   return (
@@ -31,7 +39,7 @@ function App() {
           flex: 1 1 auto
             `}
       >
-        <WeeklyCalendar />
+        <RouterProvider router={router} />
       </div>
     </div>
   );
