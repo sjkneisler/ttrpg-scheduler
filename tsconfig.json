@@ -21,6 +21,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "sourceMap": true,
+    "jsxImportSource": "@emotion/react"
   },
   "ts-node": {
     "compilerOptions": {

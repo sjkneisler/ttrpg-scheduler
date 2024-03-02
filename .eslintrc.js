@@ -24,8 +24,16 @@ module.exports = {
         "project": './tsconfig.json',
     },
     "plugins": [
-        "react"
+        "react",
+        "@emotion"
     ],
     "rules": {
+        "react/no-unknown-property": ["error", { "ignore": ["css"] }],
+        "import/prefer-default-export": "off",
+        "react/function-component-definition": "off",
+    },
+    settings: {
+        failOnError: false,
+        emitWarning: true,
     }
 }

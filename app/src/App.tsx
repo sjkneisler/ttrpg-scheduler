@@ -1,51 +1,38 @@
-import { Example } from '@prisma/client';
-import React, { useEffect, useState } from 'react';
-import logo from './logo.svg';
+/** @jsxImportSource @emotion/react */
+import React from 'react';
+import { css } from '@emotion/react';
+import { AppBar, Toolbar, Typography } from '@mui/material';
 import './App.css';
-import { getExampleData, seed } from './api/client';
+import { WeeklyCalendar } from './components/WeekyCalendar';
 
 function App() {
-  const [data, setData] = useState<Example[]>([]);
-  useEffect(() => {
-    getExampleData().then(setData);
-  }, []);
   return (
-    <div className="App">
-      {data.map((datum) => (
-        <div>
-          {datum.foo}
-          {' '}
-          -
-          {' '}
-          {datum.bar}
-        </div>
-      ))}
-      <button
-        type="button"
-        onClick={() => {
-          seed();
-        }}
+    <div css={css`
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    `}
+    >
+      <AppBar
+        position="relative"
+        css={css`
+        flex: 0 0  auto;
+      `}
       >
-        Seed
-      </button>
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit
-          {' '}
-          <code>src/App.tsx</code>
-          {' '}
-          and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+        <Toolbar>
+          <Typography variant="h4">
+            TTRPG Scheduler
+          </Typography>
+        </Toolbar>
+      </AppBar>
+
+      <div css={css`
+          flex: 1 1 auto
+            `}
+      >
+        <WeeklyCalendar />
+      </div>
     </div>
   );
 }
