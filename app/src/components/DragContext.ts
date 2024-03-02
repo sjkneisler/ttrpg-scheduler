@@ -1,0 +1,17 @@
+import React from 'react';
+import { Day } from '../../../common/types/day';
+
+export const DragContext = React.createContext<{
+  onDragStart:(pos: DragPosition) => void;
+  onDragEnd: (pos: DragPosition) => void;
+  onDrag: (pos: DragPosition) => void;
+}>({
+      onDragStart: () => null,
+      onDragEnd: () => null,
+      onDrag: () => null,
+    });
+
+export interface DragPosition {
+  day: Day;
+  time: number; // Time here represents an index of 15-minute blocks from 0 to 95
+}
