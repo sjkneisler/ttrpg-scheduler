@@ -28,7 +28,8 @@
     }
   },
   "include": [
-    "app/src"
+    "app/src",
+    "server"
   ],
   "lib": [
     "es2021"

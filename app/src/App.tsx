@@ -1,24 +1,41 @@
+import { Example } from '@prisma/client';
 import React, { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { getExampleData, seed } from "./api/client";
-import { Example } from "@prisma/client";
+import { getExampleData, seed } from './api/client';
 
 function App() {
   const [data, setData] = useState<Example[]>([]);
   useEffect(() => {
     getExampleData().then(setData);
-  }, [])
+  }, []);
   return (
     <div className="App">
-      {data.map((data) => <div>{data.foo} - {data.bar}</div>)}
-      <button onClick={() => {
-        seed();
-      }}>Seed</button>
+      {data.map((datum) => (
+        <div>
+          {datum.foo}
+          {' '}
+          -
+          {' '}
+          {datum.bar}
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => {
+          seed();
+        }}
+      >
+        Seed
+      </button>
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Edit <code>src/App.tsx</code> and save to reload.
+          Edit
+          {' '}
+          <code>src/App.tsx</code>
+          {' '}
+          and save to reload.
         </p>
         <a
           className="App-link"
