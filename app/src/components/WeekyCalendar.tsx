@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import _ from 'lodash';
 
@@ -61,14 +61,41 @@ function getDayText(day: Day): string {
   }
 }
 
-const DayView: React.FC<{ day: Day }> = ({ day }) => {
-  const availability: { color: string, key: number }[] = _.times<{ color: string, key: number }>(
-    24,
-    (num) => ({
-      key: num,
-      color: '#FF0000',
-    }),
-  );
+const DragContext = React.createContext<{
+  onDragStart:(pos: DragPosition) => void;
+  onDragEnd: (pos: DragPosition) => void;
+  onDrag: (pos: DragPosition) => void;
+}>({
+      onDragStart: () => null,
+      onDragEnd: () => null,
+      onDrag: () => null,
+    });
+
+enum AvailabilityState {
+  GREEN,
+  YELLOW,
+  RED,
+}
+
+function getColorFromAvailabilityState(state: AvailabilityState): string {
+  switch (state) {
+    case AvailabilityState.YELLOW:
+      return '#FFFF00';
+    case AvailabilityState.RED:
+      return '#FF0000';
+    case AvailabilityState.GREEN:
+      return '#00FF00';
+    default:
+      return '#FF00FF';
+  }
+}
+
+const DayView: React.FC<{ day: Day, availability: DayAvailability }> = ({ day, availability }) => {
+  const {
+    onDragStart,
+    onDragEnd,
+    onDrag,
+  } = useContext(DragContext);
   return (
     <div>
       <div css={css`
@@ -84,11 +111,10 @@ const DayView: React.FC<{ day: Day }> = ({ day }) => {
                 flex-direction: column;
             `}
       >
-        {availability.map((item) => (
+        {_.times(24, (hourCount) => (
           <div
-            key={item.key}
+            key={hourCount}
             css={css`
-                            background-color: ${item.color};
                             border: 1px solid #b60505;
                             display: flex;
                             flex-direction: column;
@@ -104,7 +130,11 @@ const DayView: React.FC<{ day: Day }> = ({ day }) => {
                                         width: 100px;
                                         height: 8px;
                                         border: 1px solid #9d0505;
+                                        background-color: ${getColorFromAvailabilityState(availability[hourCount * 4 + num])};
                                     `}
+                  onMouseMove={() => onDrag({ day, time: hourCount * 4 + num })}
+                  onMouseDown={() => onDragStart({ day, time: hourCount * 4 + num })}
+                  onMouseUp={() => onDragEnd({ day, time: hourCount * 4 + num })}
                 />
               ),
             )}
@@ -135,20 +165,102 @@ const Guide: React.FC = () => (
   </div>
 );
 
-export const WeeklyCalendar: React.FC = () => (
-  <div css={css`
-        display: flex;
-        flex-direction: row;
-    `}
-  >
-    <Guide />
-    <DayView day={Day.Sunday} />
-    <DayView day={Day.Monday} />
-    <DayView day={Day.Tuesday} />
-    <DayView day={Day.Wednesday} />
-    <DayView day={Day.Thursday} />
-    <DayView day={Day.Friday} />
-    <DayView day={Day.Saturday} />
-    <Guide />
-  </div>
-);
+interface DragPosition {
+  day: Day;
+  time: number; // Time here represents an index of 15-minute blocks from 0 to 95
+}
+
+// TODO: Revisit these types to be better but still space efficient in the database
+type DayAvailability = AvailabilityState[];
+type WeekAvailability = DayAvailability[];
+
+function generateInitialAvailabilities(): WeekAvailability {
+  return _.times(7, () => _.times(96, () => AvailabilityState.GREEN));
+}
+
+function updateAvailabilityBox(
+  week: WeekAvailability,
+  start: DragPosition,
+  end: DragPosition,
+  newValue: AvailabilityState,
+): WeekAvailability {
+  return _.times(7, (day) => _.times(96, (time) => {
+    if (day >= start.day && day <= end.day && time >= start.time && time <= end.time) {
+      return newValue;
+    }
+    return week[day][time];
+  }));
+}
+
+export const WeeklyCalendar: React.FC = () => {
+  const [dragging, setDragging] = useState<boolean>(false);
+  const [dragStart, setDragStart] = useState<DragPosition | null>(null);
+  // const [dragEnd, setDragEnd] = useState<DragPosition | null>(null);
+
+  const [states, setStates] = useState(generateInitialAvailabilities());
+
+  const onDragStart = (pos: DragPosition) => {
+    console.log(`Drag start ${pos}`);
+    setDragging(true);
+    setDragStart(pos);
+    // setDragEnd(pos);
+    const initialValue = states[pos!.day][pos!.time];
+    const newValue = initialValue === AvailabilityState.RED
+      ? AvailabilityState.GREEN
+      : AvailabilityState.RED;
+    setStates(updateAvailabilityBox(states, pos!, pos!, newValue));
+  };
+  const onDragEnd = (pos: DragPosition) => {
+    console.log(`Drag end ${pos}`);
+    // TODO: Why am I getting no dragStart here?  It's probably a state/useMemo issue
+    console.log(`Drag end  - start ${dragStart}`);
+    setDragging(false);
+    setDragStart(null);
+    // setDragEnd(null);
+    // TODO: Update the availability state here
+    const initialValue = states[dragStart!.day][dragStart!.time];
+    const newValue = initialValue === AvailabilityState.RED
+      ? AvailabilityState.GREEN
+      : AvailabilityState.RED;
+    setStates(updateAvailabilityBox(states, dragStart!, pos!, newValue));
+  };
+  const onDrag = (pos: DragPosition) => {
+    console.log(`Drag ${pos}`);
+    if (dragging) {
+      const startPos = dragStart || pos;
+      // setDragEnd(pos);
+      const initialValue = states[startPos!.day][startPos!.time];
+      const newValue = initialValue === AvailabilityState.RED
+        ? AvailabilityState.GREEN
+        : AvailabilityState.RED;
+      setStates(updateAvailabilityBox(states, startPos!, pos!, newValue));
+    }
+  };
+
+  const dragContextValue = useMemo(() => ({
+    onDragStart,
+    onDragEnd,
+    onDrag,
+  }), []);
+
+  return (
+    <DragContext.Provider value={dragContextValue}>
+
+      <div css={css`
+                display: flex;
+                flex-direction: row;
+            `}
+      >
+        <Guide />
+        <DayView day={Day.Sunday} availability={states[0]} />
+        <DayView day={Day.Monday} availability={states[1]} />
+        <DayView day={Day.Tuesday} availability={states[2]} />
+        <DayView day={Day.Wednesday} availability={states[3]} />
+        <DayView day={Day.Thursday} availability={states[4]} />
+        <DayView day={Day.Friday} availability={states[5]} />
+        <DayView day={Day.Saturday} availability={states[6]} />
+        <Guide />
+      </div>
+    </DragContext.Provider>
+  );
+};
