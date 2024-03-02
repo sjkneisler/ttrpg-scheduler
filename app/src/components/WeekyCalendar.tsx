@@ -198,9 +198,11 @@ export const WeeklyCalendar: React.FC = () => {
   // const [dragEnd, setDragEnd] = useState<DragPosition | null>(null);
 
   const [states, setStates] = useState(generateInitialAvailabilities());
+  const [temporaryStates, setTemporaryStates] = useState(states);
 
   const onDragStart = (pos: DragPosition) => {
-    console.log(`Drag start ${pos}`);
+    console.log('Drag start');
+    console.log(pos);
     setDragging(true);
     setDragStart(pos);
     // setDragEnd(pos);
@@ -208,12 +210,11 @@ export const WeeklyCalendar: React.FC = () => {
     const newValue = initialValue === AvailabilityState.RED
       ? AvailabilityState.GREEN
       : AvailabilityState.RED;
-    setStates(updateAvailabilityBox(states, pos!, pos!, newValue));
+    setTemporaryStates(updateAvailabilityBox(states, pos!, pos!, newValue));
   };
   const onDragEnd = (pos: DragPosition) => {
-    console.log(`Drag end ${pos}`);
-    // TODO: Why am I getting no dragStart here?  It's probably a state/useMemo issue
-    console.log(`Drag end  - start ${dragStart}`);
+    console.log('Drag end');
+    console.log(pos);
     setDragging(false);
     setDragStart(null);
     // setDragEnd(null);
@@ -222,10 +223,13 @@ export const WeeklyCalendar: React.FC = () => {
     const newValue = initialValue === AvailabilityState.RED
       ? AvailabilityState.GREEN
       : AvailabilityState.RED;
-    setStates(updateAvailabilityBox(states, dragStart!, pos!, newValue));
+    const newStates = updateAvailabilityBox(states, dragStart!, pos!, newValue);
+    setStates(newStates);
+    setTemporaryStates(newStates);
   };
   const onDrag = (pos: DragPosition) => {
-    console.log(`Drag ${pos}`);
+    console.log('Drag');
+    console.log(pos);
     if (dragging) {
       const startPos = dragStart || pos;
       // setDragEnd(pos);
@@ -233,7 +237,7 @@ export const WeeklyCalendar: React.FC = () => {
       const newValue = initialValue === AvailabilityState.RED
         ? AvailabilityState.GREEN
         : AvailabilityState.RED;
-      setStates(updateAvailabilityBox(states, startPos!, pos!, newValue));
+      setTemporaryStates(updateAvailabilityBox(states, startPos!, pos!, newValue));
     }
   };
 
@@ -241,7 +245,7 @@ export const WeeklyCalendar: React.FC = () => {
     onDragStart,
     onDragEnd,
     onDrag,
-  }), []);
+  }), [dragStart, dragging, states]);
 
   return (
     <DragContext.Provider value={dragContextValue}>
@@ -252,13 +256,13 @@ export const WeeklyCalendar: React.FC = () => {
             `}
       >
         <Guide />
-        <DayView day={Day.Sunday} availability={states[0]} />
-        <DayView day={Day.Monday} availability={states[1]} />
-        <DayView day={Day.Tuesday} availability={states[2]} />
-        <DayView day={Day.Wednesday} availability={states[3]} />
-        <DayView day={Day.Thursday} availability={states[4]} />
-        <DayView day={Day.Friday} availability={states[5]} />
-        <DayView day={Day.Saturday} availability={states[6]} />
+        <DayView day={Day.Sunday} availability={temporaryStates[0]} />
+        <DayView day={Day.Monday} availability={temporaryStates[1]} />
+        <DayView day={Day.Tuesday} availability={temporaryStates[2]} />
+        <DayView day={Day.Wednesday} availability={temporaryStates[3]} />
+        <DayView day={Day.Thursday} availability={temporaryStates[4]} />
+        <DayView day={Day.Friday} availability={temporaryStates[5]} />
+        <DayView day={Day.Saturday} availability={temporaryStates[6]} />
         <Guide />
       </div>
     </DragContext.Provider>
