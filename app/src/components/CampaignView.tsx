@@ -21,7 +21,7 @@ export const CampaignView: React.FC = () => {
     if (!schedule) {
       return;
     }
-    const user = await createUser(schedule.id, name);
+    const user = await createUser(schedule.id, name, Intl.DateTimeFormat().resolvedOptions().timeZone);
     navigate(`/schedule/${schedule.id}/user/${user.id}`);
   };
 

@@ -59,11 +59,13 @@ app.post<{
   id: string
 }, StrippedScheduleUser, {
   name: string,
+  timezone: string,
   password: string | undefined,
 }>('/schedule/:id/user', async (req, res) => {
   const baseUser = {
     scheduleId: parseInt(req.params.id, 10),
     name: req.body.name,
+    timezone: req.body.timezone,
     availability: {
       weekly: _.times(7, () => _.times(96, () => Availability.Green)),
       exceptions: [],

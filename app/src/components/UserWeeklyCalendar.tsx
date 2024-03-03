@@ -1,12 +1,16 @@
 /** @jsxImportSource @emotion/react */
 import React, { Suspense, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button, Typography } from '@mui/material';
+import {
+  Button, MenuItem, Select, SelectChangeEvent, Typography,
+} from '@mui/material';
 import { css } from '@emotion/react';
 import { WeeklyCalendar } from './WeekyCalendar';
 import { UserWithIncludes } from '../../../common/types/user';
 import { getUser, updateUser } from '../api/client';
 import { Availability } from '../../../common/types/availability-state';
+
+const timezones = Intl.supportedValuesOf('timeZone');
 
 export const UserWeeklyCalendar: React.FC = () => {
   const [user, setUser] = useState<UserWithIncludes | null>(null);
@@ -30,6 +34,18 @@ export const UserWeeklyCalendar: React.FC = () => {
         ...user.availability,
         weekly: availability,
       },
+    };
+    updateUser(updatedUser);
+    setUser(updatedUser);
+  };
+
+  const setTimezone = (timezoneChangeEvent: SelectChangeEvent<string | null>) => {
+    if (!user) {
+      return;
+    }
+    const updatedUser = {
+      ...user,
+      timezone: timezoneChangeEvent.target.value,
     };
     updateUser(updatedUser);
     setUser(updatedUser);
@@ -65,6 +81,9 @@ export const UserWeeklyCalendar: React.FC = () => {
           {user.name}
         </Typography>
         <Button variant="outlined" onClick={onBack}>Back</Button>
+        <Select value={user.timezone} onChange={setTimezone}>
+          {timezones.map((timezone) => <MenuItem value={timezone}>{timezone}</MenuItem>)}
+        </Select>
       </div>
       <div css={css`
                 flex: 1 1 auto;

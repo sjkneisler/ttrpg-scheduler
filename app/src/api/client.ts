@@ -53,9 +53,10 @@ export async function createSchedule(name: string): Promise<Schedule> {
   });
 }
 
-export async function createUser(scheduleId: number, name: string): Promise<UserWithIncludes> {
+export async function createUser(scheduleId: number, name: string, timezone: string): Promise<UserWithIncludes> {
   return postJson(`schedule/${scheduleId}/user`, {
     name,
+    timezone,
   });
 }
 
