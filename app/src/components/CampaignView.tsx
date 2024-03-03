@@ -10,6 +10,7 @@ import { useSchedule } from '../hooks/useSchedule';
 import { AggregateWeeklyCalendar } from './AggregateWeekyCalendar';
 import { aggregateAvailability } from '../utils/aggregate';
 import { AggregationType } from '../../../common/types/aggregation-type';
+import { getCurrentTimezone } from '../../../common/util/timezones';
 
 export const CampaignView: React.FC = () => {
   const [name, setName] = useState('');
@@ -21,7 +22,7 @@ export const CampaignView: React.FC = () => {
     if (!schedule) {
       return;
     }
-    const user = await createUser(schedule.id, name, Intl.DateTimeFormat().resolvedOptions().timeZone);
+    const user = await createUser(schedule.id, name, getCurrentTimezone());
     navigate(`/schedule/${schedule.id}/user/${user.id}`);
   };
 

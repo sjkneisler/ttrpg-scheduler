@@ -13,7 +13,7 @@ export const HoursGuide: React.FC<{ editable: boolean }> = ({ editable }) => (
     {hourTimes.map((time) => (
       <div
         css={css`
-                    height: 30px;
+                    height: 31px;
                 `}
         key={time}
       >

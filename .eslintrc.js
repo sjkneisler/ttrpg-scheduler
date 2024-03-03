@@ -35,6 +35,7 @@ module.exports = {
         "jsx-a11y/no-static-element-interactions": "warn",
         "max-len": "warn",
         "jsx-a11y/mouse-events-have-key-events": "warn",
+        "no-plusplus": "warn",
     },
     settings: {
         failOnError: false,

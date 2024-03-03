@@ -1,5 +1,7 @@
 /** @jsxImportSource @emotion/react */
-import React, { Suspense, useEffect, useState } from 'react';
+import React, {
+  Suspense, useEffect, useMemo, useState,
+} from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Button, MenuItem, Select, SelectChangeEvent, Typography,
@@ -9,6 +11,7 @@ import { WeeklyCalendar } from './WeekyCalendar';
 import { UserWithIncludes } from '../../../common/types/user';
 import { getUser, updateUser } from '../api/client';
 import { Availability } from '../../../common/types/availability-state';
+import { getCurrentTimezone, getTimezoneOffset, shiftAvailabilityByTimezone } from '../../../common/util/timezones';
 
 const timezones = Intl.supportedValuesOf('timeZone');
 
@@ -25,14 +28,16 @@ export const UserWeeklyCalendar: React.FC = () => {
   }, []);
 
   const onAvailabilityUpdate = (availability: Availability[][]) => {
+    console.log('Sending updated availability');
     if (!user) {
       return;
     }
+    const shiftedAvailability = shiftAvailabilityByTimezone(availability, -1 * getTimezoneOffset(user.timezone || getCurrentTimezone()));
     const updatedUser = {
       ...user,
       availability: {
         ...user.availability,
-        weekly: availability,
+        weekly: shiftedAvailability,
       },
     };
     updateUser(updatedUser);
@@ -43,10 +48,21 @@ export const UserWeeklyCalendar: React.FC = () => {
     if (!user) {
       return;
     }
+    const newTimezone = timezoneChangeEvent.target.value!;
+    const newOffset = getTimezoneOffset(newTimezone);
+    const oldOffset = getTimezoneOffset(user.timezone!);
+    const offsetDifference = newOffset - oldOffset;
+    const shiftedAvailability = shiftAvailabilityByTimezone(user.availability.weekly, -1 * offsetDifference);
     const updatedUser = {
       ...user,
-      timezone: timezoneChangeEvent.target.value,
+      availability: {
+        ...user.availability,
+        weekly: shiftedAvailability,
+      },
+      timezone: newTimezone,
     };
+
+    // TODO: When shifting timezones, we need to update our local representation (maybe?)
     updateUser(updatedUser);
     setUser(updatedUser);
   };
@@ -57,9 +73,17 @@ export const UserWeeklyCalendar: React.FC = () => {
     navigate(`/schedule/${scheduleId}`);
   };
 
-  if (user == null || user.availability == null) {
+  const shiftedWeeklyAvailability = useMemo(() => {
+    if (!user) {
+      return null;
+    }
+    return shiftAvailabilityByTimezone(user.availability.weekly, getTimezoneOffset(user.timezone || getCurrentTimezone()));
+  }, [user]);
+
+  if (user == null || user.availability == null || shiftedWeeklyAvailability == null) {
     return <Suspense />;
   }
+
   return (
     <div css={css`
             display: flex;
@@ -89,7 +113,7 @@ export const UserWeeklyCalendar: React.FC = () => {
                 flex: 1 1 auto;
             `}
       >
-        <WeeklyCalendar availability={user.availability.weekly} onAvailabilityUpdate={onAvailabilityUpdate} />
+        <WeeklyCalendar availability={shiftedWeeklyAvailability} onAvailabilityUpdate={onAvailabilityUpdate} />
       </div>
     </div>
   );

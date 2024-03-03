@@ -96,7 +96,7 @@ export const DayView: React.FC<DayViewProps> = ({
                   css={css`
                                         flex: 1 1 auto;
                                         width: 100px;
-                                        height: 5px;
+                                        height: 6px;
                                         border-color: #000000FF;
                                         border-style: solid;
                                         border-width: ${getBorderForTimeSegment(num)};
