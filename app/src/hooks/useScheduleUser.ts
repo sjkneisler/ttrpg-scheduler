@@ -2,8 +2,9 @@ import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getUser } from '../api/client';
 import { UserWithIncludes } from '../../../common/types/user';
+import { useSchedule } from './useSchedule';
 
-export const useSchedule = (): UserWithIncludes | null => {
+export const useScheduleUser = (): UserWithIncludes | null => {
   const { userId } = useParams();
   const [user, setUser] = useState<UserWithIncludes | null>(null);
   const schedule = useSchedule();

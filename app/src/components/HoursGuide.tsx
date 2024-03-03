@@ -5,7 +5,7 @@ import { hourTimes } from '../utils/hourTimes';
 
 export const HoursGuide: React.FC = () => (
   <div css={css`
-        padding: 30px 5px 0 5px;
+        padding: 70px 5px 0 5px;
         text-align: right;
         color: #777777;
     `}
@@ -13,7 +13,7 @@ export const HoursGuide: React.FC = () => (
     {hourTimes.map((time) => (
       <div
         css={css`
-                    height: 34px;
+                    height: 30px;
                 `}
         key={time}
       >

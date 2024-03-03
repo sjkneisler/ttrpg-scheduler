@@ -2,6 +2,7 @@
 import React, { useContext } from 'react';
 import { css } from '@emotion/react';
 import _ from 'lodash';
+import { IconButton } from '@mui/material';
 import { getColorFromAvailabilityState } from '../utils/availbility-states';
 import { DragContext } from './DragContext';
 import { Availability } from '../../../common/types/availability-state';
@@ -17,9 +18,25 @@ function getBorderForTimeSegment(intervalNum: number): string {
   return '1px';
 }
 
-export const DayView: React.FC<{ day: number, availability: Availability[] }> = ({
+const ColorButton: React.FC<{
+  onClick: () => void;
+  color: string;
+}> = ({
+  onClick,
+  color,
+}) => (
+  <IconButton
+    css={css`
+    background-color: ${color}
+  `}
+    onClick={onClick}
+  />
+);
+
+export const DayView: React.FC<{ day: number, availability: Availability[], setDayTo: (availability: Availability) => void }> = ({
   day,
   availability,
+  setDayTo,
 }) => {
   const {
     onDragStart,
@@ -37,6 +54,14 @@ export const DayView: React.FC<{ day: number, availability: Availability[] }> = 
             `}
       >
         {getDayText(day)}
+      </div>
+      <div>
+        Set day to:
+        <div>
+          <ColorButton color="#FF0000" onClick={() => setDayTo(Availability.Red)} />
+          <ColorButton color="#FFFF00" onClick={() => setDayTo(Availability.Yellow)} />
+          <ColorButton color="#00FF00" onClick={() => setDayTo(Availability.Green)} />
+        </div>
       </div>
       <div css={css`
                 flex: 0 0 auto;
@@ -61,7 +86,7 @@ export const DayView: React.FC<{ day: number, availability: Availability[] }> = 
                   css={css`
                                         flex: 1 1 auto;
                                         width: 100px;
-                                        height: 6px;
+                                        height: 5px;
                                         border-color: #000000FF;
                                         border-style: solid;
                                         border-width: ${getBorderForTimeSegment(num)};

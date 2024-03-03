@@ -21,6 +21,17 @@ export const CampaignView: React.FC = () => {
     navigate(`/schedule/${schedule.id}/user/${user.id}`);
   };
 
+  const onBack = () => {
+    navigate('/');
+  };
+
+  const goToUser = (userId: number) => {
+    if (!schedule) {
+      return;
+    }
+    navigate(`/schedule/${schedule.id}/user/${userId}`);
+  };
+
   if (!schedule) {
     return <Suspense />;
   }
@@ -30,6 +41,7 @@ export const CampaignView: React.FC = () => {
             margin: 30px;
         `}
     >
+      <Button variant="outlined" onClick={onBack}>Back</Button>
       <Typography variant="h4">
         Schedule:
         {' '}
@@ -43,11 +55,15 @@ export const CampaignView: React.FC = () => {
             <TableCell>
               Name
             </TableCell>
+            <TableCell>
+              Goto
+            </TableCell>
           </TableRow>
         </TableHead>
         {schedule.users.map((user) => (
           <TableRow>
             <TableCell>{user.name}</TableCell>
+            <TableCell><Button variant="outlined" onClick={() => goToUser(user.id)}>See User</Button></TableCell>
           </TableRow>
         ))}
       </Table>
