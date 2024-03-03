@@ -1,36 +1,34 @@
 /** @jsxImportSource @emotion/react */
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import {Availability, Day} from '@prisma/client';
 import { DayView } from './DayView';
 import { HoursGuide } from './HoursGuide';
 import { DragContext, DragPosition } from './DragContext';
 import { Nullable } from '../../../common/types/nullable';
-import { getNumberForDay } from '../../../common/util/day';
-import { WeeklyAvailabilityWithIncludes } from '../../../common/types/user';
+import { Availability } from '../../../common/types/availability-state';
 
 function getNewAvailabilityValue(initialValue: Availability, mouseButton: number): Availability {
   if (mouseButton === 2) {
     console.log('test');
-    return Availability.YELLOW;
+    return Availability.Yellow;
   }
-  return initialValue === Availability.RED
-    ? Availability.GREEN
-    : Availability.RED;
+  return initialValue === Availability.Red
+    ? Availability.Green
+    : Availability.Red;
 }
 
 function updateAvailabilityBox(
-  week: WeeklyAvailabilityWithIncludes,
+  week: Availability[][],
   start: DragPosition,
   end: DragPosition,
   newValue: Availability,
-): WeeklyAvailabilityWithIncludes {
+): Availability[][] {
   const beginPos = {
-    day: Math.min(getNumberForDay(start.day), getNumberForDay(end.day)),
+    day: Math.min(start.day, end.day),
     time: Math.min(start.time, end.time),
   };
   const endPos = {
-    day: Math.max(getNumberForDay(start.day), getNumberForDay(end.day)),
+    day: Math.max(start.day, end.day),
     time: Math.max(start.time, end.time),
   };
 
@@ -40,28 +38,23 @@ function updateAvailabilityBox(
   //     }
   //     return week.days[day.ts].availability[time];
   // }));
-  return {
-    ...week,
-    days: week.days.map((day) => {
-      if (getNumberForDay(day.day) < beginPos.day || getNumberForDay(day.day) > endPos.day) {
-        return day;
+  console.log(week);
+  return week.map((day, index) => {
+    if (index < beginPos.day || index > endPos.day) {
+      return day;
+    }
+    return day.map((availability, time) => {
+      if (time < beginPos.time || time > endPos.time) {
+        return availability;
       }
-      return {
-        ...day,
-        availability: day.availability.map((availability, time) => {
-          if (time < beginPos.time || time > endPos.time) {
-            return availability;
-          }
-          return newValue;
-        }),
-      };
-    }),
-  };
+      return newValue;
+    });
+  });
 }
 
 export const WeeklyCalendar: React.FC<{
-  availability: WeeklyAvailabilityWithIncludes,
-  onAvailabilityUpdate: (availability: WeeklyAvailabilityWithIncludes) => void;
+  availability: Availability[][],
+  onAvailabilityUpdate: (availability: Availability[][]) => void;
 }> = ({ availability, onAvailabilityUpdate }) => {
   const [dragging, setDragging] = useState<boolean>(false);
   const [dragNewState, setDragNewState] = useState<Nullable<Availability>>(null);
@@ -71,7 +64,7 @@ export const WeeklyCalendar: React.FC<{
   const onDragStart = (e: React.MouseEvent, pos: DragPosition) => {
     setDragging(true);
     setDragStart(pos);
-    const initialValue: Availability = availability.days[getNumberForDay(pos!.day)].availability[pos!.time];
+    const initialValue: Availability = availability[pos!.day][pos!.time];
     const newState = getNewAvailabilityValue(initialValue, e.button);
     setDragNewState(newState);
     setTemporaryStates(updateAvailabilityBox(availability, pos!, pos!, newState));
@@ -120,13 +113,13 @@ export const WeeklyCalendar: React.FC<{
                         //border: 1px solid #000000;
                     `}
         >
-          <DayView day={Day.SUNDAY} availability={temporaryStates.days[0]} />
-          <DayView day={Day.MONDAY} availability={temporaryStates.days[1]} />
-          <DayView day={Day.TUESDAY} availability={temporaryStates.days[2]} />
-          <DayView day={Day.WEDNESDAY} availability={temporaryStates.days[3]} />
-          <DayView day={Day.THURSDAY} availability={temporaryStates.days[4]} />
-          <DayView day={Day.FRIDAY} availability={temporaryStates.days[5]} />
-          <DayView day={Day.SATURDAY} availability={temporaryStates.days[6]} />
+          <DayView day={0} availability={temporaryStates[0]} />
+          <DayView day={1} availability={temporaryStates[1]} />
+          <DayView day={2} availability={temporaryStates[2]} />
+          <DayView day={3} availability={temporaryStates[3]} />
+          <DayView day={4} availability={temporaryStates[4]} />
+          <DayView day={5} availability={temporaryStates[5]} />
+          <DayView day={6} availability={temporaryStates[6]} />
         </div>
         <HoursGuide />
       </div>

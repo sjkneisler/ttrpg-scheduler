@@ -1,12 +1,12 @@
-import { Availability } from '@prisma/client';
+import { Availability } from '../../../common/types/availability-state';
 
 export function getColorFromAvailabilityState(state: Availability): string {
   switch (state) {
-    case Availability.YELLOW:
+    case Availability.Yellow:
       return '#FFFF00';
-    case Availability.RED:
+    case Availability.Red:
       return '#FF0000';
-    case Availability.GREEN:
+    case Availability.Green:
       return '#00FF00';
     default:
       return '#FF00FF';

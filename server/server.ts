@@ -2,13 +2,35 @@ import express, { Express } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import {
-  Availability, Day, PrismaClient, Schedule, ScheduleUser,
+  PrismaClient, Schedule, ScheduleUser,
 } from '@prisma/client';
 import crypto from 'crypto';
 import _ from 'lodash';
 import { StrippedScheduleUser, UnstrippedUserWithIncludes, UserWithIncludes } from '../common/types/user';
+import { Availability } from '../common/types/availability-state';
 
 dotenv.config();
+
+declare global {
+  namespace PrismaJson {
+    export type UserAvailability = {
+      weekly: Availability[][];
+      exceptions: AvailabilityException[];
+    };
+
+    export enum Availability {
+      Green,
+      Yellow,
+      Red,
+    }
+
+    export type AvailabilityException = {
+      startTime: Date,
+      endTime: Date,
+      availability: Availability,
+    };
+  }
+}
 
 const app: Express = express();
 const port = process.env.SERVER_PORT || 3000;
@@ -43,40 +65,8 @@ app.post<{
     scheduleId: parseInt(req.params.id, 10),
     name: req.body.name,
     availability: {
-      create: {
-        days: {
-          create: [
-            {
-              day: Day.SUNDAY,
-              availability: _.times(96, () => Availability.GREEN),
-            },
-            {
-              day: Day.MONDAY,
-              availability: _.times(96, () => Availability.GREEN),
-            },
-            {
-              day: Day.TUESDAY,
-              availability: _.times(96, () => Availability.GREEN),
-            },
-            {
-              day: Day.WEDNESDAY,
-              availability: _.times(96, () => Availability.GREEN),
-            },
-            {
-              day: Day.THURSDAY,
-              availability: _.times(96, () => Availability.GREEN),
-            },
-            {
-              day: Day.FRIDAY,
-              availability: _.times(96, () => Availability.GREEN),
-            },
-            {
-              day: Day.SATURDAY,
-              availability: _.times(96, () => Availability.GREEN),
-            },
-          ],
-        },
-      },
+      weekly: _.times(7, () => _.times(96, () => Availability.Green)),
+      exceptions: [],
     },
   };
 
@@ -114,16 +104,7 @@ app.get<{ id: string }, Schedule, {}>('/schedule/:id', async (req, res) => {
       id: parseInt(req.params.id, 10),
     },
     include: {
-      users: {
-        include: {
-          exceptions: true,
-          availability: {
-            include: {
-              days: true,
-            },
-          },
-        },
-      },
+      users: true,
     },
   });
   res.status(200).json(schedule);
@@ -141,16 +122,17 @@ app.put<{
   id: string,
   userId: string,
 }, UserWithIncludes, UserWithIncludes, UserWithIncludes>('/schedule/:id/user/:userId', async (req, res) => {
-  await Promise.all(req.body.availability!.days.map((day) => prisma.dayAvailability.update({
-    data: {
-      availability: day.availability,
-    },
+  const result = await prisma.scheduleUser.update({
     where: {
-      id: day.id,
+      id: req.body.id,
     },
-  })));
+    data: _.omit(req.body, 'schedule'),
+    include: {
+      schedule: true,
+    },
+  });
 
-  res.status(200);
+  res.status(200).json(result);
 });
 
 app.get<{
@@ -160,15 +142,6 @@ app.get<{
   const user = await prisma.scheduleUser.findFirstOrThrow({
     where: {
       id: parseInt(req.params.userId, 10),
-    },
-    include: {
-      availability: {
-        include: {
-          days: true,
-        },
-      },
-      schedule: true,
-      exceptions: true,
     },
   });
 

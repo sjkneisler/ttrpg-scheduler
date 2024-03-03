@@ -1,4 +1,3 @@
-import { Day } from '@prisma/client';
 import React from 'react';
 
 export const DragContext = React.createContext<{
@@ -12,6 +11,6 @@ export const DragContext = React.createContext<{
     });
 
 export interface DragPosition {
-  day: Day;
+  day: number;
   time: number; // Time here represents an index of 15-minute blocks from 0 to 95
 }

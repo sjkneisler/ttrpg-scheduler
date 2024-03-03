@@ -1,8 +1,9 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { WeeklyCalendar } from './WeekyCalendar';
-import { UserWithIncludes, WeeklyAvailabilityWithIncludes } from '../../../common/types/user';
+import { UserWithIncludes } from '../../../common/types/user';
 import { getUser, updateUser } from '../api/client';
+import { Availability } from '../../../common/types/availability-state';
 
 export const UserWeeklyCalendar: React.FC = () => {
   const [user, setUser] = useState<UserWithIncludes | null>(null);
@@ -16,16 +17,17 @@ export const UserWeeklyCalendar: React.FC = () => {
     getUser(parseInt(scheduleId!, 10), parseInt(userId!, 10)).then(setUser);
   }, []);
 
-  const onAvailabilityUpdate = (availability: WeeklyAvailabilityWithIncludes) => {
+  const onAvailabilityUpdate = (availability: Availability[][]) => {
     if (!user) {
       return;
     }
     const updatedUser = {
       ...user,
-      availability,
+      availability: {
+        ...user.availability,
+        weekly: availability,
+      },
     };
-    console.log('Updated User');
-    console.log(updatedUser);
     updateUser(updatedUser);
     setUser(updatedUser);
   };
@@ -35,7 +37,7 @@ export const UserWeeklyCalendar: React.FC = () => {
   }
   return (
     <div>
-      <WeeklyCalendar availability={user.availability} onAvailabilityUpdate={onAvailabilityUpdate} />
+      <WeeklyCalendar availability={user.availability.weekly} onAvailabilityUpdate={onAvailabilityUpdate} />
     </div>
   );
 };

@@ -1,20 +1,18 @@
-import { Day } from '@prisma/client';
-
-export function getDayText(day: Day): string {
+export function getDayText(day: number): string {
   switch (day) {
-    case Day.SUNDAY:
+    case 0:
       return 'Sunday';
-    case Day.MONDAY:
+    case 1:
       return 'Monday';
-    case Day.TUESDAY:
+    case 2:
       return 'Tuesday';
-    case Day.WEDNESDAY:
+    case 3:
       return 'Wednesday';
-    case Day.THURSDAY:
+    case 4:
       return 'Thursday';
-    case Day.FRIDAY:
+    case 5:
       return 'Friday';
-    case Day.SATURDAY:
+    case 6:
       return 'Saturday';
     default:
       throw new Error("shouldn't get here!");
