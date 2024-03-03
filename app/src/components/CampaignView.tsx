@@ -1,7 +1,9 @@
 /** @jsxImportSource @emotion/react */
 import React, { Suspense, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, TextField, Typography } from '@mui/material';
+import {
+  Button, Table, TableCell, TableHead, TableRow, TextField, Typography,
+} from '@mui/material';
 import { css } from '@emotion/react';
 import { createUser } from '../api/client';
 import { useSchedule } from '../hooks/useSchedule';
@@ -25,8 +27,8 @@ export const CampaignView: React.FC = () => {
 
   return (
     <div css={css`
-        margin: 30px;
-    `}
+            margin: 30px;
+        `}
     >
       <Typography variant="h4">
         Schedule:
@@ -35,6 +37,20 @@ export const CampaignView: React.FC = () => {
       </Typography>
       <TextField label="User Name" value={name} onChange={(e) => setName(e.target.value)} />
       <Button variant="outlined" onClick={onCreateUserClicked}>Create User</Button>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>
+              Name
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        {schedule.users.map((user) => (
+          <TableRow>
+            <TableCell>{user.name}</TableCell>
+          </TableRow>
+        ))}
+      </Table>
     </div>
   );
 };

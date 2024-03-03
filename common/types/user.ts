@@ -7,3 +7,7 @@ export type UnstrippedUserWithIncludes = Prisma.ScheduleUserGetPayload<{ include
 } }>;
 
 export type UserWithIncludes = Omit<UnstrippedUserWithIncludes, 'passwordSalt' | 'passwordSaltIterations' | 'passwordHash'>;
+
+export type ScheduleWithIncludes = Prisma.ScheduleGetPayload<{ include: {
+  users:true;
+} }>;

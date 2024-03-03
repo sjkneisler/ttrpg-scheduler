@@ -160,7 +160,22 @@ app.get<{}, Schedule, {
     where: {
       inviteCode: req.body.inviteCode,
     },
+    include: {
+      users: true,
+    },
   });
 
   res.status(200).json(schedule);
+});
+
+app.get<{
+  scheduleId: string
+}, ScheduleUser[]>('/schedule/:scheduleId/users', async (req, res) => {
+  const users = await prisma.scheduleUser.findMany({
+    where: {
+      scheduleId: parseInt(req.params.scheduleId, 10),
+    },
+  });
+
+  res.status(200).json(users);
 });

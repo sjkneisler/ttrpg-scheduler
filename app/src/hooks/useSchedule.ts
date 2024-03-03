@@ -1,11 +1,11 @@
 import { useParams } from 'react-router-dom';
-import { Schedule } from '@prisma/client';
 import { useEffect, useState } from 'react';
 import { getSchedule } from '../api/client';
+import { ScheduleWithIncludes } from '../../../common/types/user';
 
-export const useSchedule = (): Schedule | null => {
+export const useSchedule = (): ScheduleWithIncludes | null => {
   const { scheduleId } = useParams();
-  const [schedule, setSchedule] = useState<Schedule | null>(null);
+  const [schedule, setSchedule] = useState<ScheduleWithIncludes | null>(null);
 
   if (!scheduleId) {
     return null;

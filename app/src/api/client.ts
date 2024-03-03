@@ -1,5 +1,5 @@
 import { Schedule } from '@prisma/client';
-import { UserWithIncludes } from '../../../common/types/user';
+import { ScheduleWithIncludes, UserWithIncludes } from '../../../common/types/user';
 
 const API_ROOT = 'http://localhost:3001/';
 
@@ -59,6 +59,6 @@ export async function createUser(scheduleId: number, name: string): Promise<User
   });
 }
 
-export async function getSchedule(scheduleId: number): Promise<Schedule> {
+export async function getSchedule(scheduleId: number): Promise<ScheduleWithIncludes> {
   return getJson(`schedule/${scheduleId}`);
 }
