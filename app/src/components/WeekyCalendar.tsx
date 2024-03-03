@@ -103,7 +103,7 @@ export const WeeklyCalendar: React.FC<{
                 `}
         onMouseLeave={onMouseOut}
       >
-        <HoursGuide />
+        <HoursGuide editable />
         <div
           css={css`
                         display: flex;
@@ -119,7 +119,7 @@ export const WeeklyCalendar: React.FC<{
           <DayView day={5} editable availability={temporaryStates[5]} setDayTo={(newAvailability) => setDayTo(5, newAvailability)} />
           <DayView day={6} editable availability={temporaryStates[6]} setDayTo={(newAvailability) => setDayTo(6, newAvailability)} />
         </div>
-        <HoursGuide />
+        <HoursGuide editable />
       </div>
     </DragContext.Provider>
   );

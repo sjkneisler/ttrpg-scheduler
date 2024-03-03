@@ -14,7 +14,7 @@ export const AggregateWeeklyCalendar: React.FC<{
                   flex-direction: row;
               `}
   >
-    <HoursGuide />
+    <HoursGuide editable={false} />
     <div
       css={css`
                       display: flex;
@@ -30,6 +30,6 @@ export const AggregateWeeklyCalendar: React.FC<{
       <DayView day={5} editable={false} availability={availability[5]} setDayTo={() => null} />
       <DayView day={6} editable={false} availability={availability[6]} setDayTo={() => null} />
     </div>
-    <HoursGuide />
+    <HoursGuide editable={false} />
   </div>
 );

@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { ScheduleWithIncludes } from '../../../common/types/user';
 import { AggregateAvailability, Availability } from '../../../common/types/availability-state';
+import { AggregationType } from '../../../common/types/aggregation-type';
 
 function availabilityToGradient(availability: Availability): number {
   switch (availability) {
@@ -20,11 +21,24 @@ function getColorForGradient(value: number) {
   return ['hsl(', hue, ',100%,50%)'].join('');
 }
 
-export function aggregateAvailability(schedule: ScheduleWithIncludes): AggregateAvailability {
+export function aggregateAvailability(schedule: ScheduleWithIncludes, aggregationType: AggregationType): AggregateAvailability {
   const userAvailabilities = schedule.users.map((user) => user.availability.weekly);
 
   return _.times(7, (day) => _.times(96, (time) => {
-    const gradient = userAvailabilities.reduce((acc, cur) => acc + availabilityToGradient(cur[day][time]), 0) / userAvailabilities.length;
-    return getColorForGradient(gradient);
+    if (aggregationType === AggregationType.Average) {
+      const gradient = userAvailabilities.reduce((acc, cur) => acc + availabilityToGradient(cur[day][time]), 0) / userAvailabilities.length;
+      return getColorForGradient(gradient);
+    } // Aggregation type Common
+    const availabilities = userAvailabilities.map((user) => user[day][time]);
+    // TODO: Fix this hacky nonsense
+    // @ts-ignore
+    if (availabilities.some((a) => a === Availability.Red)) {
+      return '#ff0000';
+    }
+    // @ts-ignore
+    if (availabilities.some((a) => a === Availability.Yellow)) {
+      return '#ffff00';
+    }
+    return '#00ff00';
   }));
 }
