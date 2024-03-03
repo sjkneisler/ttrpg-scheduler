@@ -1,20 +1,38 @@
-import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Button, TextField } from '@mui/material';
+/** @jsxImportSource @emotion/react */
+import React, { Suspense, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button, TextField, Typography } from '@mui/material';
+import { css } from '@emotion/react';
 import { createUser } from '../api/client';
+import { useSchedule } from '../hooks/useSchedule';
 
 export const CampaignView: React.FC = () => {
   const [name, setName] = useState('');
   const navigate = useNavigate();
-  const { scheduleId } = useParams();
-  const parsedScheduleId = parseInt(scheduleId!, 10);
+  const schedule = useSchedule();
 
   const onCreateUserClicked = async () => {
-    const user = await createUser(parsedScheduleId, name);
-    navigate(`/schedule/${parsedScheduleId}/user/${user.id}`);
+    if (!schedule) {
+      return;
+    }
+    const user = await createUser(schedule.id, name);
+    navigate(`/schedule/${schedule.id}/user/${user.id}`);
   };
+
+  if (!schedule) {
+    return <Suspense />;
+  }
+
   return (
-    <div>
+    <div css={css`
+        margin: 30px;
+    `}
+    >
+      <Typography variant="h4">
+        Schedule:
+        {' '}
+        {schedule.name}
+      </Typography>
       <TextField label="User Name" value={name} onChange={(e) => setName(e.target.value)} />
       <Button variant="outlined" onClick={onCreateUserClicked}>Create User</Button>
     </div>

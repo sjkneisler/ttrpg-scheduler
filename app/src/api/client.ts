@@ -30,11 +30,12 @@ function post(path: string, body: any): Promise<Response> {
 function getJson<T>(path: string): Promise<T> {
   return get(path).then((res) => res.json());
 }
-function putJson<T, U>(path: string, body:T): Promise<U> {
+
+function putJson<T, U>(path: string, body: T): Promise<U> {
   return put(path, body).then((res) => res.json());
 }
 
-function postJson<T, U>(path: string, body:T): Promise<U> {
+function postJson<T, U>(path: string, body: T): Promise<U> {
   return post(path, body).then((res) => res.json());
 }
 
@@ -52,8 +53,12 @@ export async function createSchedule(name: string): Promise<Schedule> {
   });
 }
 
-export async function createUser(scheduleId: number, name: string): Promise<Schedule> {
+export async function createUser(scheduleId: number, name: string): Promise<UserWithIncludes> {
   return postJson(`schedule/${scheduleId}/user`, {
     name,
   });
+}
+
+export async function getSchedule(scheduleId: number): Promise<Schedule> {
+  return getJson(`schedule/${scheduleId}`);
 }

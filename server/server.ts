@@ -143,6 +143,9 @@ app.get<{
     where: {
       id: parseInt(req.params.userId, 10),
     },
+    include: {
+      schedule: true,
+    },
   });
 
   const strippedUser = stripUser(user);

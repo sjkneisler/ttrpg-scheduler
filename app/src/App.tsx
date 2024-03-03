@@ -21,10 +21,6 @@ const router = createBrowserRouter([
     path: '/schedule/:scheduleId/user/:userId',
     element: <UserWeeklyCalendar />,
   },
-  // {
-  //   path: '/schedule/:scheduleId',
-  //   element: (routes, opts) => <WeeklyCalendar type={} />,
-  // },
 ]);
 
 function App() {

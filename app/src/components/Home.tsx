@@ -1,6 +1,8 @@
+/** @jsxImportSource @emotion/react */
 import { Button, TextField } from '@mui/material';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { css } from '@emotion/react';
 import { createSchedule } from '../api/client';
 
 export const Home: React.FC = () => {
@@ -11,7 +13,10 @@ export const Home: React.FC = () => {
     navigate(`/schedule/${schedule.id}`);
   };
   return (
-    <div>
+    <div css={css`
+        margin: 30px;
+    `}
+    >
       <TextField label="Campaign Name" value={name} onChange={(e) => setName(e.target.value)} />
       <Button variant="outlined" onClick={createCampaign}>Create Campaign</Button>
     </div>
