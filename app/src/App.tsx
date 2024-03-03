@@ -5,11 +5,17 @@ import { AppBar, Toolbar, Typography } from '@mui/material';
 import './App.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { UserWeeklyCalendar } from './components/UserWeeklyCalendar';
+import { Home } from './components/Home';
+import { CampaignView } from './components/CampaignView';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <div />,
+    element: <Home />,
+  },
+  {
+    path: '/schedule/:scheduleId',
+    element: <CampaignView />,
   },
   {
     path: '/schedule/:scheduleId/user/:userId',
