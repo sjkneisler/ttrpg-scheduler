@@ -1,16 +1,18 @@
 export type UserAvailability = {
-    weekly: Availability[][];
-    exceptions: AvailabilityException[];
+  weekly: Availability[][];
+  exceptions: AvailabilityException[];
 };
 
 export enum Availability {
-    Green,
-    Yellow,
-    Red,
+  Green,
+  Yellow,
+  Red,
 }
 
 export type AvailabilityException = {
-    startTime: Date,
-    endTime: Date,
-    availability: Availability,
+  startTime: Date,
+  endTime: Date,
+  availability: Availability,
 };
+
+export type AggregateAvailability = string[][];

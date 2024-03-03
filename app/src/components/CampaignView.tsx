@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Button, Table, TableCell, TableHead, TableRow, TextField, Typography,
@@ -7,6 +7,8 @@ import {
 import { css } from '@emotion/react';
 import { createUser } from '../api/client';
 import { useSchedule } from '../hooks/useSchedule';
+import { AggregateWeeklyCalendar } from './AggregateWeekyCalendar';
+import { aggregateAvailability } from '../utils/aggregate';
 
 export const CampaignView: React.FC = () => {
   const [name, setName] = useState('');
@@ -32,7 +34,15 @@ export const CampaignView: React.FC = () => {
     navigate(`/schedule/${schedule.id}/user/${userId}`);
   };
 
-  if (!schedule) {
+  const showAvailability = useMemo(() => {
+    if (!schedule) {
+      return null;
+    }
+
+    return aggregateAvailability(schedule);
+  }, [schedule]);
+
+  if (!schedule || !showAvailability) {
     return <Suspense />;
   }
 
@@ -67,6 +77,7 @@ export const CampaignView: React.FC = () => {
           </TableRow>
         ))}
       </Table>
+      <AggregateWeeklyCalendar availability={showAvailability} />
     </div>
   );
 };

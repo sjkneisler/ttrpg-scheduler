@@ -5,7 +5,7 @@ import { hourTimes } from '../utils/hourTimes';
 
 export const HoursGuide: React.FC = () => (
   <div css={css`
-        padding: 70px 5px 0 5px;
+        padding: 72px 5px 0 5px;
         text-align: right;
         color: #777777;
     `}

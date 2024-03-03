@@ -9,7 +9,6 @@ import { Availability } from '../../../common/types/availability-state';
 
 function getNewAvailabilityValue(initialValue: Availability, mouseButton: number): Availability {
   if (mouseButton === 2) {
-    console.log('test');
     return Availability.Yellow;
   }
   return initialValue === Availability.Red
@@ -112,13 +111,13 @@ export const WeeklyCalendar: React.FC<{
                         //border: 1px solid #000000;
                     `}
         >
-          <DayView day={0} availability={temporaryStates[0]} setDayTo={(newAvailability) => setDayTo(0, newAvailability)} />
-          <DayView day={1} availability={temporaryStates[1]} setDayTo={(newAvailability) => setDayTo(1, newAvailability)} />
-          <DayView day={2} availability={temporaryStates[2]} setDayTo={(newAvailability) => setDayTo(2, newAvailability)} />
-          <DayView day={3} availability={temporaryStates[3]} setDayTo={(newAvailability) => setDayTo(3, newAvailability)} />
-          <DayView day={4} availability={temporaryStates[4]} setDayTo={(newAvailability) => setDayTo(4, newAvailability)} />
-          <DayView day={5} availability={temporaryStates[5]} setDayTo={(newAvailability) => setDayTo(5, newAvailability)} />
-          <DayView day={6} availability={temporaryStates[6]} setDayTo={(newAvailability) => setDayTo(6, newAvailability)} />
+          <DayView day={0} editable availability={temporaryStates[0]} setDayTo={(newAvailability) => setDayTo(0, newAvailability)} />
+          <DayView day={1} editable availability={temporaryStates[1]} setDayTo={(newAvailability) => setDayTo(1, newAvailability)} />
+          <DayView day={2} editable availability={temporaryStates[2]} setDayTo={(newAvailability) => setDayTo(2, newAvailability)} />
+          <DayView day={3} editable availability={temporaryStates[3]} setDayTo={(newAvailability) => setDayTo(3, newAvailability)} />
+          <DayView day={4} editable availability={temporaryStates[4]} setDayTo={(newAvailability) => setDayTo(4, newAvailability)} />
+          <DayView day={5} editable availability={temporaryStates[5]} setDayTo={(newAvailability) => setDayTo(5, newAvailability)} />
+          <DayView day={6} editable availability={temporaryStates[6]} setDayTo={(newAvailability) => setDayTo(6, newAvailability)} />
         </div>
         <HoursGuide />
       </div>

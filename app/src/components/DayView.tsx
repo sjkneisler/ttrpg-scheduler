@@ -27,16 +27,24 @@ const ColorButton: React.FC<{
 }) => (
   <IconButton
     css={css`
-    background-color: ${color}
-  `}
+            background-color: ${color}
+        `}
     onClick={onClick}
   />
 );
 
-export const DayView: React.FC<{ day: number, availability: Availability[], setDayTo: (availability: Availability) => void }> = ({
+export type DayViewProps = {
+  day: number;
+  availability: (Availability | string)[];
+  setDayTo: (availability: Availability) => void;
+  editable: boolean;
+};
+
+export const DayView: React.FC<DayViewProps> = ({
   day,
   availability,
   setDayTo,
+  editable,
 }) => {
   const {
     onDragStart,
@@ -55,6 +63,7 @@ export const DayView: React.FC<{ day: number, availability: Availability[], setD
       >
         {getDayText(day)}
       </div>
+      { editable && (
       <div>
         Set day to:
         <div>
@@ -63,6 +72,7 @@ export const DayView: React.FC<{ day: number, availability: Availability[], setD
           <ColorButton color="#00FF00" onClick={() => setDayTo(Availability.Green)} />
         </div>
       </div>
+      )}
       <div css={css`
                 flex: 0 0 auto;
                 display: flex;
@@ -91,6 +101,7 @@ export const DayView: React.FC<{ day: number, availability: Availability[], setD
                                         border-style: solid;
                                         border-width: ${getBorderForTimeSegment(num)};
                                         background-color: ${getColorFromAvailabilityState(availability[hourCount * 4 + num])};
+                                        cursor: ${editable ? 'pointer' : 'default'};
                                     `}
                   onMouseMove={(e) => onDrag(e, { day, time: hourCount * 4 + num })}
                   onMouseDown={(e) => onDragStart(e, { day, time: hourCount * 4 + num })}
