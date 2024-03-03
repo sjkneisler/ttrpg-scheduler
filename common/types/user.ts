@@ -2,7 +2,7 @@ import { Prisma, ScheduleUser } from '@prisma/client';
 
 export type StrippedScheduleUser = Omit<ScheduleUser, 'passwordSalt' | 'passwordSaltIterations' | 'passwordHash'>;
 
-export type UserWithIncludes = Omit<Prisma.ScheduleUserGetPayload<{ include: {
+export type UnstrippedUserWithIncludes = Prisma.ScheduleUserGetPayload<{ include: {
   availability: {
     include: {
       days: true,
@@ -10,7 +10,9 @@ export type UserWithIncludes = Omit<Prisma.ScheduleUserGetPayload<{ include: {
   },
   schedule: true,
   exceptions: true,
-} }>, 'passwordSalt' | 'passwordSaltIterations' | 'passwordHash'>;
+} }>;
+
+export type UserWithIncludes = Omit<UnstrippedUserWithIncludes, 'passwordSalt' | 'passwordSaltIterations' | 'passwordHash'>;
 
 export type WeeklyAvailabilityWithIncludes = Prisma.WeeklyAvailabilityGetPayload<{
   include: {

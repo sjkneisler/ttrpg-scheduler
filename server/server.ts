@@ -6,7 +6,7 @@ import {
 } from '@prisma/client';
 import crypto from 'crypto';
 import _ from 'lodash';
-import { StrippedScheduleUser } from '../common/types/user';
+import { StrippedScheduleUser, UnstrippedUserWithIncludes, UserWithIncludes } from '../common/types/user';
 
 dotenv.config();
 
@@ -132,29 +132,25 @@ app.get<{ id: string }, Schedule, {}>('/schedule/:id', async (req, res) => {
 function stripUser(user: ScheduleUser): StrippedScheduleUser {
   return _.omit(user, 'passwordSalt', 'passwordSaltIterations', 'passwordHash');
 }
+
+function stripUserWithIncludes(user: UnstrippedUserWithIncludes): UserWithIncludes {
+  return _.omit(user, 'passwordSalt', 'passwordSaltIterations', 'passwordHash');
+}
+
 app.put<{
   id: string,
   userId: string,
-}, StrippedScheduleUser, StrippedScheduleUser>('/schedule/:id/user/:userId', async (req, res) => {
-  const result = await prisma.scheduleUser.update({
+}, UserWithIncludes, UserWithIncludes, UserWithIncludes>('/schedule/:id/user/:userId', async (req, res) => {
+  await Promise.all(req.body.availability!.days.map((day) => prisma.dayAvailability.update({
+    data: {
+      availability: day.availability,
+    },
     where: {
-      id: parseInt(req.params.userId, 10),
+      id: day.id,
     },
-    data: req.body,
-    include: {
-      availability: {
-        include: {
-          days: true,
-        },
-      },
-      schedule: true,
-      exceptions: true,
-    },
-  });
+  })));
 
-  const strippedResult = stripUser(result);
-
-  res.status(200).json(strippedResult);
+  res.status(200);
 });
 
 app.get<{
