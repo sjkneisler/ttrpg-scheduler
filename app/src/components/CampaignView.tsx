@@ -10,7 +10,7 @@ import { useSchedule } from '../hooks/useSchedule';
 import { AggregateWeeklyCalendar } from './AggregateWeekyCalendar';
 import { aggregateAvailability } from '../utils/aggregate';
 import { AggregationType } from '../../../common/types/aggregation-type';
-import { getCurrentTimezone } from '../../../common/util/timezones';
+import { getCurrentTimezone, getTimezoneOffset } from '../../../common/util/timezones';
 
 export const CampaignView: React.FC = () => {
   const [name, setName] = useState('');
@@ -42,7 +42,7 @@ export const CampaignView: React.FC = () => {
       return null;
     }
 
-    return aggregateAvailability(schedule, aggregationType);
+    return aggregateAvailability(schedule, aggregationType, getTimezoneOffset(getCurrentTimezone()));
   }, [schedule, aggregationType]);
 
   if (!schedule || !showAvailability) {
