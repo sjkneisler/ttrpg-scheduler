@@ -7,6 +7,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { UserWeeklyCalendar } from './components/UserWeeklyCalendar';
 import { Home } from './components/Home';
 import { CampaignView } from './components/CampaignView';
+import { ExceptionsCalendar } from './components/ExceptionsCalendar';
 
 const router = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
   {
     path: '/schedule/:scheduleId/user/:userId',
     element: <UserWeeklyCalendar />,
+  },
+  {
+    path: '/schedule/:scheduleId/user/:userId/exceptions',
+    element: <ExceptionsCalendar />,
   },
 ]);
 

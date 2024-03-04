@@ -40,6 +40,7 @@
     "server/**/*",
     ".eslintrc.js",
     "common/**/*",
+    "server_old/**/*",
   ],
   "lib": [
     "es2021"

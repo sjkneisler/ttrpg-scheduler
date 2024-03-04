@@ -86,6 +86,10 @@ export const UserWeeklyCalendar: React.FC = () => {
     navigate(`/schedule/${scheduleId}`);
   };
 
+  const gotoExceptions = () => {
+    navigate(`/schedule/${scheduleId}/user/${userId}/exceptions`);
+  };
+
   const shiftedWeeklyAvailability = useMemo(() => {
     if (!user) {
       return null;
@@ -126,6 +130,9 @@ export const UserWeeklyCalendar: React.FC = () => {
             <MenuItem value={timezone}>{timezone}</MenuItem>
           ))}
         </Select>
+        <Button variant="outlined" onClick={gotoExceptions}>
+          Go To Date Specific Availabilities
+        </Button>
       </div>
       <div
         css={css`
