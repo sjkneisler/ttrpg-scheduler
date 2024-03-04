@@ -10,9 +10,9 @@ export enum Availability {
 }
 
 export type AvailabilityException = {
-  startTime: Date,
-  endTime: Date,
-  availability: Availability,
+  startTime: Date;
+  endTime: Date;
+  availability: Availability;
 };
 
 export type AggregateAvailability = string[][];

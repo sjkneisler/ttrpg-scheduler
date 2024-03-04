@@ -13,12 +13,20 @@ export const Home: React.FC = () => {
     navigate(`/schedule/${schedule.id}`);
   };
   return (
-    <div css={css`
+    <div
+      css={css`
         margin: 30px;
-    `}
+      `}
     >
-      <TextField label="Campaign Name" value={name} onChange={(e) => setName(e.target.value)} />
-      <Button variant="outlined" onClick={createCampaign}>Create Campaign</Button>
+      <TextField
+        label="Campaign Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
+      <Button variant="outlined" onClick={createCampaign}>
+        Create Campaign
+      </Button>
     </div>
   );
 };

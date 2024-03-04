@@ -1,5 +1,8 @@
 import { Schedule } from '@prisma/client';
-import { ScheduleWithIncludes, UserWithIncludes } from '../../../common/types/user';
+import {
+  ScheduleWithIncludes,
+  UserWithIncludes,
+} from '../../../common/types/user';
 
 const API_ROOT = 'http://localhost:3001/';
 
@@ -28,22 +31,27 @@ function post(path: string, body: any): Promise<Response> {
 }
 
 function getJson<T>(path: string): Promise<T> {
-  return get(path).then((res) => res.json());
+  return get(path).then((res) => res.json()) as Promise<T>;
 }
 
 function putJson<T, U>(path: string, body: T): Promise<U> {
-  return put(path, body).then((res) => res.json());
+  return put(path, body).then((res) => res.json()) as Promise<U>;
 }
 
 function postJson<T, U>(path: string, body: T): Promise<U> {
-  return post(path, body).then((res) => res.json());
+  return post(path, body).then((res) => res.json()) as Promise<U>;
 }
 
-export async function getUser(scheduleId: number, userId: number): Promise<UserWithIncludes> {
+export async function getUser(
+  scheduleId: number,
+  userId: number,
+): Promise<UserWithIncludes> {
   return getJson(`schedule/${scheduleId}/user/${userId}`);
 }
 
-export async function updateUser(user: UserWithIncludes): Promise<UserWithIncludes> {
+export async function updateUser(
+  user: UserWithIncludes,
+): Promise<UserWithIncludes> {
   return putJson(`schedule/${user.scheduleId}/user/${user.id}`, user);
 }
 
@@ -53,13 +61,19 @@ export async function createSchedule(name: string): Promise<Schedule> {
   });
 }
 
-export async function createUser(scheduleId: number, name: string, timezone: string): Promise<UserWithIncludes> {
+export async function createUser(
+  scheduleId: number,
+  name: string,
+  timezone: string,
+): Promise<UserWithIncludes> {
   return postJson(`schedule/${scheduleId}/user`, {
     name,
     timezone,
   });
 }
 
-export async function getSchedule(scheduleId: number): Promise<ScheduleWithIncludes> {
+export async function getSchedule(
+  scheduleId: number,
+): Promise<ScheduleWithIncludes> {
   return getJson(`schedule/${scheduleId}`);
 }

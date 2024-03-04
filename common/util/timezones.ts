@@ -1,7 +1,10 @@
 import { DateTime } from 'luxon';
 import { Availability } from '../types/availability-state';
 
-export function shiftAvailabilityByTimezone(weekData: Availability[][], offsetMinutes: number): Availability[][] {
+export function shiftAvailabilityByTimezone(
+  weekData: Availability[][],
+  offsetMinutes: number,
+): Availability[][] {
   const shiftAmount: number = offsetMinutes / 15; // Convert offset to 15-minute intervals
   const daysInWeek: number = 7;
   const intervalsPerDay: number = 96; // 24 hours * 4 intervals per hour
@@ -26,7 +29,12 @@ export function shiftAvailabilityByTimezone(weekData: Availability[][], offsetMi
   // Rebuild the week data from the shifted flat array
   const newWeekData: Availability[][] = [];
   for (let dayIndex = 0; dayIndex < daysInWeek; dayIndex++) {
-    newWeekData.push(flattened.slice(dayIndex * intervalsPerDay, (dayIndex + 1) * intervalsPerDay));
+    newWeekData.push(
+      flattened.slice(
+        dayIndex * intervalsPerDay,
+        (dayIndex + 1) * intervalsPerDay,
+      ),
+    );
   }
 
   return newWeekData;

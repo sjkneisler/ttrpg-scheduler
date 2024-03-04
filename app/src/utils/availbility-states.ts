@@ -1,6 +1,8 @@
 import { Availability } from '../../../common/types/availability-state';
 
-export function getColorFromAvailabilityState(state: Availability | string): string {
+export function getColorFromAvailabilityState(
+  state: Availability | string,
+): string {
   if (typeof state === 'string') {
     return state;
   }

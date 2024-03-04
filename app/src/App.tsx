@@ -25,29 +25,29 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <div css={css`
+    <div
+      css={css`
         height: 100%;
         width: 100%;
         display: flex;
         flex-direction: column;
-    `}
+      `}
     >
       <AppBar
         position="relative"
         css={css`
-        flex: 0 0  auto;
-      `}
+          flex: 0 0 auto;
+        `}
       >
         <Toolbar>
-          <Typography variant="h4">
-            TTRPG Scheduler
-          </Typography>
+          <Typography variant="h4">TTRPG Scheduler</Typography>
         </Toolbar>
       </AppBar>
 
-      <div css={css`
-          flex: 1 1 auto
-            `}
+      <div
+        css={css`
+          flex: 1 1 auto;
+        `}
       >
         <RouterProvider router={router} />
       </div>

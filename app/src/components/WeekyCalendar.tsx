@@ -7,7 +7,10 @@ import { DragContext, DragPosition } from './DragContext';
 import { Nullable } from '../../../common/types/nullable';
 import { Availability } from '../../../common/types/availability-state';
 
-function getNewAvailabilityValue(initialValue: Availability, mouseButton: number): Availability {
+function getNewAvailabilityValue(
+  initialValue: Availability,
+  mouseButton: number,
+): Availability {
   if (mouseButton === 2) {
     return Availability.Yellow;
   }
@@ -45,52 +48,66 @@ function updateAvailabilityBox(
 }
 
 export const WeeklyCalendar: React.FC<{
-  availability: Availability[][],
-  onAvailabilityUpdate: (availability: Availability[][]) => void;
+  availability: Availability[][];
+  onAvailabilityUpdate: (availability: Availability[][]) => Promise<void>;
 }> = ({ availability, onAvailabilityUpdate }) => {
   const [dragging, setDragging] = useState<boolean>(false);
-  const [dragNewState, setDragNewState] = useState<Nullable<Availability>>(null);
+  const [dragNewState, setDragNewState] =
+    useState<Nullable<Availability>>(null);
   const [dragStart, setDragStart] = useState<Nullable<DragPosition>>(null);
   const [temporaryStates, setTemporaryStates] = useState(availability);
 
   const onDragStart = (e: React.MouseEvent, pos: DragPosition) => {
     setDragging(true);
     setDragStart(pos);
-    const initialValue: Availability = availability[pos!.day][pos!.time];
+    const initialValue: Availability = availability[pos.day][pos.time];
     const newState = getNewAvailabilityValue(initialValue, e.button);
     setDragNewState(newState);
-    setTemporaryStates(updateAvailabilityBox(availability, pos!, pos!, newState));
+    setTemporaryStates(updateAvailabilityBox(availability, pos, pos, newState));
   };
-  const onDragEnd = (e: React.MouseEvent, pos: DragPosition) => {
+  const onDragEnd = async (e: React.MouseEvent, pos: DragPosition) => {
     if (dragging) {
       setDragging(false);
       setDragStart(null);
       // TODO: Update the availability state here
-      const newStates = updateAvailabilityBox(availability, dragStart!, pos!, dragNewState!);
-      onAvailabilityUpdate(newStates);
+      const newStates = updateAvailabilityBox(
+        availability,
+        dragStart!,
+        pos,
+        dragNewState!,
+      );
+      await onAvailabilityUpdate(newStates);
       setTemporaryStates(newStates);
     }
     return false;
   };
   const onMouseOut = () => {
-    console.log('Stopping drag due to mouse leaving area');
     setDragging(false);
   };
   const onDrag = (e: React.MouseEvent, pos: DragPosition) => {
     if (dragging) {
-      setTemporaryStates(updateAvailabilityBox(availability, dragStart!, pos!, dragNewState!));
+      setTemporaryStates(
+        updateAvailabilityBox(availability, dragStart!, pos, dragNewState!),
+      );
     }
   };
 
-  const dragContextValue = useMemo(() => ({
-    onDragStart,
-    onDragEnd,
-    onDrag,
-  }), [dragStart, dragging, availability, dragNewState]);
-
-  const setDayTo = (day: number, newAvailability: Availability) => {
-    const newStates = updateAvailabilityBox(availability, { day, time: 0 }, { day, time: 95 }, newAvailability);
-    onAvailabilityUpdate(newStates);
+  const dragContextValue = useMemo(
+    () => ({
+      onDragStart,
+      onDragEnd,
+      onDrag,
+    }),
+    [dragStart, dragging, availability, dragNewState],
+  );
+  const setDayTo = async (day: number, newAvailability: Availability) => {
+    const newStates = updateAvailabilityBox(
+      availability,
+      { day, time: 0 },
+      { day, time: 95 },
+      newAvailability,
+    );
+    await onAvailabilityUpdate(newStates);
     setTemporaryStates(newStates);
   };
 
@@ -98,26 +115,61 @@ export const WeeklyCalendar: React.FC<{
     <DragContext.Provider value={dragContextValue}>
       <div
         css={css`
-                    display: flex;
-                    flex-direction: row;
-                `}
+          display: flex;
+          flex-direction: row;
+        `}
         onMouseLeave={onMouseOut}
       >
         <HoursGuide editable />
         <div
           css={css`
-                        display: flex;
-                        flex-direction: row;
-                        //border: 1px solid #000000;
-                    `}
+            display: flex;
+            flex-direction: row;
+            //border: 1px solid #000000;
+          `}
         >
-          <DayView day={0} editable availability={temporaryStates[0]} setDayTo={(newAvailability) => setDayTo(0, newAvailability)} />
-          <DayView day={1} editable availability={temporaryStates[1]} setDayTo={(newAvailability) => setDayTo(1, newAvailability)} />
-          <DayView day={2} editable availability={temporaryStates[2]} setDayTo={(newAvailability) => setDayTo(2, newAvailability)} />
-          <DayView day={3} editable availability={temporaryStates[3]} setDayTo={(newAvailability) => setDayTo(3, newAvailability)} />
-          <DayView day={4} editable availability={temporaryStates[4]} setDayTo={(newAvailability) => setDayTo(4, newAvailability)} />
-          <DayView day={5} editable availability={temporaryStates[5]} setDayTo={(newAvailability) => setDayTo(5, newAvailability)} />
-          <DayView day={6} editable availability={temporaryStates[6]} setDayTo={(newAvailability) => setDayTo(6, newAvailability)} />
+          <DayView
+            day={0}
+            editable
+            availability={temporaryStates[0]}
+            setDayTo={(newAvailability) => setDayTo(0, newAvailability)}
+          />
+          <DayView
+            day={1}
+            editable
+            availability={temporaryStates[1]}
+            setDayTo={(newAvailability) => setDayTo(1, newAvailability)}
+          />
+          <DayView
+            day={2}
+            editable
+            availability={temporaryStates[2]}
+            setDayTo={(newAvailability) => setDayTo(2, newAvailability)}
+          />
+          <DayView
+            day={3}
+            editable
+            availability={temporaryStates[3]}
+            setDayTo={(newAvailability) => setDayTo(3, newAvailability)}
+          />
+          <DayView
+            day={4}
+            editable
+            availability={temporaryStates[4]}
+            setDayTo={(newAvailability) => setDayTo(4, newAvailability)}
+          />
+          <DayView
+            day={5}
+            editable
+            availability={temporaryStates[5]}
+            setDayTo={(newAvailability) => setDayTo(5, newAvailability)}
+          />
+          <DayView
+            day={6}
+            editable
+            availability={temporaryStates[6]}
+            setDayTo={(newAvailability) => setDayTo(6, newAvailability)}
+          />
         </div>
         <HoursGuide editable />
       </div>

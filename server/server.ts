@@ -1,12 +1,14 @@
 import express, { Express } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import {
-  PrismaClient, Schedule, ScheduleUser,
-} from '@prisma/client';
+import { PrismaClient, Schedule, ScheduleUser } from '@prisma/client';
 import crypto from 'crypto';
 import _ from 'lodash';
-import { StrippedScheduleUser, UnstrippedUserWithIncludes, UserWithIncludes } from '../common/types/user';
+import {
+  StrippedScheduleUser,
+  UnstrippedUserWithIncludes,
+  UserWithIncludes,
+} from '../common/types/user';
 import { Availability } from '../common/types/availability-state';
 
 dotenv.config();
@@ -25,9 +27,9 @@ declare global {
     }
 
     export type AvailabilityException = {
-      startTime: Date,
-      endTime: Date,
-      availability: Availability,
+      startTime: Date;
+      endTime: Date;
+      availability: Availability;
     };
   }
 }
@@ -43,9 +45,17 @@ app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
 });
 
-app.post<{}, {}, {
-  name: string
-}>('/schedule', async (req, res) => {
+app.get('/', (req, res) => {
+  res.status(200).json('Server status OK');
+});
+
+app.post<
+  {},
+  {},
+  {
+    name: string;
+  }
+>('/schedule', async (req, res) => {
   const data = await prisma.schedule.create({
     data: {
       name: req.body.name,
@@ -55,13 +65,17 @@ app.post<{}, {}, {
   res.status(200).json(data);
 });
 
-app.post<{
-  id: string
-}, StrippedScheduleUser, {
-  name: string,
-  timezone: string,
-  password: string | undefined,
-}>('/schedule/:id/user', async (req, res) => {
+app.post<
+  {
+    id: string;
+  },
+  StrippedScheduleUser,
+  {
+    name: string;
+    timezone: string;
+    password: string | undefined;
+  }
+>('/schedule/:id/user', async (req, res) => {
   const baseUser = {
     scheduleId: parseInt(req.params.id, 10),
     name: req.body.name,
@@ -75,7 +89,13 @@ app.post<{
   if (req.body.password) {
     const salt = crypto.randomBytes(128).toString('base64');
     const iterations = 10000;
-    const hash = crypto.pbkdf2Sync(req.body.password, salt, iterations, 64, 'sha512');
+    const hash = crypto.pbkdf2Sync(
+      req.body.password,
+      salt,
+      iterations,
+      64,
+      'sha512',
+    );
 
     const user = await prisma.scheduleUser.create({
       data: {
@@ -116,14 +136,21 @@ function stripUser(user: ScheduleUser): StrippedScheduleUser {
   return _.omit(user, 'passwordSalt', 'passwordSaltIterations', 'passwordHash');
 }
 
-function stripUserWithIncludes(user: UnstrippedUserWithIncludes): UserWithIncludes {
+function stripUserWithIncludes(
+  user: UnstrippedUserWithIncludes,
+): UserWithIncludes {
   return _.omit(user, 'passwordSalt', 'passwordSaltIterations', 'passwordHash');
 }
 
-app.put<{
-  id: string,
-  userId: string,
-}, UserWithIncludes, UserWithIncludes, UserWithIncludes>('/schedule/:id/user/:userId', async (req, res) => {
+app.put<
+  {
+    id: string;
+    userId: string;
+  },
+  UserWithIncludes,
+  UserWithIncludes,
+  UserWithIncludes
+>('/schedule/:id/user/:userId', async (req, res) => {
   const result = await prisma.scheduleUser.update({
     where: {
       id: req.body.id,
@@ -137,10 +164,14 @@ app.put<{
   res.status(200).json(result);
 });
 
-app.get<{
-  id: string,
-  userId: string,
-}, StrippedScheduleUser, {}>('/schedule/:id/user/:userId', async (req, res) => {
+app.get<
+  {
+    id: string;
+    userId: string;
+  },
+  StrippedScheduleUser,
+  {}
+>('/schedule/:id/user/:userId', async (req, res) => {
   const user = await prisma.scheduleUser.findFirstOrThrow({
     where: {
       id: parseInt(req.params.userId, 10),
@@ -155,9 +186,13 @@ app.get<{
   res.status(200).json(strippedUser);
 });
 
-app.get<{}, Schedule, {
-  inviteCode: string;
-}>('/scheduleByInviteCode', async (req, res) => {
+app.get<
+  {},
+  Schedule,
+  {
+    inviteCode: string;
+  }
+>('/scheduleByInviteCode', async (req, res) => {
   const schedule = await prisma.schedule.findFirstOrThrow({
     where: {
       inviteCode: req.body.inviteCode,
@@ -170,9 +205,12 @@ app.get<{}, Schedule, {
   res.status(200).json(schedule);
 });
 
-app.get<{
-  scheduleId: string
-}, ScheduleUser[]>('/schedule/:scheduleId/users', async (req, res) => {
+app.get<
+  {
+    scheduleId: string;
+  },
+  ScheduleUser[]
+>('/schedule/:scheduleId/users', async (req, res) => {
   const users = await prisma.scheduleUser.findMany({
     where: {
       scheduleId: parseInt(req.params.scheduleId, 10),

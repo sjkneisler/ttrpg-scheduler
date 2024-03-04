@@ -20,7 +20,9 @@ export const useScheduleUser = (): UserWithIncludes | null => {
       return;
     }
 
-    getUser(schedule.id, parsedUserId).then((fetchedUser) => setUser(fetchedUser));
+    getUser(schedule.id, parsedUserId).then((fetchedUser) =>
+      setUser(fetchedUser),
+    );
   }, [userId]);
 
   return user;

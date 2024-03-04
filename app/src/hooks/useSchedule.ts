@@ -11,14 +11,17 @@ export const useSchedule = (): ScheduleWithIncludes | null => {
     return null;
   }
 
-  const parsedScheduleId = parseInt(scheduleId!, 10);
+  const parsedScheduleId = parseInt(scheduleId, 10);
 
   useEffect(() => {
     if (!parsedScheduleId) {
       return;
     }
 
-    getSchedule(parsedScheduleId).then((fetchedSchedule) => setSchedule(fetchedSchedule));
+    // eslint-disable-next-line no-void
+    void getSchedule(parsedScheduleId).then((fetchedSchedule) =>
+      setSchedule(fetchedSchedule),
+    );
   }, [scheduleId]);
 
   return schedule;
