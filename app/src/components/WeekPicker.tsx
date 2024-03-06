@@ -6,6 +6,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
+import { useMemo } from 'react';
 
 dayjs.extend(isBetweenPlugin);
 
@@ -72,21 +73,36 @@ function Day(
   );
 }
 
-export default function WeekPicker() {
+export const WeekPicker: React.FC<{
+  weekValue: Dayjs;
+  setWeekValue: (newValue: Dayjs) => void;
+}> = ({ weekValue, setWeekValue }) => {
   const [hoveredDay, setHoveredDay] = React.useState<Dayjs | null>(null);
-  const [value, setValue] = React.useState<Dayjs | null>(dayjs('2022-04-17'));
+
+  const setDay = (newValue: any) => {
+    if (!newValue) {
+      return;
+    }
+
+    const firstDayOfWeek = (newValue as Dayjs).day(0);
+
+    setWeekValue(firstDayOfWeek);
+  };
+
+  useMemo(() => {
+    console.log(weekValue);
+  }, [weekValue]);
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DateCalendar
-        value={value}
-        onChange={(newValue) => setValue(newValue as Dayjs | null)}
+        value={weekValue}
+        onChange={setDay}
         showDaysOutsideCurrentMonth
-        displayWeekNumber
         slots={{ day: Day }}
         slotProps={{
           day: (ownerState) => ({
-            selectedDay: value,
+            selectedDay: weekValue,
             hoveredDay,
             onPointerEnter: () => setHoveredDay(ownerState.day),
             onPointerLeave: () => setHoveredDay(null),
@@ -95,4 +111,4 @@ export default function WeekPicker() {
       />
     </LocalizationProvider>
   );
-}
+};

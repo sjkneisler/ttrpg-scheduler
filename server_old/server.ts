@@ -27,8 +27,8 @@ declare global {
     }
 
     export type AvailabilityException = {
-      startTime: Date;
-      endTime: Date;
+      startTime: string;
+      endTime: string;
       availability: Availability;
     };
   }

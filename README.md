@@ -14,9 +14,8 @@
 
 ## Roadmap
 
- * Add basic data types
- * Create and display schedule
  * Add Invite links
- * Create weekly availabilities
- * Create specific day availabilities
- * Create aggregate view
+
+## Known issues
+ * Schedule exceptions do not respect the selected week and always appear. (this will also cause issues with dates wrapping over but that should never happen with the UI as designed, but could happen with bad data or future calendar integration or manual exception data input)
+ * Schedule exceptions do not shift when changing user timezone (should they? Weekly availabilities do, but maybe they shouldn't? Use case of a campaign that is at a specific time, but the user moves to a different timezone)

@@ -35,6 +35,7 @@ export type DayViewProps = {
   availability: (Availability | string)[];
   setDayTo: (availability: Availability) => Promise<void>;
   editable: boolean;
+  label?: string;
 };
 
 export const DayView: React.FC<DayViewProps> = ({
@@ -42,6 +43,7 @@ export const DayView: React.FC<DayViewProps> = ({
   availability,
   setDayTo,
   editable,
+  label = getDayText(day),
 }) => {
   const { onDragStart, onDragEnd, onDrag } = useContext(DragContext);
   return (
@@ -56,7 +58,7 @@ export const DayView: React.FC<DayViewProps> = ({
           margin: 10px 0;
         `}
       >
-        {getDayText(day)}
+        {label}
       </div>
       {editable && (
         <div>

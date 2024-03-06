@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { DayView } from './DayView';
 import { HoursGuide } from './HoursGuide';
@@ -49,13 +49,36 @@ function updateAvailabilityBox(
 
 export const WeeklyCalendar: React.FC<{
   availability: Availability[][];
-  onAvailabilityUpdate: (availability: Availability[][]) => Promise<void>;
-}> = ({ availability, onAvailabilityUpdate }) => {
+  onAvailabilityUpdate: (
+    availability: Availability[][],
+    dragStart: DragPosition,
+    dragEnd: DragPosition,
+    dragNewState: Availability,
+  ) => Promise<void>;
+  labels?: string[];
+}> = ({
+  availability,
+  onAvailabilityUpdate,
+  labels = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+  ],
+}) => {
   const [dragging, setDragging] = useState<boolean>(false);
   const [dragNewState, setDragNewState] =
     useState<Nullable<Availability>>(null);
   const [dragStart, setDragStart] = useState<Nullable<DragPosition>>(null);
   const [temporaryStates, setTemporaryStates] = useState(availability);
+
+  useEffect(() => {
+    console.log('resetting availability of weekly calendar due to update');
+    setTemporaryStates(availability);
+  }, [availability]);
 
   const onDragStart = (e: React.MouseEvent, pos: DragPosition) => {
     setDragging(true);
@@ -76,7 +99,7 @@ export const WeeklyCalendar: React.FC<{
         pos,
         dragNewState!,
       );
-      await onAvailabilityUpdate(newStates);
+      await onAvailabilityUpdate(newStates, dragStart!, pos, dragNewState!);
       setTemporaryStates(newStates);
     }
     return false;
@@ -107,7 +130,12 @@ export const WeeklyCalendar: React.FC<{
       { day, time: 95 },
       newAvailability,
     );
-    await onAvailabilityUpdate(newStates);
+    await onAvailabilityUpdate(
+      newStates,
+      { day, time: 0 },
+      { day, time: 95 },
+      newAvailability,
+    );
     setTemporaryStates(newStates);
   };
 
@@ -133,42 +161,49 @@ export const WeeklyCalendar: React.FC<{
             editable
             availability={temporaryStates[0]}
             setDayTo={(newAvailability) => setDayTo(0, newAvailability)}
+            label={labels[0]}
           />
           <DayView
             day={1}
             editable
             availability={temporaryStates[1]}
             setDayTo={(newAvailability) => setDayTo(1, newAvailability)}
+            label={labels[1]}
           />
           <DayView
             day={2}
             editable
             availability={temporaryStates[2]}
             setDayTo={(newAvailability) => setDayTo(2, newAvailability)}
+            label={labels[2]}
           />
           <DayView
             day={3}
             editable
             availability={temporaryStates[3]}
             setDayTo={(newAvailability) => setDayTo(3, newAvailability)}
+            label={labels[3]}
           />
           <DayView
             day={4}
             editable
             availability={temporaryStates[4]}
             setDayTo={(newAvailability) => setDayTo(4, newAvailability)}
+            label={labels[4]}
           />
           <DayView
             day={5}
             editable
             availability={temporaryStates[5]}
             setDayTo={(newAvailability) => setDayTo(5, newAvailability)}
+            label={labels[5]}
           />
           <DayView
             day={6}
             editable
             availability={temporaryStates[6]}
             setDayTo={(newAvailability) => setDayTo(6, newAvailability)}
+            label={labels[6]}
           />
         </div>
         <HoursGuide editable />

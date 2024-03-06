@@ -18,9 +18,7 @@ module.exports = {
       env: {
         node: true,
       },
-      files: [
-        '.eslintrc.{js,cjs}',
-      ],
+      files: ['.eslintrc.{js,cjs}'],
       parserOptions: {
         sourceType: 'script',
       },
@@ -33,11 +31,7 @@ module.exports = {
     project: './tsconfig.json', // Specify it only for TypeScript files
     tsconfigRootDir: __dirname,
   },
-  plugins: [
-    'react',
-    '@emotion',
-    '@typescript-eslint',
-  ],
+  plugins: ['react', '@emotion', '@typescript-eslint'],
   rules: {
     'react/no-unknown-property': ['error', { ignore: ['css'] }],
     'import/prefer-default-export': 'off',
@@ -53,6 +47,8 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
+    'react/require-default-props': 'warn',
+    'prettier/prettier': 'warn',
   },
   settings: {
     failOnError: false,
