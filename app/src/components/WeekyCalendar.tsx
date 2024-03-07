@@ -56,6 +56,7 @@ export const WeeklyCalendar: React.FC<{
     dragNewState: Availability,
   ) => Promise<void>;
   labels?: string[];
+  headerChildren?: React.ReactNode[];
 }> = ({
   availability,
   onAvailabilityUpdate,
@@ -68,6 +69,7 @@ export const WeeklyCalendar: React.FC<{
     'Friday',
     'Saturday',
   ],
+  headerChildren = [],
 }) => {
   const [dragging, setDragging] = useState<boolean>(false);
   const [dragNewState, setDragNewState] =
@@ -162,6 +164,7 @@ export const WeeklyCalendar: React.FC<{
             availability={temporaryStates[0]}
             setDayTo={(newAvailability) => setDayTo(0, newAvailability)}
             label={labels[0]}
+            headerChild={headerChildren[0]}
           />
           <DayView
             day={1}
@@ -169,6 +172,7 @@ export const WeeklyCalendar: React.FC<{
             availability={temporaryStates[1]}
             setDayTo={(newAvailability) => setDayTo(1, newAvailability)}
             label={labels[1]}
+            headerChild={headerChildren[1]}
           />
           <DayView
             day={2}
@@ -176,6 +180,7 @@ export const WeeklyCalendar: React.FC<{
             availability={temporaryStates[2]}
             setDayTo={(newAvailability) => setDayTo(2, newAvailability)}
             label={labels[2]}
+            headerChild={headerChildren[2]}
           />
           <DayView
             day={3}
@@ -183,6 +188,7 @@ export const WeeklyCalendar: React.FC<{
             availability={temporaryStates[3]}
             setDayTo={(newAvailability) => setDayTo(3, newAvailability)}
             label={labels[3]}
+            headerChild={headerChildren[3]}
           />
           <DayView
             day={4}
@@ -190,6 +196,7 @@ export const WeeklyCalendar: React.FC<{
             availability={temporaryStates[4]}
             setDayTo={(newAvailability) => setDayTo(4, newAvailability)}
             label={labels[4]}
+            headerChild={headerChildren[4]}
           />
           <DayView
             day={5}
@@ -197,6 +204,7 @@ export const WeeklyCalendar: React.FC<{
             availability={temporaryStates[5]}
             setDayTo={(newAvailability) => setDayTo(5, newAvailability)}
             label={labels[5]}
+            headerChild={headerChildren[5]}
           />
           <DayView
             day={6}
@@ -204,6 +212,7 @@ export const WeeklyCalendar: React.FC<{
             availability={temporaryStates[6]}
             setDayTo={(newAvailability) => setDayTo(6, newAvailability)}
             label={labels[6]}
+            headerChild={headerChildren[6]}
           />
         </div>
         <HoursGuide editable />

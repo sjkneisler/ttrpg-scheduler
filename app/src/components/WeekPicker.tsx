@@ -84,7 +84,7 @@ export const WeekPicker: React.FC<{
       return;
     }
 
-    const firstDayOfWeek = (newValue as Dayjs).day(0);
+    const firstDayOfWeek = (newValue as Dayjs).startOf('week');
 
     setWeekValue(firstDayOfWeek);
   };

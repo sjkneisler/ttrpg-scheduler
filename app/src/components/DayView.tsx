@@ -36,6 +36,7 @@ export type DayViewProps = {
   setDayTo: (availability: Availability) => Promise<void>;
   editable: boolean;
   label?: string;
+  headerChild?: React.ReactNode;
 };
 
 export const DayView: React.FC<DayViewProps> = ({
@@ -44,6 +45,7 @@ export const DayView: React.FC<DayViewProps> = ({
   setDayTo,
   editable,
   label = getDayText(day),
+  headerChild,
 }) => {
   const { onDragStart, onDragEnd, onDrag } = useContext(DragContext);
   return (
@@ -81,6 +83,7 @@ export const DayView: React.FC<DayViewProps> = ({
           </div>
         </div>
       )}
+      {headerChild}
       <div
         css={css`
           flex: 0 0 auto;

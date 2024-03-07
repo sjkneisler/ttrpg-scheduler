@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import _ from 'lodash';
 import {
   Button,
   MenuItem,
@@ -33,6 +34,38 @@ dayjs.extend(timezone);
 const msPerInterval = 1000 * 60 * 15; // milliseconds in 15 minutes
 
 const timezones = Intl.supportedValuesOf('timeZone');
+
+// TODO: For some reason, exceptions added to sunday are getting shifted one hour earlier (oh shit is that DST? there's no way)
+
+function resetExceptionsForDay(
+  exceptions: AvailabilityException[],
+  dayNumber: number,
+  week: Dayjs,
+): AvailabilityException[] {
+  const day = week.day(dayNumber);
+  const dayEnd = day.endOf('day');
+  return exceptions.filter((exception) => {
+    return (
+      !dayjs(exception.startTime).isBetween(day, dayEnd) &&
+      !dayjs(exception.endTime).isBetween(day, dayEnd)
+    );
+  });
+}
+
+function doesDayHaveExceptions(
+  exceptions: AvailabilityException[],
+  dayNumber: number,
+  week: Dayjs,
+): boolean {
+  const day = week.day(dayNumber);
+  const dayEnd = day.endOf('day');
+  return exceptions.some((exception) => {
+    return (
+      dayjs(exception.startTime).isBetween(day, dayEnd) ||
+      dayjs(exception.endTime).isBetween(day, dayEnd)
+    );
+  });
+}
 
 function mergeExceptions(
   exceptions: AvailabilityException[],
@@ -162,14 +195,17 @@ function updateExceptions(
 
 export const ExceptionsCalendar: React.FC = () => {
   const [user, setUser] = useState<UserWithIncludes | null>(null);
-  const [week, setWeek] = useState<Dayjs>(dayjs());
+  const [week, setWeek] = useState<Dayjs>(dayjs().startOf('week'));
 
   const { userId, scheduleId } = useParams();
 
   useEffect(() => {
     // eslint-disable-next-line no-void
     void getUser(parseInt(scheduleId!, 10), parseInt(userId!, 10)).then(
-      setUser,
+      (newUser) => {
+        setUser(newUser);
+        // setWeek(dayjs().tz(newUser.timezone!).startOf('week'));
+      },
     );
   }, []);
 
@@ -244,37 +280,49 @@ export const ExceptionsCalendar: React.FC = () => {
       user.availability.weekly,
       getTimezoneOffset(user.timezone || getCurrentTimezone()),
     );
-    user.availability.exceptions.forEach((availability) => {
-      const startDate = dayjs(availability.startTime).tz(user.timezone!);
-      const endDate = dayjs(availability.endTime).tz(user.timezone!);
-      const startDayIndex = startDate.day();
-      const endDayIndex = endDate.day();
-      const startTime = startDate.diff(
-        startDate.startOf('day'),
-        'milliseconds',
-      );
-      const endTime = endDate.diff(endDate.startOf('day'), 'milliseconds');
+    user.availability.exceptions
+      .map((exception) => ({
+        ...exception,
+        startTime: dayjs(exception.startTime).tz(user.timezone!),
+        endTime: dayjs(exception.endTime).tz(user.timezone!),
+      }))
+      .filter(({ startTime, endTime }) => {
+        const endWeek = week.endOf('week');
+        return (
+          startTime.isBetween(week, endWeek) || endTime.isBetween(week, endWeek)
+        );
+      })
+      .forEach(({ startTime, endTime, availability }) => {
+        const startDayIndex = startTime.day();
+        const endDayIndex = endTime.day();
+        const startTimeMs = startTime.diff(
+          startTime.startOf('day'),
+          'milliseconds',
+        );
+        const endTimeMs = endTime.diff(endTime.startOf('day'), 'milliseconds');
 
-      // Calculate the start and end intervals in the week
-      const startIntervalIndex = Math.floor(
-        (startTime % 86400000) / msPerInterval,
-      );
-      const endIntervalIndex = Math.floor((endTime % 86400000) / msPerInterval);
+        // Calculate the start and end intervals in the week
+        const startIntervalIndex = Math.floor(
+          (startTimeMs % 86400000) / msPerInterval,
+        );
+        const endIntervalIndex = Math.floor(
+          (endTimeMs % 86400000) / msPerInterval,
+        );
 
-      // If the availability spans multiple days, handle accordingly
-      let currentDayIndex = startDayIndex;
-      let currentIntervalIndex = startIntervalIndex;
+        // If the availability spans multiple days, handle accordingly
+        let currentDayIndex = startDayIndex;
+        let currentIntervalIndex = startIntervalIndex;
 
-      while (currentDayIndex <= endDayIndex) {
-        while (currentIntervalIndex <= endIntervalIndex) {
-          shiftedWeeklyAvailability[currentDayIndex][currentIntervalIndex] =
-            availability.availability;
-          currentIntervalIndex++;
+        while (currentDayIndex <= endDayIndex) {
+          while (currentIntervalIndex <= endIntervalIndex) {
+            shiftedWeeklyAvailability[currentDayIndex][currentIntervalIndex] =
+              availability;
+            currentIntervalIndex++;
+          }
+          currentIntervalIndex = startIntervalIndex;
+          currentDayIndex++;
         }
-        currentIntervalIndex = startIntervalIndex;
-        currentDayIndex++;
-      }
-    });
+      });
 
     return shiftedWeeklyAvailability;
   }, [user, week]);
@@ -290,6 +338,41 @@ export const ExceptionsCalendar: React.FC = () => {
       week.day(6).format('ddd MMM D'),
     ];
   }, [week]);
+
+  const weeklyCalendarHeaderChildren = _.times(7, (index) => {
+    if (
+      !user ||
+      !doesDayHaveExceptions(user.availability.exceptions, index, week)
+    ) {
+      return undefined;
+    }
+    return (
+      <Button
+        onClick={() => {
+          if (!user) {
+            return;
+          }
+          const updatedUser: UserWithIncludes = {
+            ...user,
+            availability: {
+              ...user.availability,
+              exceptions: resetExceptionsForDay(
+                user.availability.exceptions,
+                index,
+                week,
+              ),
+            },
+          };
+
+          setUser(updatedUser);
+          // eslint-disable-next-line no-void
+          void updateUser(updatedUser);
+        }}
+      >
+        Reset Day
+      </Button>
+    );
+  });
 
   if (
     user == null ||
@@ -322,7 +405,13 @@ export const ExceptionsCalendar: React.FC = () => {
             <MenuItem value={timezoneListItem}>{timezoneListItem}</MenuItem>
           ))}
         </Select>
-        <WeekPicker weekValue={week} setWeekValue={setWeek} />
+        <WeekPicker
+          weekValue={week}
+          setWeekValue={(newWeek) => {
+            // setWeek(newWeek.tz(user.timezone!));
+            setWeek(newWeek);
+          }}
+        />
       </div>
       <div
         css={css`
@@ -333,6 +422,7 @@ export const ExceptionsCalendar: React.FC = () => {
           availability={availabilityWithExceptions}
           onAvailabilityUpdate={onAvailabilityUpdate}
           labels={dayLabels}
+          headerChildren={weeklyCalendarHeaderChildren}
         />
       </div>
     </div>
