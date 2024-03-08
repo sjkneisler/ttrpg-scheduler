@@ -1,0 +1,10 @@
+{
+  "registry.terraform.io/hashicorp/aws": {
+    "hash": "h1:66UBDb7nDnLJ3MHmRZZRlqvWoeJOFFwN44gifJzs/IE=",
+    "version": "5.40.0"
+  },
+  "registry.terraform.io/integrations/github": {
+    "hash": "h1:J06uvP5XNaED7+8poPbBaDHyl/VhchA4GQiIT8eMIrg=",
+    "version": "6.0.1"
+  }
+}
