@@ -13,6 +13,8 @@ terraform {
 
 variable GITHUB_TOKEN {}
 
+variable AWS_TOKEN_KEY {}
+
 provider "aws" {
   region = "us-east-1"
 }
@@ -206,19 +208,19 @@ resource "github_actions_environment_variable" "envvar_ecs_cluster" {
   value = aws_ecs_cluster.app_ecs_cluster.name
 }
 
-resource "github_actions_environment_secret" "envvar_aws_access_key_id" {
+resource "github_actions_environment_variable" "envvar_aws_access_key_id" {
   repository = data.github_repository.repo.name
   environment = github_repository_environment.repo_sandbox_env.environment
-  secret_name = "AWS_ACCESS_KEY_ID"
-#   value = var.AWS_ACCESS_KEY
+  variable_name = "AWS_ACCESS_KEY_ID"
+  value = var.AWS_TOKEN_KEY
 }
 
-resource "github_actions_environment_secret" "envvar_aws_access_key_secret" {
-  repository = data.github_repository.repo.name
-  environment = github_repository_environment.repo_sandbox_env.environment
-  secret_name = "AWS_SECRET_ACCESS_KEY"
-#   value = var.AWS_SECRET_KEY
-}
+#resource "github_actions_environment_secret" "envvar_aws_access_key_secret" {
+#  repository = data.github_repository.repo.name
+#  environment = github_repository_environment.repo_sandbox_env.environment
+#  secret_name = "AWS_SECRET_ACCESS_KEY"
+##   value = var.AWS_SECRET_KEY
+#}
 
 output "app_url" {
   value = aws_alb.application_load_balancer.dns_name
