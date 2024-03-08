@@ -3,7 +3,7 @@ run-name: TTRPG Scheduler Deploy ${{ github.actor }}
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
