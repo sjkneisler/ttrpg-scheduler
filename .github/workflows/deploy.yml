@@ -39,8 +39,9 @@ jobs:
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Download task definition
+        # TODO: Update this command to programmatically pull the task definition family
         run: |
-          aws ecs describe-task-definition --task-definition service --query taskDefinition > task-definition.json
+          aws ecs describe-task-definition --task-definition ttrpg-scheduler-first-task --query taskDefinition > task-definition.json
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
