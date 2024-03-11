@@ -25,6 +25,7 @@ provider "github" {
 
 resource "aws_ecr_repository" "app_ecr_repo" {
   name = "ttrpg-scheduler-repo"
+  image_tag_mutability = "MUTABLE"
 }
 
 resource "aws_ecs_cluster" "app_ecs_cluster" {
