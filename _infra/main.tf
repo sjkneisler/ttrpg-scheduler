@@ -32,6 +32,10 @@ resource "aws_ecs_cluster" "app_ecs_cluster" {
   name = "ttrpg-scheduler-cluster"
 }
 
+resource "aws_cloudwatch_log_group" "main" {
+  name = "ttrpg-scheduler-logs"
+}
+
 resource "aws_ecs_task_definition" "app_task" {
   family = "ttrpg-scheduler-first-task"
   container_definitions = jsonencode([
@@ -52,6 +56,14 @@ resource "aws_ecs_task_definition" "app_task" {
                   value = "postgresql://${aws_db_instance.database.username}:${aws_db_instance.database.password}@${aws_db_instance.database.endpoint}/ttrpg_scheduler?schema=public"
                 }
               ]
+              logConfiguration = {
+                logDriver = "awslogs"
+                options = {
+                  awslogs-group = aws_cloudwatch_log_group.main.name
+                  awslogs-region = "us-east-1"
+                  awslogs-stream-prefix = "ecs"
+                }
+              }
             }
           ])
   requires_compatibilities = ["FARGATE"]
@@ -59,6 +71,11 @@ resource "aws_ecs_task_definition" "app_task" {
   memory = 512
   cpu = 256
   execution_role_arn = aws_iam_role.ecsTaskExecutionRole.arn
+  lifecycle {
+    ignore_changes = [
+      container_definitions # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
+    ]
+  }
 }
 
 resource "aws_iam_role" "ecsTaskExecutionRole" {
