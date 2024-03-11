@@ -176,6 +176,12 @@ resource "aws_ecs_service" "app_service" {
     assign_public_ip = true     # Provide the containers with public IPs
     security_groups  = [aws_security_group.service_security_group.id] # Set up the security group
   }
+
+  lifecycle {
+    ignore_changes = [
+      task_definition # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
+    ]
+  }
 }
 
 resource "aws_security_group" "service_security_group" {
@@ -198,11 +204,10 @@ resource "aws_security_group" "service_security_group" {
 
 resource "aws_security_group" "rds_security_group" {
   ingress {
-    from_port = 0
-    to_port   = 0
-    protocol  = "-1"
-    # Only allowing traffic in from the load balancer security group
-    security_groups = [aws_security_group.load_balancer_security_group.id]
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Allow traffic in from all sources
   }
 
   egress {
@@ -274,8 +279,8 @@ resource "aws_db_instance" "database" {
 #   master_user_secret {
 #
 #   }
-  vpc_security_group_ids = [aws_security_group.rds_security_group.id, aws_security_group.service_security_group.id]
-  publicly_accessible = true # TODO: Set this up as false and secure behind VPCs
+  vpc_security_group_ids = [aws_security_group.rds_security_group.id]
+  publicly_accessible = false
 
   lifecycle {
     prevent_destroy = true
