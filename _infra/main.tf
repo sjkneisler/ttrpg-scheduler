@@ -46,6 +46,12 @@ resource "aws_ecs_task_definition" "app_task" {
                 }],
               memory = 512,
               cpu = 256
+              environment = [
+                {
+                  name = "DATABASE_URL"
+                  value = "postgresql://${aws_db_instance.database.username}:${aws_db_instance.database.password}@${aws_db_instance.database.endpoint}/ttrpg_scheduler?schema=public"
+                }
+              ]
             }
           ])
   requires_compatibilities = ["FARGATE"]
@@ -172,6 +178,24 @@ resource "aws_security_group" "service_security_group" {
   }
 }
 
+
+resource "aws_security_group" "rds_security_group" {
+  ingress {
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+    # Only allowing traffic in from the load balancer security group
+    security_groups = [aws_security_group.load_balancer_security_group.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 data "github_repository" "repo" {
   full_name = "sjkneisler/ttrpg-scheduler"
 }
@@ -222,6 +246,29 @@ resource "github_actions_environment_variable" "envvar_aws_access_key_id" {
 #  secret_name = "AWS_SECRET_ACCESS_KEY"
 ##   value = var.AWS_SECRET_KEY
 #}
+
+resource "aws_db_instance" "database" {
+  engine = "postgres"
+  instance_class = "db.t3.micro"
+  allocated_storage = 10
+  username = "main"
+  password = "2GSOlt6FrlxPzHSS" # TODO: Use KMS for this secret, or pass in as variable and store in remote state
+#   manage_master_user_password = true
+#   master_user_secret {
+#
+#   }
+  vpc_security_group_ids = [aws_security_group.rds_security_group.id, aws_security_group.service_security_group.id]
+  publicly_accessible = true # TODO: Set this up as false and secure behind VPCs
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "aws_secretsmanager_secret" "db_master_password" {
+  name = "db_master_password"
+
+}
 
 output "app_url" {
   value = aws_alb.application_load_balancer.dns_name

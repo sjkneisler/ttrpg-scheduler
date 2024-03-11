@@ -17,4 +17,4 @@ RUN ["yarn", "db:generate"]
 
 EXPOSE 3001
 
-CMD [ "npx", "ts-node", "./server/server.ts" ]
+CMD [ "npx", "ts-node", "./server_old/server.ts" ]
