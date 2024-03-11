@@ -103,8 +103,8 @@ resource "aws_alb" "application_load_balancer" {
 
 resource "aws_security_group" "load_balancer_security_group" {
   ingress {
-    from_port   = 80
-    to_port     = 80
+    from_port   = 3001
+    to_port     = 3001
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] # Allow traffic in from all sources
   }
@@ -119,7 +119,7 @@ resource "aws_security_group" "load_balancer_security_group" {
 
 resource "aws_lb_target_group" "target_group" {
   name        = "ttrpg-scheduler-target-group"
-  port        = 80
+  port        = 3001
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = aws_default_vpc.default_vpc.id # default VPC
@@ -127,7 +127,7 @@ resource "aws_lb_target_group" "target_group" {
 
 resource "aws_lb_listener" "listener" {
   load_balancer_arn = aws_alb.application_load_balancer.arn #  load balancer
-  port              = "80"
+  port              = "3001"
   protocol          = "HTTP"
   default_action {
     type             = "forward"
