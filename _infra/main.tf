@@ -262,12 +262,12 @@ resource "github_actions_environment_variable" "envvar_aws_access_key_id" {
   value = var.AWS_TOKEN_KEY
 }
 
-#resource "github_actions_environment_secret" "envvar_aws_access_key_secret" {
-#  repository = data.github_repository.repo.name
-#  environment = github_repository_environment.repo_sandbox_env.environment
-#  secret_name = "AWS_SECRET_ACCESS_KEY"
-##   value = var.AWS_SECRET_KEY
-#}
+resource "github_actions_environment_secret" "envvar_database_url" {
+  repository = data.github_repository.repo.name
+  environment = github_repository_environment.repo_sandbox_env.environment
+  secret_name = "DATABASE_URL"
+  plaintext_value = "postgresql://${aws_db_instance.database.username}:${aws_db_instance.database.password}@${aws_db_instance.database.endpoint}/ttrpg_scheduler?schema=public"
+}
 
 resource "aws_db_instance" "database" {
   engine = "postgres"
