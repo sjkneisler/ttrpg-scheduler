@@ -6,8 +6,8 @@ on:
       - master
 
 jobs:
-  deploy:
-    name: Deploy
+  deploybackend:
+    name: Deploy Backend
     runs-on: ubuntu-latest
     environment: sandbox
     steps:
@@ -23,10 +23,6 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-#      - name: Apply all pending migrations to the database
-#        env:
-#          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-#        run: npx prisma migrate deploy
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
@@ -61,6 +57,20 @@ jobs:
           service: ${{ vars.ECS_SERVICE }}
           cluster: ${{ vars.ECS_CLUSTER }}
           wait-for-service-stability: true
+  deployfrontend:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    environment: sandbox
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
       - name: Install dependencies
         run: yarn install
       - name: Build frontend
