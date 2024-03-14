@@ -83,4 +83,4 @@ jobs:
       - name: Deploy frontend S3 bucket
         env:
           FRONTEND_S3_BUCKET: ${{ vars.FRONTEND_S3_BUCKET }}
-        run: aws s3 sync ./build/ s3://$FRONTEND_S3_BUCKET --delete
+        run: aws s3 sync ./build/ "s3://$FRONTEND_S3_BUCKET" --delete

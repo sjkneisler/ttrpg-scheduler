@@ -59,9 +59,9 @@ resource "aws_ecs_task_definition" "app_task" {
               healthCheck = {
                 retries = 5
                 command = [ "CMD-SHELL", "curl -f http://localhost:3001/ || exit 1" ]
-                timeout: 5
-                interval: 30
-                startPeriod: 90
+                timeout = 5
+                interval = 30
+                startPeriod = 90
               }
               logConfiguration = {
                 logDriver = "awslogs"
