@@ -40,7 +40,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "build": "react-app-rewired build",
+    "build:frontend": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject",
     "start": "concurrently \"yarn start:frontend\" \"yarn start:backend:old\"",

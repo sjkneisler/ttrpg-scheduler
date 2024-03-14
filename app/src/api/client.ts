@@ -4,7 +4,7 @@ import {
   UserWithIncludes,
 } from '../../../common/types/user';
 
-const API_ROOT = 'http://localhost:3001/';
+const API_ROOT = process.env.REACT_APP_SERVER_URL || 'http://localhost:3001/';
 
 function get(path: string): Promise<Response> {
   return fetch(API_ROOT + path);

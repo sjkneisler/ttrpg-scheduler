@@ -182,6 +182,8 @@ resource "aws_ecs_service" "app_service" {
       task_definition # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
     ]
   }
+
+   health_check_grace_period_seconds = 180 # Wait up to 3 minutes for prisma migrations
 }
 
 resource "aws_security_group" "service_security_group" {
@@ -289,7 +291,32 @@ resource "aws_db_instance" "database" {
 
 resource "aws_secretsmanager_secret" "db_master_password" {
   name = "db_master_password"
+}
 
+resource "aws_s3_bucket" "frontend" {
+  bucket = "ttrpg-scheduler-frontend-bucket"
+}
+
+resource "github_actions_environment_variable" "envvar_frontend_s3_bucket" {
+  repository = data.github_repository.repo.name
+  environment = github_repository_environment.repo_sandbox_env.environment
+  variable_name = "FRONTEND_S3_BUCKET"
+  value = aws_s3_bucket.frontend.bucket_domain_name
+}
+
+resource "github_actions_environment_variable" "envvar_react_app_server_url" {
+  repository = data.github_repository.repo.name
+  environment = github_repository_environment.repo_sandbox_env.environment
+  variable_name = "REACT_APP_SERVER_URL"
+  value = "${aws_alb.application_load_balancer.dns_name}:3001"
+}
+
+resource "aws_s3_bucket_website_configuration" "frontend_s3_config" {
+  bucket = aws_s3_bucket.frontend.id
+
+  index_document {
+    suffix = "index.html"
+  }
 }
 
 output "app_url" {
