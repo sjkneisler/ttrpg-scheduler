@@ -23,10 +23,10 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-      - name: Apply all pending migrations to the database
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: npx prisma migrate deploy
+#      - name: Apply all pending migrations to the database
+#        env:
+#          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+#        run: npx prisma migrate deploy
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
