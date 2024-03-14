@@ -48,6 +48,7 @@
     "start:backend:old": "npx ts-node-dev server_old/server.ts",
     "db:init": "npx prisma migrate dev --name init",
     "db:migrate": "npx prisma migrate dev",
+    "db:migrate:prod": "npx prisma migrate deploy",
     "db:generate": "npx prisma generate",
     "db:up": "yarn db:migrate && yarn db:generate",
     "lint": "npx eslint \"{src,apps,libs,test}/**/*.ts\" --fix",

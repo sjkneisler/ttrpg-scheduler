@@ -17,4 +17,4 @@ RUN ["yarn", "db:generate"]
 
 EXPOSE 3001
 
-CMD yarn db:migrate; npx ts-node ./server_old/server.ts
+CMD yarn db:migrate:prod; npx ts-node ./server_old/server.ts
