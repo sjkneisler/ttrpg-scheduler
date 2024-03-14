@@ -73,6 +73,8 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
       - name: Install dependencies
         run: yarn install
+      - name: Generate Prisma files
+        run: yarn db:generate
       - name: Build frontend
         env:
           REACT_APP_SERVER_URL: ${{ vars.REACT_APP_SERVER_URL }}
