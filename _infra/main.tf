@@ -308,14 +308,14 @@ resource "github_actions_environment_variable" "envvar_frontend_s3_bucket" {
   repository = data.github_repository.repo.name
   environment = github_repository_environment.repo_sandbox_env.environment
   variable_name = "FRONTEND_S3_BUCKET"
-  value = aws_s3_bucket.frontend.bucket_domain_name
+  value = aws_s3_bucket.frontend.bucket
 }
 
 resource "github_actions_environment_variable" "envvar_react_app_server_url" {
   repository = data.github_repository.repo.name
   environment = github_repository_environment.repo_sandbox_env.environment
   variable_name = "REACT_APP_SERVER_URL"
-  value = "${aws_alb.application_load_balancer.dns_name}:3001"
+  value = "${aws_alb.application_load_balancer.dns_name}:3001/"
 }
 
 resource "aws_s3_bucket_website_configuration" "frontend_s3_config" {
@@ -324,6 +324,24 @@ resource "aws_s3_bucket_website_configuration" "frontend_s3_config" {
   index_document {
     suffix = "index.html"
   }
+}
+
+resource "aws_s3_bucket_policy" "frontend_bucket_policy" {
+  bucket = aws_s3_bucket.frontend.id
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Sid" : "PublicReadGetObject",
+          "Effect" : "Allow",
+          "Principal" : "*",
+          "Action" : "s3:GetObject",
+          "Resource" : "arn:aws:s3:::${aws_s3_bucket.frontend.id}/*"
+        }
+      ]
+    }
+  )
 }
 
 output "app_url" {
