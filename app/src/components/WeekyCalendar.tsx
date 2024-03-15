@@ -150,14 +150,17 @@ export const WeeklyCalendar: React.FC<{
         `}
         onMouseLeave={onMouseOut}
       >
-        <HoursGuide editable />
         <div
           css={css`
-            display: flex;
+            display: grid;
+            grid-auto-flow: column;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+            grid-template-rows: auto 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
             flex-direction: row;
             //border: 1px solid #000000;
           `}
         >
+          <HoursGuide />
           <DayView
             day={0}
             editable
@@ -214,8 +217,8 @@ export const WeeklyCalendar: React.FC<{
             label={labels[6]}
             headerChild={headerChildren[6]}
           />
+          <HoursGuide />
         </div>
-        <HoursGuide editable />
       </div>
     </DragContext.Provider>
   );

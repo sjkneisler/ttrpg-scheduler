@@ -14,14 +14,17 @@ export const AggregateWeeklyCalendar: React.FC<{
       flex-direction: row;
     `}
   >
-    <HoursGuide editable={false} />
     <div
       css={css`
-        display: flex;
+        display: grid;
+        grid-auto-flow: column;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+        grid-template-rows: auto 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
         flex-direction: row;
         //border: 1px solid #000000;
       `}
     >
+      <HoursGuide />
       <DayView
         day={0}
         editable={false}
@@ -64,7 +67,7 @@ export const AggregateWeeklyCalendar: React.FC<{
         availability={availability[6]}
         setDayTo={() => Promise.resolve()}
       />
+      <HoursGuide />
     </div>
-    <HoursGuide editable={false} />
   </div>
 );
