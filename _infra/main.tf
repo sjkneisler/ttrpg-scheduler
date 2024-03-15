@@ -84,7 +84,7 @@ resource "aws_ecs_task_definition" "app_task" {
   execution_role_arn = aws_iam_role.ecsTaskExecutionRole.arn
   lifecycle {
     ignore_changes = [
-#       container_definitions # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
+      container_definitions # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
     ]
   }
 }
@@ -210,7 +210,7 @@ resource "aws_ecs_service" "app_service" {
 
   lifecycle {
     ignore_changes = [
-#       task_definition # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
+      task_definition # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
     ]
   }
 
