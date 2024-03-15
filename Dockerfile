@@ -15,6 +15,6 @@ COPY --chown=node:node . .
 
 RUN ["yarn", "db:generate"]
 
-EXPOSE 3001
+EXPOSE 443
 
 CMD yarn db:migrate:prod; npx ts-node ./server_old/server.ts

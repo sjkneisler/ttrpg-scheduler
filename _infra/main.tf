@@ -11,6 +11,10 @@ terraform {
   }
 }
 
+locals {
+  domain = "ttrpgscheduler.com"
+}
+
 variable GITHUB_TOKEN {}
 
 variable AWS_TOKEN_KEY {}
@@ -45,8 +49,8 @@ resource "aws_ecs_task_definition" "app_task" {
               essential = true,
               portMappings = [
                 {
-                  "containerPort": 3001,
-                  "hostPort": 3001,
+                  "containerPort": 443,
+                  "hostPort": 443,
                 }],
               memory = 512,
               cpu = 256
@@ -58,7 +62,7 @@ resource "aws_ecs_task_definition" "app_task" {
               ]
               healthCheck = {
                 retries = 5
-                command = [ "CMD-SHELL", "curl -f http://localhost:3001/ || exit 1" ]
+                command = [ "CMD-SHELL", "curl -f http://localhost:443/ || exit 1" ]
                 timeout = 5
                 interval = 30
                 startPeriod = 90
@@ -80,7 +84,7 @@ resource "aws_ecs_task_definition" "app_task" {
   execution_role_arn = aws_iam_role.ecsTaskExecutionRole.arn
   lifecycle {
     ignore_changes = [
-      container_definitions # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
+#       container_definitions # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
     ]
   }
 }
@@ -121,7 +125,7 @@ resource "aws_default_subnet" "default_subnet_b" {
 }
 
 resource "aws_alb" "application_load_balancer" {
-  name               = "ttrpg-scheduler-load-balancer" #load balancer name
+  name               = "ttrpg-scheduler-lb"
   load_balancer_type = "application"
   subnets = [ # Referencing the default subnets
     aws_default_subnet.default_subnet_a.id,
@@ -133,8 +137,8 @@ resource "aws_alb" "application_load_balancer" {
 
 resource "aws_security_group" "load_balancer_security_group" {
   ingress {
-    from_port   = 3001
-    to_port     = 3001
+    from_port   = 443
+    to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] # Allow traffic in from all sources
   }
@@ -149,19 +153,39 @@ resource "aws_security_group" "load_balancer_security_group" {
 
 resource "aws_lb_target_group" "target_group" {
   name        = "ttrpg-scheduler-target-group"
-  port        = 3001
+  port        = 443
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = aws_default_vpc.default_vpc.id # default VPC
 }
 
+resource "aws_acm_certificate" "backend_cert" {
+  domain_name = aws_route53_record.api.name
+  validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 resource "aws_lb_listener" "listener" {
+  depends_on = [aws_acm_certificate_validation.api_validation]
+
   load_balancer_arn = aws_alb.application_load_balancer.arn #  load balancer
-  port              = "3001"
-  protocol          = "HTTP"
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn = aws_acm_certificate.backend_cert.arn
+
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.target_group.arn # target group
+  }
+
+  lifecycle {
+    replace_triggered_by = [
+      aws_lb_target_group.target_group,
+    ]
   }
 }
 
@@ -175,7 +199,7 @@ resource "aws_ecs_service" "app_service" {
   load_balancer {
     target_group_arn = aws_lb_target_group.target_group.arn # Reference the target group
     container_name   = aws_ecs_task_definition.app_task.family
-    container_port   = 3001 # Specify the container port
+    container_port   = 443 # Specify the container port
   }
 
   network_configuration {
@@ -186,7 +210,7 @@ resource "aws_ecs_service" "app_service" {
 
   lifecycle {
     ignore_changes = [
-      task_definition # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
+#       task_definition # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
     ]
   }
 
@@ -315,7 +339,7 @@ resource "github_actions_environment_variable" "envvar_react_app_server_url" {
   repository = data.github_repository.repo.name
   environment = github_repository_environment.repo_sandbox_env.environment
   variable_name = "REACT_APP_SERVER_URL"
-  value = "http://${aws_alb.application_load_balancer.dns_name}:3001/"
+  value = "https://${aws_route53_record.api.name}/"
 }
 
 resource "aws_s3_bucket_website_configuration" "frontend_s3_config" {
@@ -324,6 +348,65 @@ resource "aws_s3_bucket_website_configuration" "frontend_s3_config" {
   index_document {
     suffix = "index.html"
   }
+}
+
+resource "aws_cloudfront_origin_access_identity" "frontend" {
+  comment = "ttrpg-scheduler-frontend"
+}
+
+resource "aws_cloudfront_distribution" "frontend_cloudfront" {
+  depends_on = [aws_acm_certificate_validation.root_validation]
+
+  enabled = true
+  default_root_object = "index.html"
+  aliases = [data.aws_route53_zone.main.name]
+  origin {
+    domain_name = aws_s3_bucket.frontend.bucket_regional_domain_name
+    origin_id = aws_s3_bucket.frontend.bucket
+
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.frontend.cloudfront_access_identity_path
+    }
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  default_cache_behavior {
+    allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods         = ["GET", "HEAD"]
+    target_origin_id       = aws_s3_bucket.frontend.bucket
+    viewer_protocol_policy = "redirect-to-https"
+    compress               = true
+
+    min_ttl     = 0
+    default_ttl = 5 * 60
+    max_ttl     = 60 * 60
+
+    forwarded_values {
+      query_string = true
+
+      cookies {
+        forward = "none"
+      }
+    }
+  }
+
+  viewer_certificate {
+    acm_certificate_arn = aws_acm_certificate.root_cert.arn
+    ssl_support_method = "sni-only"
+  }
+}
+
+resource "aws_cloudfront_function" "frontend_redirect" {
+  name    = "ttrpg_scheduler_frontend_redirect"
+  runtime = "cloudfront-js-2.0"
+  comment = "TTRPG Scheduler Frontend React Router Redirect"
+  publish = true
+  code    = file("${path.root}/cloudfront/frontend_redirect.js")
 }
 
 resource "aws_s3_bucket_policy" "frontend_bucket_policy" {
@@ -344,7 +427,84 @@ resource "aws_s3_bucket_policy" "frontend_bucket_policy" {
   )
 }
 
-output "app_url" {
-  value = aws_alb.application_load_balancer.dns_name
+data "aws_route53_zone" "main" {
+  name = "ttrpgscheduler.com"
 }
 
+resource "aws_route53_record" "root" {
+  zone_id = data.aws_route53_zone.main.id
+  name = data.aws_route53_zone.main.name
+  type = "A"
+
+  alias {
+    name = aws_cloudfront_distribution.frontend_cloudfront.domain_name
+    zone_id = aws_cloudfront_distribution.frontend_cloudfront.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "api" {
+  name = "api.${data.aws_route53_zone.main.name}"
+  zone_id = data.aws_route53_zone.main.id
+  type = "CNAME"
+  ttl = 60
+  records = [aws_alb.application_load_balancer.dns_name]
+}
+
+resource "aws_route53_record" "api_validations" {
+  for_each = {
+    for dvo in aws_acm_certificate.backend_cert.domain_validation_options : dvo.domain_name => {
+      name    = dvo.resource_record_name
+      record  = dvo.resource_record_value
+      type    = dvo.resource_record_type
+      zone_id = data.aws_route53_zone.main.zone_id
+    }
+  }
+
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = 60
+  type            = each.value.type
+  zone_id         = each.value.zone_id
+}
+
+resource "aws_acm_certificate_validation" "api_validation" {
+  certificate_arn = aws_acm_certificate.backend_cert.arn
+  validation_record_fqdns = [for record in aws_route53_record.api_validations : record.fqdn]
+}
+
+
+### Root SSL certificate and API validations
+
+resource "aws_route53_record" "root_validations" {
+  for_each = {
+    for dvo in aws_acm_certificate.root_cert.domain_validation_options : dvo.domain_name => {
+      name    = dvo.resource_record_name
+      record  = dvo.resource_record_value
+      type    = dvo.resource_record_type
+      zone_id = data.aws_route53_zone.main.zone_id
+    }
+  }
+
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = 60
+  type            = each.value.type
+  zone_id         = each.value.zone_id
+}
+
+resource "aws_acm_certificate" "root_cert" {
+  domain_name = data.aws_route53_zone.main.name
+  validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_acm_certificate_validation" "root_validation" {
+  certificate_arn = aws_acm_certificate.root_cert.arn
+  validation_record_fqdns = [for record in aws_route53_record.root_validations : record.fqdn]
+}
