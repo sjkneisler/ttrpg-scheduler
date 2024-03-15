@@ -49,8 +49,8 @@ resource "aws_ecs_task_definition" "app_task" {
               essential = true,
               portMappings = [
                 {
-                  "containerPort": 443,
-                  "hostPort": 443,
+                  "containerPort": 3001,
+                  "hostPort": 3001,
                 }],
               memory = 512,
               cpu = 256
@@ -62,7 +62,7 @@ resource "aws_ecs_task_definition" "app_task" {
               ]
               healthCheck = {
                 retries = 5
-                command = [ "CMD-SHELL", "curl -f http://localhost:443/ || exit 1" ]
+                command = [ "CMD-SHELL", "curl -f http://localhost:3001/ || exit 1" ]
                 timeout = 5
                 interval = 30
                 startPeriod = 90
@@ -84,7 +84,7 @@ resource "aws_ecs_task_definition" "app_task" {
   execution_role_arn = aws_iam_role.ecsTaskExecutionRole.arn
   lifecycle {
     ignore_changes = [
-      container_definitions # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
+#       container_definitions # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
     ]
   }
 }
@@ -153,7 +153,7 @@ resource "aws_security_group" "load_balancer_security_group" {
 
 resource "aws_lb_target_group" "target_group" {
   name        = "ttrpg-scheduler-target-group"
-  port        = 443
+  port        = 3001
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = aws_default_vpc.default_vpc.id # default VPC
@@ -199,7 +199,7 @@ resource "aws_ecs_service" "app_service" {
   load_balancer {
     target_group_arn = aws_lb_target_group.target_group.arn # Reference the target group
     container_name   = aws_ecs_task_definition.app_task.family
-    container_port   = 443 # Specify the container port
+    container_port   = 3001 # Specify the container port
   }
 
   network_configuration {
@@ -210,7 +210,7 @@ resource "aws_ecs_service" "app_service" {
 
   lifecycle {
     ignore_changes = [
-      task_definition # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
+#       task_definition # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
     ]
   }
 
