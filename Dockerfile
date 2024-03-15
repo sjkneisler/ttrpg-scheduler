@@ -17,4 +17,5 @@ RUN ["yarn", "db:generate"]
 
 EXPOSE 443
 
-CMD yarn db:migrate:prod; npx ts-node ./server_old/server.ts
+#CMD yarn db:migrate:prod; npx ts-node ./server_old/server.ts
+CMD npx ts-node ./server_old/server.ts
