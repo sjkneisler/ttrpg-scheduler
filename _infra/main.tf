@@ -60,13 +60,13 @@ resource "aws_ecs_task_definition" "app_task" {
                   value = "postgresql://${aws_db_instance.database.username}:${aws_db_instance.database.password}@${aws_db_instance.database.endpoint}/ttrpg_scheduler?schema=public"
                 }
               ]
-              healthCheck = {
-                retries = 5
-                command = [ "CMD-SHELL", "curl -f http://localhost:3001/ || exit 1" ]
-                timeout = 5
-                interval = 30
-                startPeriod = 90
-              }
+#               healthCheck = {
+#                 retries = 5
+#                 command = [ "CMD-SHELL", "curl -f http://localhost:3001/ || exit 1" ]
+#                 timeout = 5
+#                 interval = 30
+#                 startPeriod = 90
+#               }
               logConfiguration = {
                 logDriver = "awslogs"
                 options = {
@@ -84,7 +84,7 @@ resource "aws_ecs_task_definition" "app_task" {
   execution_role_arn = aws_iam_role.ecsTaskExecutionRole.arn
   lifecycle {
     ignore_changes = [
-#       container_definitions # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
+      container_definitions # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
     ]
   }
 }
@@ -157,6 +157,10 @@ resource "aws_lb_target_group" "target_group" {
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = aws_default_vpc.default_vpc.id # default VPC
+
+  health_check {
+    enabled = true
+  }
 }
 
 resource "aws_acm_certificate" "backend_cert" {
@@ -210,7 +214,7 @@ resource "aws_ecs_service" "app_service" {
 
   lifecycle {
     ignore_changes = [
-#       task_definition # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
+      task_definition # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
     ]
   }
 
@@ -361,11 +365,14 @@ resource "aws_cloudfront_distribution" "frontend_cloudfront" {
   default_root_object = "index.html"
   aliases = [data.aws_route53_zone.main.name]
   origin {
-    domain_name = aws_s3_bucket.frontend.bucket_regional_domain_name
+    domain_name = aws_s3_bucket_website_configuration.frontend_s3_config.website_endpoint
     origin_id = aws_s3_bucket.frontend.bucket
 
-    s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.frontend.cloudfront_access_identity_path
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2"]
     }
   }
 
@@ -392,6 +399,11 @@ resource "aws_cloudfront_distribution" "frontend_cloudfront" {
       cookies {
         forward = "none"
       }
+    }
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.frontend_redirect.arn
     }
   }
 
