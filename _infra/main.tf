@@ -315,7 +315,7 @@ resource "github_actions_environment_variable" "envvar_react_app_server_url" {
   repository = data.github_repository.repo.name
   environment = github_repository_environment.repo_sandbox_env.environment
   variable_name = "REACT_APP_SERVER_URL"
-  value = "${aws_alb.application_load_balancer.dns_name}:3001/"
+  value = "http://${aws_alb.application_load_balancer.dns_name}:3001/"
 }
 
 resource "aws_s3_bucket_website_configuration" "frontend_s3_config" {
