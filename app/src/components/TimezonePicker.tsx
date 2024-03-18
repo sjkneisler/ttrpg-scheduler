@@ -6,15 +6,16 @@ const timezones = Intl.supportedValuesOf('timeZone');
 export const TimezonePicker: React.FC<{
   timezone: string | null;
   setTimezone: (timezone: string) => void;
-}> = ({ timezone, setTimezone }) => {
+  label?: string;
+}> = ({ timezone, setTimezone, label = 'Timezone' }) => {
   return (
     <FormControl fullWidth>
-      <InputLabel id="timezone-select-label">Timezone</InputLabel>
+      <InputLabel id="timezone-select-label">{label}</InputLabel>
       <Select
         value={timezone}
         onChange={(event) => setTimezone(event.target.value!)}
         labelId="timezone-select-label"
-        label="Timezone"
+        label={label}
       >
         {timezones.map((timezoneItem) => (
           <MenuItem value={timezoneItem}>{timezoneItem}</MenuItem>

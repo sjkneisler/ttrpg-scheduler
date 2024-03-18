@@ -46,7 +46,7 @@ export const UsersTable: React.FC = () => {
         <Typography variant="h4">People</Typography>
         <FormControl fullWidth>
           <TextField
-            label="Person"
+            label="Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             inputProps={{

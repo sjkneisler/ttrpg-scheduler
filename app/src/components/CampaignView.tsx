@@ -9,7 +9,6 @@ import {
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
-import { css } from '@emotion/react';
 import { useSchedule } from '../hooks/useSchedule';
 import { AggregateWeeklyCalendar } from './AggregateWeekyCalendar';
 import { aggregateAvailability } from '../utils/aggregate';
@@ -20,6 +19,7 @@ import {
 } from '../../../common/util/timezones';
 import { UsersTable } from './UsersTable';
 import { PageContainer } from './PageContainer';
+import { TimezonePicker } from './TimezonePicker';
 
 export const CampaignView: React.FC = () => {
   const navigate = useNavigate();
@@ -27,6 +27,7 @@ export const CampaignView: React.FC = () => {
   const [aggregationType, setAggregationType] = useState<AggregationType>(
     AggregationType.Shared,
   );
+  const [timezone, setTimezone] = useState(getCurrentTimezone());
 
   const onBack = () => {
     navigate('/');
@@ -40,9 +41,9 @@ export const CampaignView: React.FC = () => {
     return aggregateAvailability(
       schedule,
       aggregationType,
-      getTimezoneOffset(getCurrentTimezone()),
+      getTimezoneOffset(timezone),
     );
-  }, [schedule, aggregationType]);
+  }, [schedule, aggregationType, timezone]);
 
   if (!schedule || !showAvailability) {
     return <Suspense />;
@@ -71,14 +72,13 @@ export const CampaignView: React.FC = () => {
               </ToggleButton>
             </ToggleButtonGroup>
           </FormControl>
+          <TimezonePicker
+            timezone={timezone}
+            setTimezone={setTimezone}
+            label="Displayed Timezone"
+          />
         </Stack>
-        <div
-          css={css`
-            flex: 1 1 auto;
-          `}
-        >
-          <AggregateWeeklyCalendar availability={showAvailability} />
-        </div>
+        <AggregateWeeklyCalendar availability={showAvailability} />
       </Stack>
     </PageContainer>
   );
