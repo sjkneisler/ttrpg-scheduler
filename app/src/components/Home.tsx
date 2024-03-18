@@ -1,9 +1,17 @@
 /** @jsxImportSource @emotion/react */
-import { Button, TextField } from '@mui/material';
+import {
+  Box,
+  Button,
+  Container,
+  FormControl,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { css } from '@emotion/react';
 import { createSchedule } from '../api/client';
+import { PageContainer } from './PageContainer';
 
 export const Home: React.FC = () => {
   const [name, setName] = useState('');
@@ -13,20 +21,30 @@ export const Home: React.FC = () => {
     navigate(`/schedule/${schedule.id}`);
   };
   return (
-    <div
-      css={css`
-        margin: 30px;
-      `}
-    >
-      <TextField
-        label="Campaign Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
-      <Button variant="outlined" onClick={createCampaign}>
-        Create Campaign
-      </Button>
-    </div>
+    <PageContainer>
+      <Container maxWidth="sm">
+        <Stack spacing={3} marginTop={2}>
+          <Typography variant="subtitle1" align="center" fontStyle="italic">
+            A tool for scheduling recurring weekly events
+          </Typography>
+          <Box maxWidth="xs" alignSelf="center">
+            <FormControl>
+              <TextField
+                label="Schedule Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                inputProps={{
+                  'data-lpignore': true,
+                }}
+              />
+              {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
+              <Button variant="outlined" onClick={createCampaign}>
+                Create Schedule
+              </Button>
+            </FormControl>
+          </Box>
+        </Stack>
+      </Container>
+    </PageContainer>
   );
 };

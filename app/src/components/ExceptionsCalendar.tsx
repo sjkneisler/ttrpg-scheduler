@@ -2,14 +2,7 @@
 import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import _ from 'lodash';
-import {
-  Button,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  Typography,
-} from '@mui/material';
-import { css } from '@emotion/react';
+import { Button, Stack } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -27,15 +20,15 @@ import {
 } from '../../../common/util/timezones';
 import { WeekPicker } from './WeekPicker';
 import { DragPosition } from './DragContext';
+import { PageContainer } from './PageContainer';
+import { TimezonePicker } from './TimezonePicker';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const msPerInterval = 1000 * 60 * 15; // milliseconds in 15 minutes
 
-const timezones = Intl.supportedValuesOf('timeZone');
-
-// TODO: For some reason, exceptions added to sunday are getting shifted one hour earlier (oh shit is that DST? there's no way)
+// TODO: Exceptions added on the day of DST shift get moved by one hour
 
 function resetExceptionsForDay(
   exceptions: AvailabilityException[],
@@ -239,13 +232,10 @@ export const ExceptionsCalendar: React.FC = () => {
     await updateUser(updatedUser);
   };
 
-  const setTimezone = async (
-    timezoneChangeEvent: SelectChangeEvent<string | null>,
-  ) => {
+  const setTimezone = async (newTimezone: string) => {
     if (!user) {
       return;
     }
-    const newTimezone = timezoneChangeEvent.target.value!;
     const newOffset = getTimezoneOffset(newTimezone);
     const oldOffset = getTimezoneOffset(user.timezone!);
     const offsetDifference = newOffset - oldOffset;
@@ -383,48 +373,28 @@ export const ExceptionsCalendar: React.FC = () => {
   }
 
   return (
-    <div
-      css={css`
-        display: flex;
-        flex-direction: row;
-      `}
-    >
-      <div
-        css={css`
-          flex: 1 1 auto;
-        `}
-      >
-        <Typography variant="h4">Schedule: {user.schedule.name}</Typography>
-        <Typography variant="h4">User: {user.name}</Typography>
-        <Button variant="outlined" onClick={onBack}>
-          Back
-        </Button>
-        {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
-        <Select value={user.timezone} onChange={(val) => setTimezone(val)}>
-          {timezones.map((timezoneListItem) => (
-            <MenuItem value={timezoneListItem}>{timezoneListItem}</MenuItem>
-          ))}
-        </Select>
-        <WeekPicker
-          weekValue={week}
-          setWeekValue={(newWeek) => {
-            // setWeek(newWeek.tz(user.timezone!));
-            setWeek(newWeek);
-          }}
-        />
-      </div>
-      <div
-        css={css`
-          flex: 1 1 auto;
-        `}
-      >
+    <PageContainer>
+      <Stack direction="row">
+        <Stack spacing={2}>
+          <Button variant="outlined" onClick={onBack}>
+            Back
+          </Button>
+          <TimezonePicker timezone={user.timezone} setTimezone={setTimezone} />
+          <WeekPicker
+            weekValue={week}
+            setWeekValue={(newWeek) => {
+              // setWeek(newWeek.tz(user.timezone!));
+              setWeek(newWeek);
+            }}
+          />
+        </Stack>
         <WeeklyCalendar
           availability={availabilityWithExceptions}
           onAvailabilityUpdate={onAvailabilityUpdate}
           labels={dayLabels}
           headerChildren={weeklyCalendarHeaderChildren}
         />
-      </div>
-    </div>
+      </Stack>
+    </PageContainer>
   );
 };

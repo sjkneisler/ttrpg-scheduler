@@ -9,21 +9,22 @@ export const useScheduleUser = (): UserWithIncludes | null => {
   const [user, setUser] = useState<UserWithIncludes | null>(null);
   const schedule = useSchedule();
 
-  if (!userId || !schedule) {
-    return null;
-  }
-
-  const parsedUserId = parseInt(userId!, 10);
+  const parsedUserId = userId && parseInt(userId, 10);
 
   useEffect(() => {
-    if (!parsedUserId) {
+    if (!parsedUserId || !schedule || !userId) {
       return;
     }
 
-    getUser(schedule.id, parsedUserId).then((fetchedUser) =>
+    // eslint-disable-next-line no-void
+    void getUser(schedule.id, parsedUserId).then((fetchedUser) =>
       setUser(fetchedUser),
     );
-  }, [userId]);
+  }, [userId, schedule]);
+
+  if (!userId || !schedule) {
+    return null;
+  }
 
   return user;
 };

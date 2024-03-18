@@ -7,14 +7,10 @@ export const useSchedule = (): ScheduleWithIncludes | null => {
   const { scheduleId } = useParams();
   const [schedule, setSchedule] = useState<ScheduleWithIncludes | null>(null);
 
-  if (!scheduleId) {
-    return null;
-  }
-
-  const parsedScheduleId = parseInt(scheduleId, 10);
+  const parsedScheduleId = scheduleId && parseInt(scheduleId, 10);
 
   useEffect(() => {
-    if (!parsedScheduleId) {
+    if (!parsedScheduleId || !scheduleId) {
       return;
     }
 
@@ -23,6 +19,10 @@ export const useSchedule = (): ScheduleWithIncludes | null => {
       setSchedule(fetchedSchedule),
     );
   }, [scheduleId]);
+
+  if (!scheduleId) {
+    return null;
+  }
 
   return schedule;
 };

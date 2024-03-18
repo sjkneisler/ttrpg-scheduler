@@ -1,14 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  Button,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  Typography,
-} from '@mui/material';
-import { css } from '@emotion/react';
+import { Button, Stack } from '@mui/material';
 import { WeeklyCalendar } from './WeekyCalendar';
 import { UserWithIncludes } from '../../../common/types/user';
 import { getUser, updateUser } from '../api/client';
@@ -18,8 +11,8 @@ import {
   getTimezoneOffset,
   shiftAvailabilityByTimezone,
 } from '../../../common/util/timezones';
-
-const timezones = Intl.supportedValuesOf('timeZone');
+import { PageContainer } from './PageContainer';
+import { TimezonePicker } from './TimezonePicker';
 
 export const UserWeeklyCalendar: React.FC = () => {
   const [user, setUser] = useState<UserWithIncludes | null>(null);
@@ -52,13 +45,10 @@ export const UserWeeklyCalendar: React.FC = () => {
     await updateUser(updatedUser);
   };
 
-  const setTimezone = (
-    timezoneChangeEvent: SelectChangeEvent<string | null>,
-  ) => {
+  const setTimezone = (newTimezone: string) => {
     if (!user) {
       return;
     }
-    const newTimezone = timezoneChangeEvent.target.value!;
     const newOffset = getTimezoneOffset(newTimezone);
     const oldOffset = getTimezoneOffset(user.timezone!);
     const offsetDifference = newOffset - oldOffset;
@@ -109,41 +99,22 @@ export const UserWeeklyCalendar: React.FC = () => {
   }
 
   return (
-    <div
-      css={css`
-        display: flex;
-        flex-direction: row;
-      `}
-    >
-      <div
-        css={css`
-          flex: 1 1 auto;
-        `}
-      >
-        <Typography variant="h4">Schedule: {user.schedule.name}</Typography>
-        <Typography variant="h4">User: {user.name}</Typography>
-        <Button variant="outlined" onClick={onBack}>
-          Back
-        </Button>
-        <Select value={user.timezone} onChange={setTimezone}>
-          {timezones.map((timezone) => (
-            <MenuItem value={timezone}>{timezone}</MenuItem>
-          ))}
-        </Select>
-        <Button variant="outlined" onClick={gotoExceptions}>
-          Go To Date Specific Availabilities
-        </Button>
-      </div>
-      <div
-        css={css`
-          flex: 1 1 auto;
-        `}
-      >
+    <PageContainer>
+      <Stack direction="row">
+        <Stack spacing={2}>
+          <Button variant="outlined" onClick={onBack}>
+            Back
+          </Button>
+          <TimezonePicker timezone={user.timezone} setTimezone={setTimezone} />
+          <Button variant="outlined" onClick={gotoExceptions}>
+            Go To Date Specific Availabilities
+          </Button>
+        </Stack>
         <WeeklyCalendar
           availability={shiftedWeeklyAvailability}
           onAvailabilityUpdate={onAvailabilityUpdate}
         />
-      </div>
-    </div>
+      </Stack>
+    </PageContainer>
   );
 };

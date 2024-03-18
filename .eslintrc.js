@@ -49,6 +49,8 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     'react/require-default-props': 'warn',
     'prettier/prettier': 'warn',
+    '@typescript-eslint/no-misused-promises': 'warn',
+    '@typescript-eslint/no-unused-vars': 'warn',
   },
   settings: {
     failOnError: false,

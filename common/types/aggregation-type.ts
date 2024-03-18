@@ -1,4 +1,4 @@
 export enum AggregationType {
-  Common,
+  Shared,
   Average,
 }

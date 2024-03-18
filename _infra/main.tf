@@ -32,6 +32,29 @@ resource "aws_ecr_repository" "app_ecr_repo" {
   image_tag_mutability = "MUTABLE"
 }
 
+resource "aws_ecr_lifecycle_policy" "app_ecr_repo_lifecycle_policy" {
+  repository = aws_ecr_repository.app_ecr_repo.name
+
+  policy = <<EOF
+{
+    "rules": [
+        {
+            "rulePriority": 1,
+            "description": "Keep last two images",
+            "selection": {
+                "tagStatus": "any",
+                "countType": "imageCountMoreThan",
+                "countNumber": 2
+            },
+            "action": {
+                "type": "expire"
+            }
+        }
+    ]
+}
+EOF
+}
+
 resource "aws_ecs_cluster" "app_ecs_cluster" {
   name = "ttrpg-scheduler-cluster"
 }
