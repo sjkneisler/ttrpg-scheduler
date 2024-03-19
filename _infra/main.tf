@@ -65,11 +65,13 @@ resource "aws_acm_certificate" "backend_cert" {
 }
 
 resource "aws_security_group" "rds_security_group" {
+  vpc_id = aws_vpc.main.id
+
   ingress {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Allow traffic in from all sources
+    cidr_blocks = [aws_subnet.main_a.cidr_block, aws_subnet.main_b.cidr_block, aws_subnet.main_f.cidr_block]
   }
 
   egress {
@@ -128,11 +130,17 @@ resource "aws_db_instance" "database" {
 #
 #   }
   vpc_security_group_ids = [aws_security_group.rds_security_group.id]
+  db_subnet_group_name = aws_db_subnet_group.main.name
   publicly_accessible = false
 
   lifecycle {
     prevent_destroy = true
   }
+}
+
+resource "aws_db_subnet_group" "main" {
+  name = "db-subnet-main"
+  subnet_ids = [aws_subnet.main_a.id, aws_subnet.main_b.id, aws_subnet.main_f.id]
 }
 
 resource "aws_secretsmanager_secret" "db_master_password" {
@@ -394,6 +402,12 @@ resource "aws_apprunner_service" "api" {
     memory = "512"
   }
   auto_scaling_configuration_arn = aws_apprunner_auto_scaling_configuration_version.api_scaling.arn
+  network_configuration {
+    egress_configuration {
+      egress_type = "VPC"
+      vpc_connector_arn = aws_apprunner_vpc_connector.connector.arn
+    }
+  }
 }
 
 resource "aws_apprunner_auto_scaling_configuration_version" "api_scaling" {
@@ -407,4 +421,52 @@ resource "aws_apprunner_auto_scaling_configuration_version" "api_scaling" {
 resource "aws_apprunner_custom_domain_association" "api_domain" {
   domain_name = "api.ttrpgscheduler.com"
   service_arn = aws_apprunner_service.api.arn
+}
+
+resource "aws_apprunner_vpc_connector" "connector" {
+  vpc_connector_name = "ttrpg-scheduler-api-vpc-connector"
+  subnets            = [aws_subnet.main_a.id, aws_subnet.main_b.id, aws_subnet.main_f.id]
+  security_groups    = [aws_security_group.apprunner_security_group.id]
+}
+
+resource "aws_security_group" "apprunner_security_group" {
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = [aws_subnet.main_a.cidr_block, aws_subnet.main_b.cidr_block, aws_subnet.main_f.cidr_block]
+  }
+}
+
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+  enable_dns_support = "true" #gives you an internal domain name
+  enable_dns_hostnames = "true" #gives you an internal host name
+}
+
+resource "aws_subnet" "main_a" {
+  vpc_id     = aws_vpc.main.id
+  cidr_block = "10.0.1.0/24"
+  availability_zone = "us-east-1a"
+}
+
+resource "aws_subnet" "main_b" {
+  vpc_id     = aws_vpc.main.id
+  cidr_block = "10.0.3.0/24"
+  availability_zone = "us-east-1b"
+}
+# TODO: Using F here because that's where the db instance is.  There should probably be a subnet for each zone
+resource "aws_subnet" "main_f" {
+  vpc_id     = aws_vpc.main.id
+  cidr_block = "10.0.10.0/24"
+  availability_zone = "us-east-1f"
 }
