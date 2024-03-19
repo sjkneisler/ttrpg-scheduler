@@ -55,137 +55,6 @@ resource "aws_ecr_lifecycle_policy" "app_ecr_repo_lifecycle_policy" {
 EOF
 }
 
-resource "aws_ecs_cluster" "app_ecs_cluster" {
-  name = "ttrpg-scheduler-cluster"
-}
-
-resource "aws_cloudwatch_log_group" "main" {
-  name = "ttrpg-scheduler-logs"
-}
-
-resource "aws_ecs_task_definition" "app_task" {
-  family = "ttrpg-scheduler-first-task"
-  container_definitions = jsonencode([
-            {
-              name = "ttrpg-scheduler-first-task",
-              image = aws_ecr_repository.app_ecr_repo.repository_url
-              essential = true,
-              portMappings = [
-                {
-                  "containerPort": 3001,
-                  "hostPort": 3001,
-                }],
-              memory = 512,
-              cpu = 256
-              environment = [
-                {
-                  name = "DATABASE_URL"
-                  value = "postgresql://${aws_db_instance.database.username}:${aws_db_instance.database.password}@${aws_db_instance.database.endpoint}/ttrpg_scheduler?schema=public"
-                }
-              ]
-#               healthCheck = {
-#                 retries = 5
-#                 command = [ "CMD-SHELL", "curl -f http://localhost:3001/ || exit 1" ]
-#                 timeout = 5
-#                 interval = 30
-#                 startPeriod = 90
-#               }
-              logConfiguration = {
-                logDriver = "awslogs"
-                options = {
-                  awslogs-group = aws_cloudwatch_log_group.main.name
-                  awslogs-region = "us-east-1"
-                  awslogs-stream-prefix = "ecs"
-                }
-              }
-            }
-          ])
-  requires_compatibilities = ["FARGATE"]
-  network_mode = "awsvpc"
-  memory = 512
-  cpu = 256
-  execution_role_arn = aws_iam_role.ecsTaskExecutionRole.arn
-  lifecycle {
-    ignore_changes = [
-      container_definitions # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
-    ]
-  }
-}
-
-resource "aws_iam_role" "ecsTaskExecutionRole" {
-  name               = "ecsTaskExecutionRole"
-  assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
-}
-
-data "aws_iam_policy_document" "assume_role_policy" {
-  statement {
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["ecs-tasks.amazonaws.com"]
-    }
-  }
-}
-
-resource "aws_iam_role_policy_attachment" "ecsTaskExecutionRole_policy" {
-  role       = aws_iam_role.ecsTaskExecutionRole.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
-resource "aws_default_vpc" "default_vpc" {
-}
-
-# Provide references to your default subnets
-resource "aws_default_subnet" "default_subnet_a" {
-  # Use your own region here but reference to subnet 1a
-  availability_zone = "us-east-1a"
-}
-
-resource "aws_default_subnet" "default_subnet_b" {
-  # Use your own region here but reference to subnet 1b
-  availability_zone = "us-east-1b"
-}
-
-resource "aws_alb" "application_load_balancer" {
-  name               = "ttrpg-scheduler-lb"
-  load_balancer_type = "application"
-  subnets = [ # Referencing the default subnets
-    aws_default_subnet.default_subnet_a.id,
-    aws_default_subnet.default_subnet_b.id
-  ]
-  # security group
-  security_groups = [aws_security_group.load_balancer_security_group.id]
-}
-
-resource "aws_security_group" "load_balancer_security_group" {
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Allow traffic in from all sources
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-resource "aws_lb_target_group" "target_group" {
-  name        = "ttrpg-scheduler-target-group"
-  port        = 3001
-  protocol    = "HTTP"
-  target_type = "ip"
-  vpc_id      = aws_default_vpc.default_vpc.id # default VPC
-
-  health_check {
-    enabled = true
-  }
-}
-
 resource "aws_acm_certificate" "backend_cert" {
   domain_name = aws_route53_record.api.name
   validation_method = "DNS"
@@ -194,73 +63,6 @@ resource "aws_acm_certificate" "backend_cert" {
     create_before_destroy = true
   }
 }
-
-resource "aws_lb_listener" "listener" {
-  depends_on = [aws_acm_certificate_validation.api_validation]
-
-  load_balancer_arn = aws_alb.application_load_balancer.arn #  load balancer
-  port              = "443"
-  protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn = aws_acm_certificate.backend_cert.arn
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.target_group.arn # target group
-  }
-
-  lifecycle {
-    replace_triggered_by = [
-      aws_lb_target_group.target_group,
-    ]
-  }
-}
-
-resource "aws_ecs_service" "app_service" {
-  name            = "ttrpg-scheduler-first-service"     # Name the service
-  cluster         = aws_ecs_cluster.app_ecs_cluster.id   # Reference the created Cluster
-  task_definition = aws_ecs_task_definition.app_task.arn # Reference the task that the service will spin up
-  launch_type     = "FARGATE"
-  desired_count   = 1
-
-  load_balancer {
-    target_group_arn = aws_lb_target_group.target_group.arn # Reference the target group
-    container_name   = aws_ecs_task_definition.app_task.family
-    container_port   = 3001 # Specify the container port
-  }
-
-  network_configuration {
-    subnets          = [aws_default_subnet.default_subnet_a.id, aws_default_subnet.default_subnet_b.id]
-    assign_public_ip = true     # Provide the containers with public IPs
-    security_groups  = [aws_security_group.service_security_group.id] # Set up the security group
-  }
-
-  lifecycle {
-    ignore_changes = [
-      task_definition # Ignore changes because deploying this container without the github action fails deployment due to not specifying a valid ECR image tag
-    ]
-  }
-
-   health_check_grace_period_seconds = 180 # Wait up to 3 minutes for prisma migrations
-}
-
-resource "aws_security_group" "service_security_group" {
-  ingress {
-    from_port = 0
-    to_port   = 0
-    protocol  = "-1"
-    # Only allowing traffic in from the load balancer security group
-    security_groups = [aws_security_group.load_balancer_security_group.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
 
 resource "aws_security_group" "rds_security_group" {
   ingress {
@@ -299,20 +101,6 @@ resource "github_actions_environment_variable" "envvar_ecr_repository" {
   environment = github_repository_environment.repo_sandbox_env.environment
   variable_name = "ECR_REPOSITORY"
   value = aws_ecr_repository.app_ecr_repo.name
-}
-
-resource "github_actions_environment_variable" "envvar_ecs_service" {
-  repository = data.github_repository.repo.name
-  environment = github_repository_environment.repo_sandbox_env.environment
-  variable_name = "ECS_SERVICE"
-  value = aws_ecs_service.app_service.name
-}
-
-resource "github_actions_environment_variable" "envvar_ecs_cluster" {
-  repository = data.github_repository.repo.name
-  environment = github_repository_environment.repo_sandbox_env.environment
-  variable_name = "ECS_CLUSTER"
-  value = aws_ecs_cluster.app_ecs_cluster.name
 }
 
 resource "github_actions_environment_variable" "envvar_aws_access_key_id" {
@@ -481,9 +269,25 @@ resource "aws_route53_record" "root" {
 resource "aws_route53_record" "api" {
   name = "api.${data.aws_route53_zone.main.name}"
   zone_id = data.aws_route53_zone.main.id
-  type = "CNAME"
-  ttl = 60
-  records = [aws_alb.application_load_balancer.dns_name]
+  type = "A"
+
+  alias {
+    name = aws_apprunner_service.api.service_url
+    zone_id = "Z01915732ZBZKC8D32TPT" #US-East-1 app runner hosted zone ID, Found here https://docs.aws.amazon.com/general/latest/gr/apprunner.html
+    evaluate_target_health = true
+  }
+
+}
+
+resource "aws_route53_record" "api_app_runner" {
+  count = length(aws_apprunner_custom_domain_association.api_domain.certificate_validation_records)
+
+  name = aws_apprunner_custom_domain_association.api_domain.certificate_validation_records.*.name[count.index]
+  type = aws_apprunner_custom_domain_association.api_domain.certificate_validation_records.*.type[count.index]
+  ttl = 300
+  zone_id = data.aws_route53_zone.main.id
+
+  records = [aws_apprunner_custom_domain_association.api_domain.certificate_validation_records.*.value[count.index]]
 }
 
 resource "aws_route53_record" "api_validations" {
@@ -542,4 +346,62 @@ resource "aws_acm_certificate" "root_cert" {
 resource "aws_acm_certificate_validation" "root_validation" {
   certificate_arn = aws_acm_certificate.root_cert.arn
   validation_record_fqdns = [for record in aws_route53_record.root_validations : record.fqdn]
+}
+
+### New Cheaper backend (AppRunner + API Gateway)
+
+resource "aws_iam_role" "ecrAccessorRole" {
+  name               = "ecrAccessorRole"
+  assume_role_policy = data.aws_iam_policy_document.apprunner_assume_role_policy.json
+}
+
+resource "aws_iam_role_policy_attachment" "ecrAccessorRole_policy" {
+  role       = aws_iam_role.ecrAccessorRole.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
+data "aws_iam_policy_document" "apprunner_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["tasks.apprunner.amazonaws.com", "build.apprunner.amazonaws.com", "apprunner.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_apprunner_service" "api" {
+  service_name = "ttrpg-scheduler-api"
+  source_configuration {
+    image_repository {
+      image_configuration {
+        port = "3001"
+      }
+      image_identifier      = "079358094174.dkr.ecr.us-east-1.amazonaws.com/ttrpg-scheduler-repo:latest"
+      image_repository_type = "ECR"
+    }
+    auto_deployments_enabled = true
+    authentication_configuration {
+      access_role_arn = aws_iam_role.ecrAccessorRole.arn
+    }
+  }
+  instance_configuration {
+    cpu = "256"
+    memory = "512"
+  }
+  auto_scaling_configuration_arn = aws_apprunner_auto_scaling_configuration_version.api_scaling.arn
+}
+
+resource "aws_apprunner_auto_scaling_configuration_version" "api_scaling" {
+  auto_scaling_configuration_name = "ttrpg-scheduler-api-scaling"
+
+  max_concurrency = 1
+  max_size        = 1
+  min_size        = 1
+}
+
+resource "aws_apprunner_custom_domain_association" "api_domain" {
+  domain_name = "api.ttrpgscheduler.com"
+  service_arn = aws_apprunner_service.api.arn
 }
