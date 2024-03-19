@@ -348,7 +348,7 @@ resource "aws_acm_certificate_validation" "root_validation" {
   validation_record_fqdns = [for record in aws_route53_record.root_validations : record.fqdn]
 }
 
-### New Cheaper backend (AppRunner + API Gateway)
+### AppRunner backend
 
 resource "aws_iam_role" "ecrAccessorRole" {
   name               = "ecrAccessorRole"
@@ -377,6 +377,9 @@ resource "aws_apprunner_service" "api" {
     image_repository {
       image_configuration {
         port = "3001"
+        runtime_environment_variables = {
+          DATABASE_URL = "postgresql://${aws_db_instance.database.username}:${aws_db_instance.database.password}@${aws_db_instance.database.endpoint}/ttrpg_scheduler?schema=public"
+        }
       }
       image_identifier      = "079358094174.dkr.ecr.us-east-1.amazonaws.com/ttrpg-scheduler-repo:latest"
       image_repository_type = "ECR"
