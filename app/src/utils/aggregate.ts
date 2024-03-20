@@ -16,6 +16,9 @@ function availabilityToGradient(availability: Availability): number {
     case Availability.Red:
       return 1;
     default:
+      console.log(
+        "Returning default value for availability gradient (this shouldn't be reached",
+      );
       return -1;
   }
 }
@@ -25,17 +28,10 @@ function getColorForGradient(value: number) {
   return ['hsl(', hue, ',100%,50%)'].join('');
 }
 
-export function aggregateAvailability(
-  schedule: ScheduleWithIncludes,
+export function aggregateUserAvailabilities(
+  userAvailabilities: Availability[][][],
   aggregationType: AggregationType,
-  timezoneOffset: number,
 ): AggregateAvailability {
-  const userAvailabilities = schedule.users
-    .map((user) => user.availability.weekly)
-    .map((weeklyAvailability) =>
-      shiftAvailabilityByTimezone(weeklyAvailability, timezoneOffset),
-    );
-
   return _.times(7, (day) =>
     _.times(96, (time) => {
       if (aggregationType === AggregationType.Average) {
@@ -57,4 +53,18 @@ export function aggregateAvailability(
       return '#00ff00';
     }),
   );
+}
+
+export function aggregateAvailability(
+  schedule: ScheduleWithIncludes,
+  aggregationType: AggregationType,
+  timezoneOffset: number,
+): AggregateAvailability {
+  const userAvailabilities = schedule.users
+    .map((user) => user.availability.weekly)
+    .map((weeklyAvailability) =>
+      shiftAvailabilityByTimezone(weeklyAvailability, timezoneOffset),
+    );
+
+  return aggregateUserAvailabilities(userAvailabilities, aggregationType);
 }

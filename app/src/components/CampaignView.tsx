@@ -33,6 +33,10 @@ export const CampaignView: React.FC = () => {
     navigate('/');
   };
 
+  const gotoPlan = () => {
+    navigate('plan');
+  };
+
   const showAvailability = useMemo(() => {
     if (!schedule) {
       return null;
@@ -77,6 +81,9 @@ export const CampaignView: React.FC = () => {
             setTimezone={setTimezone}
             label="Displayed Timezone"
           />
+          <Button variant="outlined" onClick={gotoPlan}>
+            Plan a date!
+          </Button>
         </Stack>
         <AggregateWeeklyCalendar availability={showAvailability} />
       </Stack>

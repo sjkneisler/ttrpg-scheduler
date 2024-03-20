@@ -55,7 +55,9 @@ function doesDayHaveExceptions(
   return exceptions.some((exception) => {
     return (
       dayjs(exception.startTime).isBetween(day, dayEnd) ||
-      dayjs(exception.endTime).isBetween(day, dayEnd)
+      dayjs(exception.endTime).isBetween(day, dayEnd) ||
+      dayjs(exception.startTime).isSame(day) ||
+      dayjs(exception.endTime).isSame(dayEnd)
     );
   });
 }
@@ -132,6 +134,7 @@ function mergeExceptions(
   ); // Return sorted list for consistency
 }
 
+// TODO: This should probably accept a timezone to generate the correct exception
 function generateExceptionsFromDrag(
   dragStart: DragPosition,
   dragEnd: DragPosition,
@@ -315,7 +318,7 @@ export const ExceptionsCalendar: React.FC = () => {
       });
 
     return shiftedWeeklyAvailability;
-  }, [user, week]);
+  }, [user, week, timezone]);
 
   const dayLabels = useMemo(() => {
     return [

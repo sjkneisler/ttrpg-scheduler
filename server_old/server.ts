@@ -65,6 +65,16 @@ app.post<
   res.status(200).json(data);
 });
 
+function stripUser(user: ScheduleUser): StrippedScheduleUser {
+  return _.omit(user, 'passwordSalt', 'passwordSaltIterations', 'passwordHash');
+}
+
+function stripUserWithIncludes(
+  user: UnstrippedUserWithIncludes,
+): UserWithIncludes {
+  return _.omit(user, 'passwordSalt', 'passwordSaltIterations', 'passwordHash');
+}
+
 app.post<
   {
     id: string;
@@ -131,16 +141,6 @@ app.get<{ id: string }, Schedule, {}>('/schedule/:id', async (req, res) => {
   });
   res.status(200).json(schedule);
 });
-
-function stripUser(user: ScheduleUser): StrippedScheduleUser {
-  return _.omit(user, 'passwordSalt', 'passwordSaltIterations', 'passwordHash');
-}
-
-function stripUserWithIncludes(
-  user: UnstrippedUserWithIncludes,
-): UserWithIncludes {
-  return _.omit(user, 'passwordSalt', 'passwordSaltIterations', 'passwordHash');
-}
 
 app.put<
   {

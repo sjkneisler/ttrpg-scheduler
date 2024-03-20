@@ -6,6 +6,7 @@ import { UserWeeklyCalendar } from './components/UserWeeklyCalendar';
 import { Home } from './components/Home';
 import { CampaignView } from './components/CampaignView';
 import { ExceptionsCalendar } from './components/ExceptionsCalendar';
+import { AggregateExceptionsCalendar } from './components/AggregateExceptionsCalendar';
 
 const router = createBrowserRouter([
   {
@@ -15,6 +16,10 @@ const router = createBrowserRouter([
   {
     path: '/schedule/:scheduleId',
     element: <CampaignView />,
+  },
+  {
+    path: '/schedule/:scheduleId/plan',
+    element: <AggregateExceptionsCalendar />,
   },
   {
     path: '/schedule/:scheduleId/user/:userId',
