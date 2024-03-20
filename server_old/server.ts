@@ -1,4 +1,4 @@
-import express, { Express } from 'express';
+import express, { Express, NextFunction, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import { PrismaClient, Schedule, ScheduleUser } from '@prisma/client';
@@ -10,6 +10,9 @@ import {
   UserWithIncludes,
 } from '../common/types/user';
 import { Availability } from '../common/types/availability-state';
+
+// eslint-disable-next-line import/no-extraneous-dependencies
+require('express-async-errors');
 
 dotenv.config();
 
@@ -218,4 +221,13 @@ app.get<
   });
 
   res.status(200).json(users);
+});
+
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  if (err) {
+    res.status(500);
+    res.json({ error: 'An Error Occurred' });
+  }
+
+  next(err);
 });
