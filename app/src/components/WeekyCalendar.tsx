@@ -78,7 +78,6 @@ export const WeeklyCalendar: React.FC<{
   const [temporaryStates, setTemporaryStates] = useState(availability);
 
   useEffect(() => {
-    console.log('resetting availability of weekly calendar due to update');
     setTemporaryStates(availability);
   }, [availability]);
 

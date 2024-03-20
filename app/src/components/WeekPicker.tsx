@@ -75,8 +75,9 @@ function Day(
 
 export const WeekPicker: React.FC<{
   weekValue: Dayjs;
+  timezone: string;
   setWeekValue: (newValue: Dayjs) => void;
-}> = ({ weekValue, setWeekValue }) => {
+}> = ({ weekValue, setWeekValue, timezone }) => {
   const [hoveredDay, setHoveredDay] = React.useState<Dayjs | null>(null);
 
   const setDay = (newValue: any) => {
@@ -84,20 +85,17 @@ export const WeekPicker: React.FC<{
       return;
     }
 
-    const firstDayOfWeek = (newValue as Dayjs).startOf('week');
+    const firstDayOfWeek = (newValue as Dayjs).tz(timezone).startOf('week');
 
     setWeekValue(firstDayOfWeek);
   };
-
-  useMemo(() => {
-    console.log(weekValue);
-  }, [weekValue]);
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DateCalendar
         value={weekValue}
         onChange={setDay}
+        timezone="UTC"
         showDaysOutsideCurrentMonth
         slots={{ day: Day }}
         slotProps={{

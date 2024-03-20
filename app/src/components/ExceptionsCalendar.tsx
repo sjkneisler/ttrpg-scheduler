@@ -27,6 +27,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const msPerInterval = 1000 * 60 * 15; // milliseconds in 15 minutes
+const intervalsPerDay = (24 * 60) / 15; // count of intervals per day
 
 // TODO: Exceptions added on the day of DST shift get moved by one hour
 
@@ -200,7 +201,7 @@ export const ExceptionsCalendar: React.FC = () => {
     void getUser(parseInt(scheduleId!, 10), parseInt(userId!, 10)).then(
       (newUser) => {
         setUser(newUser);
-        // setWeek(dayjs().tz(newUser.timezone!).startOf('week'));
+        setWeek(dayjs().tz(newUser.timezone!).startOf('week'));
       },
     );
   }, []);
@@ -257,6 +258,7 @@ export const ExceptionsCalendar: React.FC = () => {
 
     setUser(updatedUser);
     await updateUser(updatedUser);
+    setWeek(dayjs().tz(updatedUser.timezone).startOf('week')); // Update week value to respect new timezone
   };
 
   const navigate = useNavigate();
@@ -307,12 +309,17 @@ export const ExceptionsCalendar: React.FC = () => {
         let currentIntervalIndex = startIntervalIndex;
 
         while (currentDayIndex <= endDayIndex) {
-          while (currentIntervalIndex <= endIntervalIndex) {
+          while (
+            (currentDayIndex < endDayIndex &&
+              currentIntervalIndex < intervalsPerDay) ||
+            (currentDayIndex === endDayIndex &&
+              currentIntervalIndex <= endIntervalIndex)
+          ) {
             shiftedWeeklyAvailability[currentDayIndex][currentIntervalIndex] =
               availability;
             currentIntervalIndex++;
           }
-          currentIntervalIndex = startIntervalIndex;
+          currentIntervalIndex = 0;
           currentDayIndex++;
         }
       });
@@ -389,6 +396,7 @@ export const ExceptionsCalendar: React.FC = () => {
               // setWeek(newWeek.tz(user.timezone!));
               setWeek(newWeek);
             }}
+            timezone={user.timezone!}
           />
         </Stack>
         <WeeklyCalendar

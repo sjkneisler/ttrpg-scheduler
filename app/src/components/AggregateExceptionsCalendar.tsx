@@ -30,6 +30,7 @@ dayjs.extend(utc);
 dayjs.extend(dayjsTimezone);
 
 const msPerInterval = 1000 * 60 * 15; // milliseconds in 15 minutes
+const intervalsPerDay = (24 * 60) / 15; // count of intervals per day
 
 export const AggregateExceptionsCalendar: React.FC = () => {
   const [week, setWeek] = useState<Dayjs>(dayjs().startOf('week'));
@@ -98,12 +99,17 @@ export const AggregateExceptionsCalendar: React.FC = () => {
           let currentIntervalIndex = startIntervalIndex;
 
           while (currentDayIndex <= endDayIndex) {
-            while (currentIntervalIndex <= endIntervalIndex) {
+            while (
+              (currentDayIndex < endDayIndex &&
+                currentIntervalIndex < intervalsPerDay) ||
+              (currentDayIndex === endDayIndex &&
+                currentIntervalIndex <= endIntervalIndex)
+            ) {
               shiftedWeeklyAvailability[currentDayIndex][currentIntervalIndex] =
                 availability;
               currentIntervalIndex++;
             }
-            currentIntervalIndex = startIntervalIndex;
+            currentIntervalIndex = 0;
             currentDayIndex++;
           }
         });
@@ -111,8 +117,6 @@ export const AggregateExceptionsCalendar: React.FC = () => {
       return shiftedWeeklyAvailability;
     });
 
-    console.log('User Availabilities');
-    console.log(userAvailabilities);
     return aggregateUserAvailabilities(userAvailabilities, aggregationType);
   }, [schedule, week, aggregationType, timezone]);
 
@@ -146,6 +150,7 @@ export const AggregateExceptionsCalendar: React.FC = () => {
               // setWeek(newWeek.tz(user.timezone!));
               setWeek(newWeek);
             }}
+            timezone={timezone}
           />
           <FormControl fullWidth>
             <Typography variant="h6">Aggregation Type</Typography>
