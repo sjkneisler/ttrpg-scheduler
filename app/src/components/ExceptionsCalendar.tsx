@@ -22,6 +22,7 @@ import { WeekPicker } from './WeekPicker';
 import { DragPosition } from './DragContext';
 import { PageContainer } from './PageContainer';
 import { TimezonePicker } from './TimezonePicker';
+import { useSchedule } from '../hooks/useSchedule';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -194,17 +195,20 @@ export const ExceptionsCalendar: React.FC = () => {
   const [user, setUser] = useState<UserWithIncludes | null>(null);
   const [week, setWeek] = useState<Dayjs>(dayjs().startOf('week'));
 
-  const { userId, scheduleId } = useParams();
+  const { userId } = useParams();
+  const schedule = useSchedule();
 
   useEffect(() => {
+    if (!schedule || !userId) {
+      return;
+    }
+
     // eslint-disable-next-line no-void
-    void getUser(parseInt(scheduleId!, 10), parseInt(userId!, 10)).then(
-      (newUser) => {
-        setUser(newUser);
-        setWeek(dayjs().tz(newUser.timezone!).startOf('week'));
-      },
-    );
-  }, []);
+    void getUser(schedule.id, parseInt(userId, 10)).then((newUser) => {
+      setUser(newUser);
+      setWeek(dayjs().tz(newUser.timezone!).startOf('week'));
+    });
+  }, [schedule]);
 
   const onAvailabilityUpdate = async (
     availability: Availability[][],
@@ -264,7 +268,7 @@ export const ExceptionsCalendar: React.FC = () => {
   const navigate = useNavigate();
 
   const onBack = () => {
-    navigate(`/schedule/${scheduleId}/user/${userId}`);
+    navigate(`/schedule/${schedule?.inviteCode}/user/${userId}`);
   };
 
   const availabilityWithExceptions = useMemo(() => {
@@ -387,7 +391,7 @@ export const ExceptionsCalendar: React.FC = () => {
       <Stack direction="row">
         <Stack spacing={2}>
           <Button variant="outlined" onClick={onBack}>
-            Back
+            Back To User
           </Button>
           <TimezonePicker timezone={user.timezone} setTimezone={setTimezone} />
           <WeekPicker

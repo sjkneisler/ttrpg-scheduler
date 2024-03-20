@@ -57,10 +57,10 @@ export const CampaignView: React.FC = () => {
     <PageContainer>
       <Stack direction="row">
         <Stack spacing={2}>
-          <Button variant="outlined" onClick={onBack}>
-            Back
-          </Button>
           <UsersTable />
+          <Button variant="outlined" onClick={gotoPlan}>
+            Plan a date!
+          </Button>
           <FormControl fullWidth>
             <Typography variant="h6">Aggregation Type</Typography>
             <ToggleButtonGroup
@@ -81,9 +81,6 @@ export const CampaignView: React.FC = () => {
             setTimezone={setTimezone}
             label="Displayed Timezone"
           />
-          <Button variant="outlined" onClick={gotoPlan}>
-            Plan a date!
-          </Button>
         </Stack>
         <AggregateWeeklyCalendar availability={showAvailability} />
       </Stack>

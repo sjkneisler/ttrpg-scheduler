@@ -1,7 +1,8 @@
 /** @jsxImportSource @emotion/react */
-import { AppBar, Toolbar, Typography } from '@mui/material';
+import { AppBar, Button, ButtonBase, Toolbar, Typography } from '@mui/material';
 import { css } from '@emotion/react';
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useSchedule } from '../hooks/useSchedule';
 import { useScheduleUser } from '../hooks/useScheduleUser';
 
@@ -21,11 +22,22 @@ export const TopBar: React.FC = () => {
           gap: 30px;
         `}
       >
-        <Typography variant="h4">TTRPG Scheduler</Typography>
+        <ButtonBase component={Link} to="/">
+          <Typography variant="h4">TTRPG Scheduler</Typography>
+        </ButtonBase>
         {schedule && (
-          <Typography variant="h5">Schedule: {schedule.name}</Typography>
+          <ButtonBase component={Link} to={`/schedule/${schedule?.inviteCode}`}>
+            <Typography variant="h5">Schedule: {schedule.name}</Typography>
+          </ButtonBase>
         )}
-        {user && <Typography variant="h5">User: {user.name}</Typography>}
+        {schedule && user && (
+          <ButtonBase
+            component={Link}
+            to={`/schedule/${schedule.inviteCode}/user/${user.id}`}
+          >
+            <Typography variant="h5">User: {user.name}</Typography>
+          </ButtonBase>
+        )}
       </Toolbar>
     </AppBar>
   );

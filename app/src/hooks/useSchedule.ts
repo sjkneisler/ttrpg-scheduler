@@ -1,26 +1,24 @@
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { getSchedule } from '../api/client';
+import { getSchedule, getScheduleByInviteCode } from '../api/client';
 import { ScheduleWithIncludes } from '../../../common/types/user';
 
 export const useSchedule = (): ScheduleWithIncludes | null => {
-  const { scheduleId } = useParams();
+  const { scheduleInviteCode } = useParams();
   const [schedule, setSchedule] = useState<ScheduleWithIncludes | null>(null);
 
-  const parsedScheduleId = scheduleId && parseInt(scheduleId, 10);
-
   useEffect(() => {
-    if (!parsedScheduleId || !scheduleId) {
+    if (!scheduleInviteCode) {
       return;
     }
 
     // eslint-disable-next-line no-void
-    void getSchedule(parsedScheduleId).then((fetchedSchedule) =>
+    void getScheduleByInviteCode(scheduleInviteCode).then((fetchedSchedule) =>
       setSchedule(fetchedSchedule),
     );
-  }, [scheduleId]);
+  }, [scheduleInviteCode]);
 
-  if (!scheduleId) {
+  if (!scheduleInviteCode) {
     return null;
   }
 

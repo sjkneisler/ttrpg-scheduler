@@ -7,6 +7,7 @@ import { Home } from './components/Home';
 import { CampaignView } from './components/CampaignView';
 import { ExceptionsCalendar } from './components/ExceptionsCalendar';
 import { AggregateExceptionsCalendar } from './components/AggregateExceptionsCalendar';
+import { NewUserPage } from './components/NewUserPage';
 
 const router = createBrowserRouter([
   {
@@ -14,19 +15,23 @@ const router = createBrowserRouter([
     element: <Home />,
   },
   {
-    path: '/schedule/:scheduleId',
+    path: '/schedule/:scheduleInviteCode',
     element: <CampaignView />,
   },
   {
-    path: '/schedule/:scheduleId/plan',
+    path: '/schedule/:scheduleInviteCode/invite',
+    element: <NewUserPage />,
+  },
+  {
+    path: '/schedule/:scheduleInviteCode/plan',
     element: <AggregateExceptionsCalendar />,
   },
   {
-    path: '/schedule/:scheduleId/user/:userId',
+    path: '/schedule/:scheduleInviteCode/user/:userId',
     element: <UserWeeklyCalendar />,
   },
   {
-    path: '/schedule/:scheduleId/user/:userId/exceptions',
+    path: '/schedule/:scheduleInviteCode/user/:userId/exceptions',
     element: <ExceptionsCalendar />,
   },
 ]);

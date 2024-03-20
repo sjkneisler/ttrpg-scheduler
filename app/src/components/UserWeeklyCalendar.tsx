@@ -13,18 +13,22 @@ import {
 } from '../../../common/util/timezones';
 import { PageContainer } from './PageContainer';
 import { TimezonePicker } from './TimezonePicker';
+import { useSchedule } from '../hooks/useSchedule';
 
 export const UserWeeklyCalendar: React.FC = () => {
   const [user, setUser] = useState<UserWithIncludes | null>(null);
 
-  const { userId, scheduleId } = useParams();
+  const { userId } = useParams();
+  const schedule = useSchedule();
 
   useEffect(() => {
+    if (!schedule || !userId) {
+      return;
+    }
+
     // eslint-disable-next-line no-void
-    void getUser(parseInt(scheduleId!, 10), parseInt(userId!, 10)).then(
-      setUser,
-    );
-  }, []);
+    void getUser(schedule.id, parseInt(userId, 10)).then(setUser);
+  }, [schedule]);
 
   const onAvailabilityUpdate = async (availability: Availability[][]) => {
     if (!user) {
@@ -73,11 +77,11 @@ export const UserWeeklyCalendar: React.FC = () => {
   const navigate = useNavigate();
 
   const onBack = () => {
-    navigate(`/schedule/${scheduleId}`);
+    navigate(`/schedule/${schedule?.inviteCode}`);
   };
 
   const gotoExceptions = () => {
-    navigate(`/schedule/${scheduleId}/user/${userId}/exceptions`);
+    navigate(`/schedule/${schedule?.inviteCode}/user/${userId}/exceptions`);
   };
 
   const shiftedWeeklyAvailability = useMemo(() => {
@@ -103,7 +107,7 @@ export const UserWeeklyCalendar: React.FC = () => {
       <Stack direction="row">
         <Stack spacing={2}>
           <Button variant="outlined" onClick={onBack}>
-            Back
+            Back To Schedule
           </Button>
           <TimezonePicker timezone={user.timezone} setTimezone={setTimezone} />
           <Button variant="outlined" onClick={gotoExceptions}>

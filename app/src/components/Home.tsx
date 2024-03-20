@@ -18,7 +18,7 @@ export const Home: React.FC = () => {
   const navigate = useNavigate();
   const createCampaign = async () => {
     const schedule = await createSchedule(name);
-    navigate(`/schedule/${schedule.id}`);
+    navigate(`/schedule/${schedule.inviteCode}`);
   };
   return (
     <PageContainer>

@@ -62,7 +62,7 @@ app.post<
   const data = await prisma.schedule.create({
     data: {
       name: req.body.name,
-      inviteCode: crypto.randomBytes(10).toString('hex'),
+      inviteCode: crypto.randomBytes(5).toString('hex'),
     },
   });
   res.status(200).json(data);
@@ -169,15 +169,16 @@ app.put<
 
 app.get<
   {
-    id: string;
+    scheduleId: string;
     userId: string;
   },
   StrippedScheduleUser,
   {}
->('/schedule/:id/user/:userId', async (req, res) => {
+>('/schedule/:scheduleId/user/:userId', async (req, res) => {
   const user = await prisma.scheduleUser.findFirstOrThrow({
     where: {
       id: parseInt(req.params.userId, 10),
+      scheduleId: parseInt(req.params.scheduleId, 10),
     },
     include: {
       schedule: true,
@@ -190,15 +191,15 @@ app.get<
 });
 
 app.get<
-  {},
-  Schedule,
   {
     inviteCode: string;
-  }
->('/scheduleByInviteCode', async (req, res) => {
+  },
+  Schedule,
+  {}
+>('/scheduleByInviteCode/:inviteCode', async (req, res) => {
   const schedule = await prisma.schedule.findFirstOrThrow({
     where: {
-      inviteCode: req.body.inviteCode,
+      inviteCode: req.params.inviteCode,
     },
     include: {
       users: true,

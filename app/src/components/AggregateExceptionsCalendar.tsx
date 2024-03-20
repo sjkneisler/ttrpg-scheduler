@@ -49,7 +49,7 @@ export const AggregateExceptionsCalendar: React.FC = () => {
       return;
     }
 
-    navigate(`/schedule/${schedule.id}`);
+    navigate(`/schedule/${schedule.inviteCode}`);
   };
 
   const availabilityWithExceptions = useMemo(() => {
@@ -141,7 +141,7 @@ export const AggregateExceptionsCalendar: React.FC = () => {
       <Stack direction="row">
         <Stack spacing={2}>
           <Button variant="outlined" onClick={onBack}>
-            Back
+            Back To Schedule
           </Button>
           <TimezonePicker timezone={timezone} setTimezone={setTimezone} />
           <WeekPicker

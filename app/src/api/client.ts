@@ -77,3 +77,9 @@ export async function getSchedule(
 ): Promise<ScheduleWithIncludes> {
   return getJson(`schedule/${scheduleId}`);
 }
+
+export async function getScheduleByInviteCode(
+  inviteCode: string,
+): Promise<ScheduleWithIncludes> {
+  return getJson(`scheduleByInviteCode/${inviteCode}`);
+}
