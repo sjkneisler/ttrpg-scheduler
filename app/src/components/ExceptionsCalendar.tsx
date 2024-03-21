@@ -390,7 +390,7 @@ export const ExceptionsCalendar: React.FC = () => {
   return (
     <PageContainer>
       <Stack direction="row">
-        <Stack spacing={1}>
+        <Stack spacing={1} maxWidth="sm">
           <Button variant="outlined" onClick={onBack}>
             Back To User
           </Button>

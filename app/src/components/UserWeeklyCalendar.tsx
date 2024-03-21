@@ -106,7 +106,7 @@ export const UserWeeklyCalendar: React.FC = () => {
   return (
     <PageContainer>
       <Stack direction="row">
-        <Stack spacing={2}>
+        <Stack spacing={2} maxWidth="sm">
           <Button variant="outlined" onClick={onBack}>
             Back To Schedule
           </Button>
