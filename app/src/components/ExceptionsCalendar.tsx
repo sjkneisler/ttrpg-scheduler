@@ -23,6 +23,7 @@ import { DragPosition } from './DragContext';
 import { PageContainer } from './PageContainer';
 import { TimezonePicker } from './TimezonePicker';
 import { useSchedule } from '../hooks/useSchedule';
+import { ScheduleInstructions } from './ScheduleInstructions';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -389,11 +390,10 @@ export const ExceptionsCalendar: React.FC = () => {
   return (
     <PageContainer>
       <Stack direction="row">
-        <Stack spacing={2}>
+        <Stack spacing={1}>
           <Button variant="outlined" onClick={onBack}>
             Back To User
           </Button>
-          <TimezonePicker timezone={user.timezone} setTimezone={setTimezone} />
           <WeekPicker
             weekValue={week}
             setWeekValue={(newWeek) => {
@@ -402,6 +402,8 @@ export const ExceptionsCalendar: React.FC = () => {
             }}
             timezone={user.timezone!}
           />
+          <TimezonePicker timezone={user.timezone} setTimezone={setTimezone} />
+          <ScheduleInstructions exceptions />
         </Stack>
         <WeeklyCalendar
           availability={availabilityWithExceptions}

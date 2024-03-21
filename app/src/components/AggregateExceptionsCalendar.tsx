@@ -143,7 +143,6 @@ export const AggregateExceptionsCalendar: React.FC = () => {
           <Button variant="outlined" onClick={onBack}>
             Back To Schedule
           </Button>
-          <TimezonePicker timezone={timezone} setTimezone={setTimezone} />
           <WeekPicker
             weekValue={week}
             setWeekValue={(newWeek) => {
@@ -167,6 +166,7 @@ export const AggregateExceptionsCalendar: React.FC = () => {
               </ToggleButton>
             </ToggleButtonGroup>
           </FormControl>
+          <TimezonePicker timezone={timezone} setTimezone={setTimezone} />
         </Stack>
         <AggregateWeeklyCalendar
           availability={availabilityWithExceptions}

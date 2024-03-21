@@ -14,6 +14,7 @@ import {
 import { PageContainer } from './PageContainer';
 import { TimezonePicker } from './TimezonePicker';
 import { useSchedule } from '../hooks/useSchedule';
+import { ScheduleInstructions } from './ScheduleInstructions';
 
 export const UserWeeklyCalendar: React.FC = () => {
   const [user, setUser] = useState<UserWithIncludes | null>(null);
@@ -113,6 +114,7 @@ export const UserWeeklyCalendar: React.FC = () => {
           <Button variant="outlined" onClick={gotoExceptions}>
             Go To Date Specific Availabilities
           </Button>
+          <ScheduleInstructions exceptions={false} />
         </Stack>
         <WeeklyCalendar
           availability={shiftedWeeklyAvailability}
