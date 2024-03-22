@@ -16,7 +16,8 @@ import { PageContainer } from './PageContainer';
 export const Home: React.FC = () => {
   const [name, setName] = useState('');
   const navigate = useNavigate();
-  const createCampaign = async () => {
+  const createCampaign = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
     const schedule = await createSchedule(name);
     navigate(`/schedule/${schedule.inviteCode}`);
   };
@@ -28,20 +29,21 @@ export const Home: React.FC = () => {
             A tool for scheduling recurring weekly events
           </Typography>
           <Box maxWidth="xs" alignSelf="center">
-            <FormControl>
-              <TextField
-                label="Schedule Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                inputProps={{
-                  'data-lpignore': true,
-                }}
-              />
-              {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
-              <Button variant="outlined" onClick={createCampaign}>
-                Create Schedule
-              </Button>
-            </FormControl>
+            <form onSubmit={createCampaign}>
+              <FormControl>
+                <TextField
+                  label="Schedule Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  inputProps={{
+                    'data-lpignore': true,
+                  }}
+                />
+                <Button variant="outlined" type="submit" disabled={!name}>
+                  Create Schedule
+                </Button>
+              </FormControl>
+            </form>
           </Box>
         </Stack>
       </Container>

@@ -30,6 +30,16 @@ export const NewUserPage: React.FC = () => {
     navigate(`/schedule/${schedule?.inviteCode}`);
   };
 
+  const onSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (name) {
+      // eslint-disable-next-line no-void
+      void onCreateUserClicked();
+    } else {
+      onGoToScheduleClicked();
+    }
+  };
+
   if (!schedule) {
     return <Suspense />;
   }
@@ -40,30 +50,32 @@ export const NewUserPage: React.FC = () => {
           <Typography variant="h4" margin={3} align="center">
             Enter Name
           </Typography>
-          <FormControl fullWidth>
-            <TextField
-              label="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              inputProps={{
-                'data-lpignore': true,
-              }}
-            />
-            {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
-            <Button
-              variant="outlined"
-              onClick={onCreateUserClicked}
-              disabled={!name}
-            >
-              Create Person
-            </Button>
-            <Typography variant="h6" margin={3} align="center">
-              OR
-            </Typography>
-            <Button variant="outlined" onClick={onGoToScheduleClicked}>
-              Go To Schedule
-            </Button>
-          </FormControl>
+          <form onSubmit={onSubmit}>
+            <FormControl fullWidth>
+              <TextField
+                label="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                inputProps={{
+                  'data-lpignore': true,
+                }}
+              />
+              {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
+              <Button
+                variant="outlined"
+                onClick={onCreateUserClicked}
+                disabled={!name}
+              >
+                Create Person
+              </Button>
+              <Typography variant="h6" margin={3} align="center">
+                OR
+              </Typography>
+              <Button variant="outlined" onClick={onGoToScheduleClicked}>
+                Go To Schedule
+              </Button>
+            </FormControl>
+          </form>
         </Stack>
       </Container>
     </PageContainer>

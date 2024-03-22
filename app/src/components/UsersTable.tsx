@@ -22,7 +22,10 @@ export const UsersTable: React.FC = () => {
   const schedule = useSchedule();
   const navigate = useNavigate();
 
-  const onCreateUserClicked = async () => {
+  const onCreateUserClicked = async (
+    e: React.SyntheticEvent<HTMLFormElement>,
+  ) => {
+    e.preventDefault();
     if (!schedule) {
       return;
     }
@@ -44,31 +47,29 @@ export const UsersTable: React.FC = () => {
   return (
     <Card>
       <Stack spacing={2} padding={2}>
-        <FormControl fullWidth>
-          <CopyToClipboardButton
-            value={`${window.location.href}/invite`}
-            text="Copy Invite Link"
-          />
-          <Typography variant="h6" margin={3} align="center">
-            OR
-          </Typography>
-          <TextField
-            label="Add New Person"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            inputProps={{
-              'data-lpignore': true,
-            }}
-          />
-          {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
-          <Button
-            variant="outlined"
-            onClick={onCreateUserClicked}
-            disabled={!name}
-          >
-            Create
-          </Button>
-        </FormControl>
+        <form onSubmit={onCreateUserClicked}>
+          <FormControl fullWidth>
+            <CopyToClipboardButton
+              value={`${window.location.href}/invite`}
+              text="Copy Invite Link"
+            />
+            <Typography variant="h6" margin={3} align="center">
+              OR
+            </Typography>
+            <TextField
+              label="Add New Person"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              inputProps={{
+                'data-lpignore': true,
+              }}
+            />
+            {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
+            <Button variant="outlined" type="submit" disabled={!name}>
+              Create
+            </Button>
+          </FormControl>
+        </form>
         {schedule.users.length > 0 && (
           <Table>
             <TableHead>
