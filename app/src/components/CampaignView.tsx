@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React, { Suspense, useMemo, useState } from 'react';
+import React, { Suspense, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -9,7 +9,6 @@ import {
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
-import { useSchedule } from '../hooks/useSchedule';
 import { AggregateWeeklyCalendar } from './AggregateWeekyCalendar';
 import { aggregateAvailability } from '../utils/aggregate';
 import { AggregationType } from '../../../common/types/aggregation-type';
@@ -20,18 +19,15 @@ import {
 import { UsersTable } from './UsersTable';
 import { PageContainer } from './PageContainer';
 import { TimezonePicker } from './TimezonePicker';
+import { ScheduleContext } from './ScheduleContainer';
 
 export const CampaignView: React.FC = () => {
   const navigate = useNavigate();
-  const schedule = useSchedule();
+  const [schedule] = useContext(ScheduleContext);
   const [aggregationType, setAggregationType] = useState<AggregationType>(
     AggregationType.Shared,
   );
   const [timezone, setTimezone] = useState(getCurrentTimezone());
-
-  const onBack = () => {
-    navigate('/');
-  };
 
   const gotoPlan = () => {
     navigate('plan');
