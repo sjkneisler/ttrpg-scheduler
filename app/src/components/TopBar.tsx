@@ -2,6 +2,7 @@
 import {
   AppBar,
   Box,
+  Button,
   ButtonBase,
   Container,
   Stack,
@@ -9,14 +10,14 @@ import {
   Typography,
 } from '@mui/material';
 import { css } from '@emotion/react';
-import React, { useContext } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { ScheduleContext } from './ScheduleContainer';
-import { ScheduleUserContext } from './ScheduleUserContainer';
+import { useSchedule } from '../hooks/useSchedule';
+import { useScheduleUser } from '../hooks/useScheduleUser';
 
 export const TopBar: React.FC = () => {
-  const [schedule] = useContext(ScheduleContext);
-  const [user] = useContext(ScheduleUserContext);
+  const schedule = useSchedule();
+  const user = useScheduleUser();
 
   return (
     <AppBar

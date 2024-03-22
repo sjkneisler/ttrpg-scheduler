@@ -1,4 +1,4 @@
-import React, { Suspense, useContext, useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import {
   Button,
   Container,
@@ -9,13 +9,13 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from './PageContainer';
+import { useSchedule } from '../hooks/useSchedule';
 import { createUser } from '../api/client';
 import { getCurrentTimezone } from '../../../common/util/timezones';
-import { ScheduleContext } from './ScheduleContainer';
 
 export const NewUserPage: React.FC = () => {
   const [name, setName] = useState('');
-  const [schedule] = useContext(ScheduleContext);
+  const schedule = useSchedule();
   const navigate = useNavigate();
 
   const onCreateUserClicked = async () => {

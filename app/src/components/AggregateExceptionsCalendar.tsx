@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React, { Suspense, useContext, useMemo, useState } from 'react';
+import React, { Suspense, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -12,6 +12,7 @@ import {
 import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import dayjsTimezone from 'dayjs/plugin/timezone';
+import { AvailabilityException } from '../../../common/types/availability-state';
 import {
   getCurrentTimezone,
   getTimezoneOffset,
@@ -20,10 +21,10 @@ import {
 import { WeekPicker } from './WeekPicker';
 import { PageContainer } from './PageContainer';
 import { TimezonePicker } from './TimezonePicker';
+import { useSchedule } from '../hooks/useSchedule';
 import { aggregateUserAvailabilities } from '../utils/aggregate';
 import { AggregationType } from '../../../common/types/aggregation-type';
 import { AggregateWeeklyCalendar } from './AggregateWeekyCalendar';
-import { ScheduleContext } from './ScheduleContainer';
 
 dayjs.extend(utc);
 dayjs.extend(dayjsTimezone);
@@ -34,7 +35,8 @@ const intervalsPerDay = (24 * 60) / 15; // count of intervals per day
 export const AggregateExceptionsCalendar: React.FC = () => {
   const [week, setWeek] = useState<Dayjs>(dayjs().startOf('week'));
 
-  const [schedule] = useContext(ScheduleContext);
+  const schedule = useSchedule();
+
   const navigate = useNavigate();
 
   const [aggregationType, setAggregationType] = useState<AggregationType>(

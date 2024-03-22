@@ -1,9 +1,10 @@
 /** @jsxImportSource @emotion/react */
-import React, { Suspense, useContext, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Stack } from '@mui/material';
 import { WeeklyCalendar } from './WeekyCalendar';
-import { updateUser } from '../api/client';
+import { UserWithIncludes } from '../../../common/types/user';
+import { getUser, updateUser } from '../api/client';
 import { Availability } from '../../../common/types/availability-state';
 import {
   getCurrentTimezone,
@@ -12,15 +13,28 @@ import {
 } from '../../../common/util/timezones';
 import { PageContainer } from './PageContainer';
 import { TimezonePicker } from './TimezonePicker';
+import { useSchedule } from '../hooks/useSchedule';
 import { ScheduleInstructions } from './ScheduleInstructions';
-import { ScheduleContext } from './ScheduleContainer';
-import { ScheduleUserContext } from './ScheduleUserContainer';
 
 export const UserWeeklyCalendar: React.FC = () => {
-  const [schedule] = useContext(ScheduleContext);
-  const [user, setUser] = useContext(ScheduleUserContext);
+  const [user, setUser] = useState<UserWithIncludes | null>(null);
+
+  const { userId } = useParams();
+  const schedule = useSchedule();
+
+  useEffect(() => {
+    if (!schedule || !userId) {
+      return;
+    }
+
+    // eslint-disable-next-line no-void
+    void getUser(schedule.id, parseInt(userId, 10)).then(setUser);
+  }, [schedule]);
 
   const onAvailabilityUpdate = async (availability: Availability[][]) => {
+    if (!user) {
+      return;
+    }
     const shiftedAvailability = shiftAvailabilityByTimezone(
       availability,
       -1 * getTimezoneOffset(user.timezone || getCurrentTimezone()),
@@ -68,7 +82,7 @@ export const UserWeeklyCalendar: React.FC = () => {
   };
 
   const gotoExceptions = () => {
-    navigate(`/schedule/${schedule?.inviteCode}/user/${user.id}/exceptions`);
+    navigate(`/schedule/${schedule?.inviteCode}/user/${userId}/exceptions`);
   };
 
   const shiftedWeeklyAvailability = useMemo(() => {
