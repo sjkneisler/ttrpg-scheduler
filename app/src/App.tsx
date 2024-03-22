@@ -8,6 +8,7 @@ import { CampaignView } from './components/CampaignView';
 import { ExceptionsCalendar } from './components/ExceptionsCalendar';
 import { AggregateExceptionsCalendar } from './components/AggregateExceptionsCalendar';
 import { NewUserPage } from './components/NewUserPage';
+import { AttributionsPage } from './components/AttributionsPage';
 
 const router = createBrowserRouter([
   {
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
   {
     path: '/schedule/:scheduleInviteCode/user/:userId/exceptions',
     element: <ExceptionsCalendar />,
+  },
+  {
+    path: '/attributions',
+    element: <AttributionsPage />,
   },
 ]);
 
