@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React, { Suspense, useMemo, useState } from 'react';
+import React, { Suspense, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -14,7 +14,6 @@ import {
 } from '@mui/material';
 import { ScheduleGranularity } from '@prisma/client';
 import _ from 'lodash';
-import { useSchedule } from '../hooks/useSchedule';
 import { AggregateWeeklyCalendar } from './AggregateWeekyCalendar';
 import { aggregateAvailability } from '../utils/aggregate';
 import { AggregationType } from '../../../common/types/aggregation-type';
@@ -25,6 +24,7 @@ import {
 import { UsersTable } from './UsersTable';
 import { PageContainer } from './PageContainer';
 import { TimezonePicker } from './TimezonePicker';
+import { ScheduleContext } from './ScheduleContainer';
 import { ScheduleWithIncludes } from '../../../common/types/user';
 import { updateSchedule } from '../api/client';
 
@@ -42,7 +42,7 @@ const granularityEnumMap: Record<string, ScheduleGranularity> = {
 
 export const CampaignView: React.FC = () => {
   const navigate = useNavigate();
-  const schedule = useSchedule();
+  const [schedule] = useContext(ScheduleContext);
   const [aggregationType, setAggregationType] = useState<AggregationType>(
     AggregationType.Shared,
   );
