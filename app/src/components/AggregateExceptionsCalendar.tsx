@@ -12,7 +12,6 @@ import {
 import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import dayjsTimezone from 'dayjs/plugin/timezone';
-import { AvailabilityException } from '../../../common/types/availability-state';
 import {
   getCurrentTimezone,
   getTimezoneOffset,
@@ -171,6 +170,7 @@ export const AggregateExceptionsCalendar: React.FC = () => {
         <AggregateWeeklyCalendar
           availability={availabilityWithExceptions}
           labels={dayLabels}
+          granularity={schedule.granularity}
         />
       </Stack>
     </PageContainer>

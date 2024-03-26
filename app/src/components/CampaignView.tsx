@@ -4,11 +4,16 @@ import { useNavigate } from 'react-router-dom';
 import {
   Button,
   FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
   Stack,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
+import { ScheduleGranularity } from '@prisma/client';
+import _ from 'lodash';
 import { useSchedule } from '../hooks/useSchedule';
 import { AggregateWeeklyCalendar } from './AggregateWeekyCalendar';
 import { aggregateAvailability } from '../utils/aggregate';
@@ -20,6 +25,20 @@ import {
 import { UsersTable } from './UsersTable';
 import { PageContainer } from './PageContainer';
 import { TimezonePicker } from './TimezonePicker';
+import { ScheduleWithIncludes } from '../../../common/types/user';
+import { updateSchedule } from '../api/client';
+
+const granularityLabelMap: Record<ScheduleGranularity, string> = {
+  FIFTEENMINUTES: 'Fifteen Minutes',
+  THIRTYMINUTES: 'Thirty Minutes',
+  ONEHOUR: 'One Hour',
+};
+
+const granularityEnumMap: Record<string, ScheduleGranularity> = {
+  FIFTEENMINUTES: ScheduleGranularity.FIFTEENMINUTES,
+  THIRTYMINUTES: ScheduleGranularity.THIRTYMINUTES,
+  ONEHOUR: ScheduleGranularity.ONEHOUR,
+};
 
 export const CampaignView: React.FC = () => {
   const navigate = useNavigate();
@@ -31,6 +50,21 @@ export const CampaignView: React.FC = () => {
 
   const onBack = () => {
     navigate('/');
+  };
+
+  const setGranularity = (newGranularityString: string) => {
+    if (!schedule) {
+      return;
+    }
+    const newGranularity = granularityEnumMap[newGranularityString];
+
+    const newSchedule: ScheduleWithIncludes = {
+      ...schedule,
+      granularity: newGranularity,
+    };
+
+    // eslint-disable-next-line no-void
+    void updateSchedule(newSchedule);
   };
 
   const gotoPlan = () => {
@@ -81,8 +115,26 @@ export const CampaignView: React.FC = () => {
             setTimezone={setTimezone}
             label="Displayed Timezone"
           />
+          <FormControl fullWidth>
+            <InputLabel id="granularity-select-label">
+              Schedule Granularity
+            </InputLabel>
+            <Select
+              value={schedule.granularity}
+              onChange={(event) => setGranularity(event.target.value)}
+              labelId="granularity-select-label"
+              label="Schedule Granularity"
+            >
+              {_.entries(granularityLabelMap).map(([granularity, label]) => (
+                <MenuItem value={granularity}>{label}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Stack>
-        <AggregateWeeklyCalendar availability={showAvailability} />
+        <AggregateWeeklyCalendar
+          availability={showAvailability}
+          granularity={schedule.granularity}
+        />
       </Stack>
     </PageContainer>
   );

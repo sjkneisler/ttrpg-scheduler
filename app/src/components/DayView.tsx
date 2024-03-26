@@ -3,6 +3,7 @@ import React, { useContext } from 'react';
 import { css } from '@emotion/react';
 import _ from 'lodash';
 import { IconButton } from '@mui/material';
+import { ScheduleGranularity } from '@prisma/client';
 import { getColorFromAvailabilityState } from '../utils/availbility-states';
 import { DragContext } from './DragContext';
 import { Availability } from '../../../common/types/availability-state';
@@ -37,6 +38,19 @@ export type DayViewProps = {
   editable: boolean;
   label?: string;
   headerChild?: React.ReactNode;
+  granularity: ScheduleGranularity;
+};
+
+const granularityToCellsPerHourMap: Record<ScheduleGranularity, number> = {
+  ONEHOUR: 1,
+  THIRTYMINUTES: 2,
+  FIFTEENMINUTES: 4,
+};
+
+const granularityToCellHeightMap: Record<ScheduleGranularity, number> = {
+  ONEHOUR: 26,
+  THIRTYMINUTES: 12,
+  FIFTEENMINUTES: 5,
 };
 
 export const DayView: React.FC<DayViewProps> = ({
@@ -46,6 +60,7 @@ export const DayView: React.FC<DayViewProps> = ({
   editable,
   label = getDayText(day),
   headerChild,
+  granularity,
 }) => {
   const { onDragStart, onDragEnd, onDrag } = useContext(DragContext);
   return (
@@ -91,13 +106,13 @@ export const DayView: React.FC<DayViewProps> = ({
             flex-direction: column;
           `}
         >
-          {_.times(4, (num) => (
+          {_.times(granularityToCellsPerHourMap[granularity], (num) => (
             <div
               key={num}
               css={css`
                 flex: 1 1 auto;
                 width: 100px;
-                height: 5px;
+                height: ${granularityToCellHeightMap[granularity]}px;
                 border-color: #000000ff;
                 border-style: solid;
                 border-width: ${getBorderForTimeSegment(num)};

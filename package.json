@@ -52,6 +52,7 @@
     "db:migrate:prod": "npx prisma migrate deploy",
     "db:generate": "npx prisma generate",
     "db:up": "yarn db:migrate && yarn db:generate",
+    "db:up:prod": "yarn db:migrate:prod && yarn db:generate",
     "lint": "npx eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "format": "prettier --write \"server/**/*.ts\" \"test/**/*.ts\" \"app/**/*.ts\"",
     "start:backend": "nest start",

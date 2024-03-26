@@ -98,7 +98,8 @@ export const UserWeeklyCalendar: React.FC = () => {
   if (
     user == null ||
     user.availability == null ||
-    shiftedWeeklyAvailability == null
+    shiftedWeeklyAvailability == null ||
+    schedule == null
   ) {
     return <Suspense />;
   }
@@ -119,6 +120,7 @@ export const UserWeeklyCalendar: React.FC = () => {
         <WeeklyCalendar
           availability={shiftedWeeklyAvailability}
           onAvailabilityUpdate={onAvailabilityUpdate}
+          scheduleGranularity={schedule.granularity}
         />
       </Stack>
     </PageContainer>

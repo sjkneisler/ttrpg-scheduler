@@ -382,7 +382,8 @@ export const ExceptionsCalendar: React.FC = () => {
   if (
     user == null ||
     user.availability == null ||
-    availabilityWithExceptions == null
+    availabilityWithExceptions == null ||
+    schedule == null
   ) {
     return <Suspense />;
   }
@@ -410,6 +411,7 @@ export const ExceptionsCalendar: React.FC = () => {
           onAvailabilityUpdate={onAvailabilityUpdate}
           labels={dayLabels}
           headerChildren={weeklyCalendarHeaderChildren}
+          scheduleGranularity={schedule.granularity}
         />
       </Stack>
     </PageContainer>

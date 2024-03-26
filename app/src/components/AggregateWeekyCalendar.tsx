@@ -2,6 +2,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import _ from 'lodash';
+import { ScheduleGranularity } from '@prisma/client';
 import { DayView } from './DayView';
 import { HoursGuide } from './HoursGuide';
 import { AggregateAvailability } from '../../../common/types/availability-state';
@@ -9,6 +10,7 @@ import { AggregateAvailability } from '../../../common/types/availability-state'
 export const AggregateWeeklyCalendar: React.FC<{
   availability: AggregateAvailability;
   labels?: string[];
+  granularity: ScheduleGranularity;
 }> = ({
   availability,
   labels = [
@@ -20,6 +22,7 @@ export const AggregateWeeklyCalendar: React.FC<{
     'Friday',
     'Saturday',
   ],
+  granularity,
 }) => (
   <div
     css={css`
@@ -45,6 +48,7 @@ export const AggregateWeeklyCalendar: React.FC<{
           availability={availability[index]}
           setDayTo={() => Promise.resolve()}
           label={labels[index]}
+          granularity={granularity}
         />
       ))}
       <HoursGuide />
