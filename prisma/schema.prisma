@@ -22,7 +22,7 @@ model Schedule {
   name        String
   inviteCode  String // Invite code to make it a bit more secure (should this be a separate table?)
   users       ScheduleUser[]
-  granularity ScheduleGranularity @default(FIFTEENMINUTES)
+  granularity ScheduleGranularity @default(THIRTYMINUTES)
 }
 
 // A temporary user local to each schedule

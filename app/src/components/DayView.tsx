@@ -9,14 +9,48 @@ import { DragContext } from './DragContext';
 import { Availability } from '../../../common/types/availability-state';
 import { getDayText } from '../utils/day';
 
-function getBorderForTimeSegment(intervalNum: number): string {
+function getBorderForTimeSegment(
+  intervalNum: number,
+  granularity: ScheduleGranularity,
+): string {
+  if (intervalNum === 0 && granularity === ScheduleGranularity.ONEHOUR) {
+    return '2px 1px 2px 1px';
+  }
   if (intervalNum === 0) {
     return '2px 1px 1px 1px';
   }
-  if (intervalNum === 3) {
+  if (
+    (intervalNum === 3 && granularity === ScheduleGranularity.FIFTEENMINUTES) ||
+    (intervalNum === 1 && granularity === ScheduleGranularity.THIRTYMINUTES)
+  ) {
     return '1px 1px 2px 1px';
   }
   return '1px';
+}
+
+const granularityToDragStartMap: Record<ScheduleGranularity, number> = {
+  ONEHOUR: 4, // This value won't ever matter
+  THIRTYMINUTES: 2,
+  FIFTEENMINUTES: 1,
+};
+
+function getDragStart(
+  hourCount: number,
+  segment: number,
+  granularity: ScheduleGranularity,
+): number {
+  return hourCount * 4 + segment * granularityToDragStartMap[granularity];
+}
+
+function getDragEnd(
+  hourCount: number,
+  segment: number,
+  granularity: ScheduleGranularity,
+): number {
+  return (
+    getDragStart(hourCount, segment, granularity) +
+    (granularityToDragStartMap[granularity] - 1)
+  );
 }
 
 const ColorButton: React.FC<{
@@ -115,18 +149,29 @@ export const DayView: React.FC<DayViewProps> = ({
                 height: ${granularityToCellHeightMap[granularity]}px;
                 border-color: #000000ff;
                 border-style: solid;
-                border-width: ${getBorderForTimeSegment(num)};
+                border-width: ${getBorderForTimeSegment(num, granularity)};
                 background-color: ${getColorFromAvailabilityState(
-                  availability[hourCount * 4 + num],
+                  availability[getDragStart(hourCount, num, granularity)],
                 )};
                 cursor: ${editable ? 'pointer' : 'default'};
               `}
-              onMouseMove={(e) => onDrag(e, { day, time: hourCount * 4 + num })}
+              onMouseMove={(e) =>
+                onDrag(e, {
+                  day,
+                  time: getDragEnd(hourCount, num, granularity),
+                })
+              }
               onMouseDown={(e) =>
-                onDragStart(e, { day, time: hourCount * 4 + num })
+                onDragStart(e, {
+                  day,
+                  time: getDragStart(hourCount, num, granularity),
+                })
               }
               onMouseUp={(e) =>
-                onDragEnd(e, { day, time: hourCount * 4 + num })
+                onDragEnd(e, {
+                  day,
+                  time: getDragEnd(hourCount, num, granularity),
+                })
               }
               onContextMenu={(e) => {
                 e.preventDefault();
