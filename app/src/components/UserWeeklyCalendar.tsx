@@ -17,7 +17,8 @@ import { ScheduleContext } from './ScheduleContainer';
 import { ScheduleUserContext } from './ScheduleUserContainer';
 
 export const UserWeeklyCalendar: React.FC = () => {
-  const [schedule] = useContext(ScheduleContext);
+  const [schedule, setSchedule, forceScheduleRefresh] =
+    useContext(ScheduleContext);
   const [user, setUser] = useContext(ScheduleUserContext);
 
   const onAvailabilityUpdate = async (availability: Availability[][]) => {
@@ -34,6 +35,7 @@ export const UserWeeklyCalendar: React.FC = () => {
     };
     setUser(updatedUser);
     await updateUser(updatedUser);
+    forceScheduleRefresh();
   };
 
   const setTimezone = (newTimezone: string) => {
@@ -59,6 +61,7 @@ export const UserWeeklyCalendar: React.FC = () => {
     // eslint-disable-next-line no-void
     void updateUser(updatedUser);
     setUser(updatedUser);
+    forceScheduleRefresh();
   };
 
   const navigate = useNavigate();

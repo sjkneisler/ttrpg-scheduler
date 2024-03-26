@@ -42,17 +42,13 @@ const granularityEnumMap: Record<string, ScheduleGranularity> = {
 
 export const CampaignView: React.FC = () => {
   const navigate = useNavigate();
-  const [schedule] = useContext(ScheduleContext);
+  const [schedule, setSchedule] = useContext(ScheduleContext);
   const [aggregationType, setAggregationType] = useState<AggregationType>(
     AggregationType.Shared,
   );
   const [timezone, setTimezone] = useState(getCurrentTimezone());
 
-  const onBack = () => {
-    navigate('/');
-  };
-
-  const setGranularity = (newGranularityString: string) => {
+  const setGranularity = async (newGranularityString: string) => {
     if (!schedule) {
       return;
     }
@@ -63,8 +59,7 @@ export const CampaignView: React.FC = () => {
       granularity: newGranularity,
     };
 
-    // eslint-disable-next-line no-void
-    void updateSchedule(newSchedule);
+    setSchedule(await updateSchedule(newSchedule));
   };
 
   const gotoPlan = () => {

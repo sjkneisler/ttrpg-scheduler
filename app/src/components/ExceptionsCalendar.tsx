@@ -1,11 +1,11 @@
 /** @jsxImportSource @emotion/react */
 import React, { Suspense, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import _ from 'lodash';
 import { Button, Stack } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import _ from 'lodash';
 import { WeeklyCalendar } from './WeekyCalendar';
 import { UserWithIncludes } from '../../../common/types/user';
 import { updateUser } from '../api/client';
@@ -196,7 +196,8 @@ function updateExceptions(
 export const ExceptionsCalendar: React.FC = () => {
   const [week, setWeek] = useState<Dayjs>(dayjs().startOf('week'));
   const [user, setUser] = useContext(ScheduleUserContext);
-  const [schedule] = useContext(ScheduleContext);
+  const [schedule, setSchedule, forceScheduleRefresh] =
+    useContext(ScheduleContext);
 
   const onAvailabilityUpdate = async (
     availability: Availability[][],
@@ -226,6 +227,7 @@ export const ExceptionsCalendar: React.FC = () => {
     };
     setUser(updatedUser);
     await updateUser(updatedUser);
+    forceScheduleRefresh();
   };
 
   const setTimezone = async (newTimezone: string) => {
@@ -250,6 +252,7 @@ export const ExceptionsCalendar: React.FC = () => {
 
     setUser(updatedUser);
     await updateUser(updatedUser);
+    forceScheduleRefresh();
     setWeek(dayjs().tz(updatedUser.timezone).startOf('week')); // Update week value to respect new timezone
   };
 
@@ -340,7 +343,7 @@ export const ExceptionsCalendar: React.FC = () => {
     }
     return (
       <Button
-        onClick={() => {
+        onClick={async () => {
           if (!user) {
             return;
           }
@@ -358,7 +361,8 @@ export const ExceptionsCalendar: React.FC = () => {
 
           setUser(updatedUser);
           // eslint-disable-next-line no-void
-          void updateUser(updatedUser);
+          await updateUser(updatedUser);
+          forceScheduleRefresh();
         }}
       >
         Reset Day

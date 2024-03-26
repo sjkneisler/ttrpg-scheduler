@@ -15,7 +15,8 @@ import { ScheduleContext } from './ScheduleContainer';
 
 export const NewUserPage: React.FC = () => {
   const [name, setName] = useState('');
-  const [schedule] = useContext(ScheduleContext);
+  const [schedule, setSchedule, forceScheduleRefresh] =
+    useContext(ScheduleContext);
   const navigate = useNavigate();
 
   const onCreateUserClicked = async () => {
@@ -23,6 +24,7 @@ export const NewUserPage: React.FC = () => {
       return;
     }
     const user = await createUser(schedule.id, name, getCurrentTimezone());
+    forceScheduleRefresh();
     navigate(`/schedule/${schedule.inviteCode}/user/${user.id}`);
   };
 
