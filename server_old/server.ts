@@ -5,6 +5,7 @@ import { PrismaClient, Schedule, ScheduleUser } from '@prisma/client';
 import crypto from 'crypto';
 import _ from 'lodash';
 import {
+  ScheduleWithIncludes,
   StrippedScheduleUser,
   UnstrippedUserWithIncludes,
   UserWithIncludes,
@@ -161,6 +162,27 @@ app.put<
     data: _.omit(req.body, 'schedule'),
     include: {
       schedule: true,
+    },
+  });
+
+  res.status(200).json(result);
+});
+
+app.put<
+  {
+    id: string;
+  },
+  ScheduleWithIncludes,
+  ScheduleWithIncludes,
+  ScheduleWithIncludes
+>('/schedule/:id', async (req, res) => {
+  const result = await prisma.schedule.update({
+    where: {
+      id: req.body.id,
+    },
+    data: _.omit(req.body, 'users'),
+    include: {
+      users: true,
     },
   });
 

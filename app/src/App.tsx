@@ -9,6 +9,8 @@ import { ExceptionsCalendar } from './components/ExceptionsCalendar';
 import { AggregateExceptionsCalendar } from './components/AggregateExceptionsCalendar';
 import { NewUserPage } from './components/NewUserPage';
 import { AttributionsPage } from './components/AttributionsPage';
+import { ScheduleContainer } from './components/ScheduleContainer';
+import { ScheduleUserContainer } from './components/ScheduleUserContainer';
 
 const router = createBrowserRouter([
   {
@@ -17,23 +19,35 @@ const router = createBrowserRouter([
   },
   {
     path: '/schedule/:scheduleInviteCode',
-    element: <CampaignView />,
-  },
-  {
-    path: '/schedule/:scheduleInviteCode/invite',
-    element: <NewUserPage />,
-  },
-  {
-    path: '/schedule/:scheduleInviteCode/plan',
-    element: <AggregateExceptionsCalendar />,
-  },
-  {
-    path: '/schedule/:scheduleInviteCode/user/:userId',
-    element: <UserWeeklyCalendar />,
-  },
-  {
-    path: '/schedule/:scheduleInviteCode/user/:userId/exceptions',
-    element: <ExceptionsCalendar />,
+    element: <ScheduleContainer />,
+    children: [
+      {
+        path: '',
+        element: <CampaignView />,
+      },
+      {
+        path: 'invite',
+        element: <NewUserPage />,
+      },
+      {
+        path: 'plan',
+        element: <AggregateExceptionsCalendar />,
+      },
+      {
+        path: 'user/:userId',
+        element: <ScheduleUserContainer />,
+        children: [
+          {
+            path: '',
+            element: <UserWeeklyCalendar />,
+          },
+          {
+            path: 'exceptions',
+            element: <ExceptionsCalendar />,
+          },
+        ],
+      },
+    ],
   },
   {
     path: '/attributions',

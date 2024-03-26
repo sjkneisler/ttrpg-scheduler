@@ -18,7 +18,9 @@ export const TimezonePicker: React.FC<{
         label={label}
       >
         {timezones.map((timezoneItem) => (
-          <MenuItem value={timezoneItem}>{timezoneItem}</MenuItem>
+          <MenuItem key={timezoneItem} value={timezoneItem}>
+            {timezoneItem}
+          </MenuItem>
         ))}
       </Select>
     </FormControl>

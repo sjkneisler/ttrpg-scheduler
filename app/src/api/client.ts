@@ -61,6 +61,12 @@ export async function createSchedule(name: string): Promise<Schedule> {
   });
 }
 
+export async function updateSchedule(
+  schedule: ScheduleWithIncludes,
+): Promise<ScheduleWithIncludes> {
+  return putJson(`schedule/${schedule.id}`, schedule);
+}
+
 export async function createUser(
   scheduleId: number,
   name: string,

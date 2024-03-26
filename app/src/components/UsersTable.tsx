@@ -10,16 +10,17 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createUser } from '../api/client';
 import { getCurrentTimezone } from '../../../common/util/timezones';
-import { useSchedule } from '../hooks/useSchedule';
 import { CopyToClipboardButton } from './CopyToClipboardButton';
+import { ScheduleContext } from './ScheduleContainer';
 
 export const UsersTable: React.FC = () => {
   const [name, setName] = useState('');
-  const schedule = useSchedule();
+  const [schedule, setSchedule, forceScheduleRefresh] =
+    useContext(ScheduleContext);
   const navigate = useNavigate();
 
   const onCreateUserClicked = async (
@@ -30,6 +31,7 @@ export const UsersTable: React.FC = () => {
       return;
     }
     const user = await createUser(schedule.id, name, getCurrentTimezone());
+    forceScheduleRefresh();
     navigate(`/schedule/${schedule.inviteCode}/user/${user.id}`);
   };
 
