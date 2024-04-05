@@ -252,8 +252,8 @@ export const ExceptionsCalendar: React.FC = () => {
 
     setUser(updatedUser);
     await updateUser(updatedUser);
-    forceScheduleRefresh();
     setWeek(dayjs().tz(updatedUser.timezone).startOf('week')); // Update week value to respect new timezone
+    forceScheduleRefresh();
   };
 
   const navigate = useNavigate();

@@ -8,6 +8,7 @@ import { getColorFromAvailabilityState } from '../utils/availbility-states';
 import { DragContext } from './DragContext';
 import { Availability } from '../../../common/types/availability-state';
 import { getDayText } from '../utils/day';
+import { HoverContext } from './HoverContext';
 
 function getBorderForTimeSegment(
   intervalNum: number,
@@ -97,6 +98,8 @@ export const DayView: React.FC<DayViewProps> = ({
   granularity,
 }) => {
   const { onDragStart, onDragEnd, onDrag } = useContext(DragContext);
+  const { onMouseEnter, onMouseLeave } = useContext(HoverContext);
+
   return (
     <>
       <div>
@@ -176,6 +179,18 @@ export const DayView: React.FC<DayViewProps> = ({
               onContextMenu={(e) => {
                 e.preventDefault();
               }}
+              onMouseEnter={(e) =>
+                onMouseEnter(e, {
+                  day,
+                  time: getDragStart(hourCount, num, granularity),
+                })
+              }
+              onMouseLeave={(e) =>
+                onMouseLeave(e, {
+                  day,
+                  time: getDragStart(hourCount, num, granularity),
+                })
+              }
             />
           ))}
         </div>

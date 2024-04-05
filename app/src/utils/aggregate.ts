@@ -17,7 +17,7 @@ function availabilityToGradient(availability: Availability): number {
       return 1;
     default:
       console.log(
-        "Returning default value for availability gradient (this shouldn't be reached",
+        "Returning default value for availability gradient (this shouldn't be reached)",
       );
       return -1;
   }
