@@ -11,8 +11,8 @@ import {
 import { css } from '@emotion/react';
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { ScheduleContext } from './ScheduleContainer';
-import { ScheduleUserContext } from './ScheduleUserContainer';
+import { ScheduleContext } from '../contexts/ScheduleContainer';
+import { ScheduleUserContext } from '../contexts/ScheduleUserContainer';
 
 export const TopBar: React.FC = () => {
   const [schedule] = useContext(ScheduleContext);

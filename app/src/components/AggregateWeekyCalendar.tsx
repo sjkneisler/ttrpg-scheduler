@@ -10,9 +10,9 @@ import {
   AggregateAvailability,
   Availability,
 } from '../../../common/types/availability-state';
-import { DragPosition, HoverContext } from './HoverContext';
+import { DragPosition, HoverContext } from '../contexts/HoverContext';
 import { TimeDetailOverlay } from './TimeDetailOverlay';
-import { ScheduleContext } from './ScheduleContainer';
+import { ScheduleContext } from '../contexts/ScheduleContainer';
 import {
   getCurrentTimezone,
   getTimezoneOffset,

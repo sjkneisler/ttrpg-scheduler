@@ -16,7 +16,7 @@ import { useTheme } from '@mui/material/styles';
 import { createUser } from '../api/client';
 import { getCurrentTimezone } from '../../../common/util/timezones';
 import { CopyToClipboardButton } from './CopyToClipboardButton';
-import { ScheduleContext } from './ScheduleContainer';
+import { ScheduleContext } from '../contexts/ScheduleContainer';
 
 export const UsersTable: React.FC = () => {
   const [name, setName] = useState('');

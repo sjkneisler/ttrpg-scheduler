@@ -12,7 +12,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import { createSchedule } from '../api/client';
-import { PageContainer } from './PageContainer';
+import { PageContainer } from '../components/PageContainer';
 
 export const Home: React.FC = () => {
   const [name, setName] = useState('');

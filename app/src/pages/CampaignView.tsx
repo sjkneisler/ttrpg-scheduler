@@ -18,17 +18,17 @@ import {
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { ScheduleGranularity } from '@prisma/client';
 import _ from 'lodash';
-import { AggregateWeeklyCalendar } from './AggregateWeekyCalendar';
+import { AggregateWeeklyCalendar } from '../components/AggregateWeekyCalendar';
 import { aggregateAvailability } from '../utils/aggregate';
 import { AggregationType } from '../../../common/types/aggregation-type';
 import {
   getCurrentTimezone,
   getTimezoneOffset,
 } from '../../../common/util/timezones';
-import { UsersTable } from './UsersTable';
-import { PageContainer } from './PageContainer';
-import { TimezonePicker } from './TimezonePicker';
-import { ScheduleContext } from './ScheduleContainer';
+import { UsersTable } from '../components/UsersTable';
+import { PageContainer } from '../components/PageContainer';
+import { TimezonePicker } from '../components/TimezonePicker';
+import { ScheduleContext } from '../contexts/ScheduleContainer';
 import { ScheduleWithIncludes } from '../../../common/types/user';
 import { updateSchedule } from '../api/client';
 

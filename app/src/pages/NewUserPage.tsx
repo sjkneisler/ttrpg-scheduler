@@ -8,10 +8,10 @@ import {
   Typography,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { PageContainer } from './PageContainer';
+import { PageContainer } from '../components/PageContainer';
 import { createUser } from '../api/client';
 import { getCurrentTimezone } from '../../../common/util/timezones';
-import { ScheduleContext } from './ScheduleContainer';
+import { ScheduleContext } from '../contexts/ScheduleContainer';
 
 export const NewUserPage: React.FC = () => {
   const [name, setName] = useState('');

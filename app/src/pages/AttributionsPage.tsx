@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Container, Link, Stack } from '@mui/material';
-import { PageContainer } from './PageContainer';
+import { PageContainer } from '../components/PageContainer';
 
 export const AttributionsPage: React.FC = () => {
   return (

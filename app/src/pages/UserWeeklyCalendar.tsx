@@ -2,7 +2,7 @@
 import React, { Suspense, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Stack } from '@mui/material';
-import { WeeklyCalendar } from './WeekyCalendar';
+import { WeeklyCalendar } from '../components/WeekyCalendar';
 import { updateUser } from '../api/client';
 import { Availability } from '../../../common/types/availability-state';
 import {
@@ -10,11 +10,11 @@ import {
   getTimezoneOffset,
   shiftAvailabilityByTimezone,
 } from '../../../common/util/timezones';
-import { PageContainer } from './PageContainer';
-import { TimezonePicker } from './TimezonePicker';
-import { ScheduleInstructions } from './ScheduleInstructions';
-import { ScheduleContext } from './ScheduleContainer';
-import { ScheduleUserContext } from './ScheduleUserContainer';
+import { PageContainer } from '../components/PageContainer';
+import { TimezonePicker } from '../components/TimezonePicker';
+import { ScheduleInstructions } from '../components/ScheduleInstructions';
+import { ScheduleContext } from '../contexts/ScheduleContainer';
+import { ScheduleUserContext } from '../contexts/ScheduleUserContainer';
 
 export const UserWeeklyCalendar: React.FC = () => {
   const [schedule, setSchedule, forceScheduleRefresh] =

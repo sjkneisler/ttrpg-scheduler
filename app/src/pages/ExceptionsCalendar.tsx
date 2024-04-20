@@ -7,7 +7,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import _ from 'lodash';
 import { useTheme } from '@mui/material/styles';
-import { WeeklyCalendar } from './WeekyCalendar';
+import { WeeklyCalendar } from '../components/WeekyCalendar';
 import { UserWithIncludes } from '../../../common/types/user';
 import { updateUser } from '../api/client';
 import {
@@ -19,13 +19,13 @@ import {
   getTimezoneOffset,
   shiftAvailabilityByTimezone,
 } from '../../../common/util/timezones';
-import { WeekPicker } from './WeekPicker';
-import { DragPosition } from './DragContext';
-import { PageContainer } from './PageContainer';
-import { TimezonePicker } from './TimezonePicker';
-import { ScheduleInstructions } from './ScheduleInstructions';
-import { ScheduleContext } from './ScheduleContainer';
-import { ScheduleUserContext } from './ScheduleUserContainer';
+import { WeekPicker } from '../components/WeekPicker';
+import { DragPosition } from '../contexts/DragContext';
+import { PageContainer } from '../components/PageContainer';
+import { TimezonePicker } from '../components/TimezonePicker';
+import { ScheduleInstructions } from '../components/ScheduleInstructions';
+import { ScheduleContext } from '../contexts/ScheduleContainer';
+import { ScheduleUserContext } from '../contexts/ScheduleUserContainer';
 import { generateDayLabels } from '../utils/day-labels';
 
 dayjs.extend(utc);

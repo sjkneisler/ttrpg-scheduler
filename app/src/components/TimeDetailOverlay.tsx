@@ -14,7 +14,7 @@ import _ from 'lodash';
 import { css } from '@emotion/react';
 import dayjs from 'dayjs';
 import { Availability } from '../../../common/types/availability-state';
-import { DragPosition } from './HoverContext';
+import { DragPosition } from '../contexts/HoverContext';
 import { getColorFromAvailabilityState } from '../utils/availbility-states';
 
 export const TimeDetailOverlay: React.FC<{

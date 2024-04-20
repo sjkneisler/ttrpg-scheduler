@@ -6,7 +6,7 @@ import { ScheduleGranularity } from '@prisma/client';
 import { Box, TypographyProps } from '@mui/material';
 import { DayView } from './DayView';
 import { HoursGuide } from './HoursGuide';
-import { DragContext, DragPosition } from './DragContext';
+import { DragContext, DragPosition } from '../contexts/DragContext';
 import { Nullable } from '../../../common/types/nullable';
 import { Availability } from '../../../common/types/availability-state';
 

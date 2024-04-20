@@ -3,15 +3,15 @@ import React from 'react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import './App.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { UserWeeklyCalendar } from './components/UserWeeklyCalendar';
-import { Home } from './components/Home';
-import { CampaignView } from './components/CampaignView';
-import { ExceptionsCalendar } from './components/ExceptionsCalendar';
-import { AggregateExceptionsCalendar } from './components/AggregateExceptionsCalendar';
-import { NewUserPage } from './components/NewUserPage';
-import { AttributionsPage } from './components/AttributionsPage';
-import { ScheduleContainer } from './components/ScheduleContainer';
-import { ScheduleUserContainer } from './components/ScheduleUserContainer';
+import { UserWeeklyCalendar } from './pages/UserWeeklyCalendar';
+import { Home } from './pages/Home';
+import { CampaignView } from './pages/CampaignView';
+import { ExceptionsCalendar } from './pages/ExceptionsCalendar';
+import { AggregateExceptionsCalendar } from './pages/AggregateExceptionsCalendar';
+import { NewUserPage } from './pages/NewUserPage';
+import { AttributionsPage } from './pages/AttributionsPage';
+import { ScheduleContainer } from './contexts/ScheduleContainer';
+import { ScheduleUserContainer } from './contexts/ScheduleUserContainer';
 import { darkTheme } from './themes/dark';
 
 const router = createBrowserRouter([

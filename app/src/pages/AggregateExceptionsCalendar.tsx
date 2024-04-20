@@ -25,13 +25,13 @@ import {
   getTimezoneOffset,
   shiftAvailabilityByTimezone,
 } from '../../../common/util/timezones';
-import { WeekPicker } from './WeekPicker';
-import { PageContainer } from './PageContainer';
-import { TimezonePicker } from './TimezonePicker';
+import { WeekPicker } from '../components/WeekPicker';
+import { PageContainer } from '../components/PageContainer';
+import { TimezonePicker } from '../components/TimezonePicker';
 import { aggregateUserAvailabilities } from '../utils/aggregate';
 import { AggregationType } from '../../../common/types/aggregation-type';
-import { AggregateWeeklyCalendar } from './AggregateWeekyCalendar';
-import { ScheduleContext } from './ScheduleContainer';
+import { AggregateWeeklyCalendar } from '../components/AggregateWeekyCalendar';
+import { ScheduleContext } from '../contexts/ScheduleContainer';
 import { generateDayLabels } from '../utils/day-labels';
 
 dayjs.extend(utc);

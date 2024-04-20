@@ -5,10 +5,10 @@ import _ from 'lodash';
 import { Box, IconButton, Typography, TypographyProps } from '@mui/material';
 import { ScheduleGranularity } from '@prisma/client';
 import { getColorFromAvailabilityState } from '../utils/availbility-states';
-import { DragContext } from './DragContext';
+import { DragContext } from '../contexts/DragContext';
 import { Availability } from '../../../common/types/availability-state';
 import { getDayText } from '../utils/day';
-import { HoverContext } from './HoverContext';
+import { HoverContext } from '../contexts/HoverContext';
 
 function getBorderForTimeSegment(
   intervalNum: number,
