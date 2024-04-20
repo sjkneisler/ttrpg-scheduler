@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { ScheduleGranularity } from '@prisma/client';
+import { Box } from '@mui/material';
 import { DayView } from './DayView';
 import { HoursGuide } from './HoursGuide';
 import { DragContext, DragPosition } from './DragContext';
@@ -78,6 +79,8 @@ export const WeeklyCalendar: React.FC<{
   const [dragNewState, setDragNewState] =
     useState<Nullable<Availability>>(null);
   const [dragStart, setDragStart] = useState<Nullable<DragPosition>>(null);
+  const [dragTempLocation, setDragTempLocation] =
+    useState<Nullable<DragPosition>>(null);
   const [temporaryStates, setTemporaryStates] = useState(availability);
 
   useEffect(() => {
@@ -87,6 +90,7 @@ export const WeeklyCalendar: React.FC<{
   const onDragStart = (e: React.MouseEvent, pos: DragPosition) => {
     setDragging(true);
     setDragStart(pos);
+    setDragTempLocation(pos);
     const initialValue: Availability = availability[pos.day][pos.time];
     const newState = getNewAvailabilityValue(initialValue, e.button);
     setDragNewState(newState);
@@ -108,11 +112,14 @@ export const WeeklyCalendar: React.FC<{
     }
     return false;
   };
-  const onMouseOut = () => {
-    setDragging(false);
+  const onMouseOut = async (e: React.MouseEvent) => {
+    if (dragTempLocation) {
+      await onDragEnd(e, dragTempLocation);
+    }
   };
   const onDrag = (e: React.MouseEvent, pos: DragPosition) => {
     if (dragging) {
+      setDragTempLocation(pos);
       setTemporaryStates(
         updateAvailabilityBox(availability, dragStart!, pos, dragNewState!),
       );
@@ -145,7 +152,7 @@ export const WeeklyCalendar: React.FC<{
 
   return (
     <DragContext.Provider value={dragContextValue}>
-      <div
+      <Box
         css={css`
           display: flex;
           flex-direction: row;
@@ -228,7 +235,7 @@ export const WeeklyCalendar: React.FC<{
           />
           <HoursGuide />
         </div>
-      </div>
+      </Box>
     </DragContext.Provider>
   );
 };

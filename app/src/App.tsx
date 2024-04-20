@@ -1,5 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
+import { CssBaseline, ThemeProvider } from '@mui/material';
 import './App.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { UserWeeklyCalendar } from './components/UserWeeklyCalendar';
@@ -11,6 +12,7 @@ import { NewUserPage } from './components/NewUserPage';
 import { AttributionsPage } from './components/AttributionsPage';
 import { ScheduleContainer } from './components/ScheduleContainer';
 import { ScheduleUserContainer } from './components/ScheduleUserContainer';
+import { darkTheme } from './themes/dark';
 
 const router = createBrowserRouter([
   {
@@ -56,7 +58,12 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <RouterProvider router={router} />
+    </ThemeProvider>
+  );
 }
 
 export default App;

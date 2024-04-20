@@ -2,7 +2,7 @@
 import React, { useContext } from 'react';
 import { css } from '@emotion/react';
 import _ from 'lodash';
-import { IconButton } from '@mui/material';
+import { Box, Container, IconButton, Typography } from '@mui/material';
 import { ScheduleGranularity } from '@prisma/client';
 import { getColorFromAvailabilityState } from '../utils/availbility-states';
 import { DragContext } from './DragContext';
@@ -102,15 +102,15 @@ export const DayView: React.FC<DayViewProps> = ({
 
   return (
     <>
-      <div>
-        <div
+      <Box>
+        <Typography
           css={css`
             text-align: center;
             margin: 10px 0;
           `}
         >
           {label}
-        </div>
+        </Typography>
         {editable && (
           <div>
             Set day to:
@@ -133,7 +133,7 @@ export const DayView: React.FC<DayViewProps> = ({
           </div>
         )}
         {headerChild}
-      </div>
+      </Box>
       {_.times(24, (hourCount) => (
         <div
           key={hourCount}
@@ -150,7 +150,7 @@ export const DayView: React.FC<DayViewProps> = ({
                 flex: 1 1 auto;
                 width: 100px;
                 height: ${granularityToCellHeightMap[granularity]}px;
-                border-color: #000000ff;
+                border-color: #444;
                 border-style: solid;
                 border-width: ${getBorderForTimeSegment(num, granularity)};
                 background-color: ${getColorFromAvailabilityState(
