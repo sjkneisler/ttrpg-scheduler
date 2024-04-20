@@ -9,7 +9,8 @@ import { getScheduleByInviteCode } from '../api/client';
 export type ScheduleContextType = [
   ScheduleWithIncludes,
   (newSchedule: ScheduleWithIncludes) => void,
-  () => void, // Force refresh
+  () => Promise<void>, // Force refresh
+  setUser: (updatedUser: ScheduleWithIncludes['users'][number]) => void,
 ];
 
 // TODO: Using {} as Schedule as a hack so that context consumers don't have to null check.  This isn't safe
@@ -17,7 +18,8 @@ export const ScheduleContext: React.Context<ScheduleContextType> =
   React.createContext([
     null as unknown as ScheduleWithIncludes,
     (newSchedule: ScheduleWithIncludes) => {},
-    () => {},
+    () => Promise.resolve(),
+    (updatedUser: ScheduleWithIncludes['users'][number]) => {},
   ]);
 
 export const ScheduleContainer: React.FC = () => {
@@ -25,30 +27,48 @@ export const ScheduleContainer: React.FC = () => {
   const [schedule, setSchedule] = useState<ScheduleWithIncludes | null>(null);
 
   const forceRefresh = useMemo(
-    () => () => {
+    () => async () => {
       if (!scheduleInviteCode) {
         return;
       }
 
-      // eslint-disable-next-line no-void
-      void getScheduleByInviteCode(scheduleInviteCode).then((fetchedSchedule) =>
-        setSchedule(fetchedSchedule),
-      );
+      const updatedSchedule = await getScheduleByInviteCode(scheduleInviteCode);
+      setSchedule(updatedSchedule);
     },
     [scheduleInviteCode],
   );
 
-  // const setUser(user: UserWithIncludes) {
-  //
-  // }
+  const setUser = (updatedUser: ScheduleWithIncludes['users'][number]) => {
+    if (!schedule) {
+      return;
+    }
+    const updatedSchedule = {
+      ...schedule,
+      users: schedule.users.map((user) => {
+        if (user.id === updatedUser.id) {
+          return updatedUser;
+        }
+
+        return user;
+      }),
+    };
+
+    setSchedule(updatedSchedule);
+  };
 
   useEffect(() => {
-    forceRefresh();
+    // eslint-disable-next-line no-void
+    void forceRefresh();
   }, [scheduleInviteCode]);
 
   // TODO: Same issue as above with type safety
   const returnMemo: ScheduleContextType = useMemo(() => {
-    return [schedule as ScheduleWithIncludes, setSchedule, forceRefresh];
+    return [
+      schedule as ScheduleWithIncludes,
+      setSchedule,
+      forceRefresh,
+      setUser,
+    ];
   }, [schedule]);
 
   if (!schedule) {

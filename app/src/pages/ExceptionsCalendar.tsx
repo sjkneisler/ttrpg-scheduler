@@ -8,7 +8,10 @@ import timezone from 'dayjs/plugin/timezone';
 import _ from 'lodash';
 import { useTheme } from '@mui/material/styles';
 import { WeeklyCalendar } from '../components/WeekyCalendar';
-import { UserWithIncludes } from '../../../common/types/user';
+import {
+  ScheduleWithIncludes,
+  UserWithIncludes,
+} from '../../../common/types/user';
 import { updateUser } from '../api/client';
 import {
   Availability,
@@ -248,7 +251,7 @@ export const ExceptionsCalendar: React.FC = () => {
       user.availability.weekly,
       -1 * offsetDifference,
     );
-    const updatedUser = {
+    const updatedUser: ScheduleWithIncludes['users'][number] = {
       ...user,
       availability: {
         ...user.availability,
@@ -259,7 +262,11 @@ export const ExceptionsCalendar: React.FC = () => {
 
     setUser(updatedUser);
     await updateUser(updatedUser);
-    setWeek(dayjs().tz(updatedUser.timezone).startOf('week')); // Update week value to respect new timezone
+    setWeek(
+      dayjs()
+        .tz(updatedUser.timezone || undefined)
+        .startOf('week'),
+    ); // Update week value to respect new timezone
     forceScheduleRefresh();
   };
 
@@ -361,7 +368,7 @@ export const ExceptionsCalendar: React.FC = () => {
           if (!user) {
             return;
           }
-          const updatedUser: UserWithIncludes = {
+          const updatedUser: ScheduleWithIncludes['users'][number] = {
             ...user,
             availability: {
               ...user.availability,

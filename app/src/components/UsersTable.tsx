@@ -32,7 +32,7 @@ export const UsersTable: React.FC = () => {
       return;
     }
     const user = await createUser(schedule.id, name, getCurrentTimezone());
-    forceScheduleRefresh();
+    await forceScheduleRefresh();
     navigate(`/schedule/${schedule.inviteCode}/user/${user.id}`);
   };
 
