@@ -2,7 +2,7 @@
 import React, { useContext } from 'react';
 import { css } from '@emotion/react';
 import _ from 'lodash';
-import { Box, Container, IconButton, Typography } from '@mui/material';
+import { Box, IconButton, Typography, TypographyProps } from '@mui/material';
 import { ScheduleGranularity } from '@prisma/client';
 import { getColorFromAvailabilityState } from '../utils/availbility-states';
 import { DragContext } from './DragContext';
@@ -72,6 +72,7 @@ export type DayViewProps = {
   setDayTo: (availability: Availability) => Promise<void>;
   editable: boolean;
   label?: string;
+  labelProps?: TypographyProps;
   headerChild?: React.ReactNode;
   granularity: ScheduleGranularity;
 };
@@ -96,6 +97,7 @@ export const DayView: React.FC<DayViewProps> = ({
   label = getDayText(day),
   headerChild,
   granularity,
+  labelProps,
 }) => {
   const { onDragStart, onDragEnd, onDrag } = useContext(DragContext);
   const { onMouseEnter, onMouseLeave } = useContext(HoverContext);
@@ -108,6 +110,7 @@ export const DayView: React.FC<DayViewProps> = ({
             text-align: center;
             margin: 10px 0;
           `}
+          {...labelProps}
         >
           {label}
         </Typography>

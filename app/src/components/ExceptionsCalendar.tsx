@@ -6,6 +6,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import _ from 'lodash';
+import { useTheme } from '@mui/material/styles';
 import { WeeklyCalendar } from './WeekyCalendar';
 import { UserWithIncludes } from '../../../common/types/user';
 import { updateUser } from '../api/client';
@@ -25,6 +26,7 @@ import { TimezonePicker } from './TimezonePicker';
 import { ScheduleInstructions } from './ScheduleInstructions';
 import { ScheduleContext } from './ScheduleContainer';
 import { ScheduleUserContext } from './ScheduleUserContainer';
+import { generateDayLabels } from '../utils/day-labels';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -339,6 +341,13 @@ export const ExceptionsCalendar: React.FC = () => {
     ];
   }, [week]);
 
+  const theme = useTheme();
+
+  const dayLabelProps = useMemo(
+    () => generateDayLabels(week, theme),
+    [week, theme],
+  );
+
   const weeklyCalendarHeaderChildren = _.times(7, (index) => {
     if (
       !user ||
@@ -407,6 +416,7 @@ export const ExceptionsCalendar: React.FC = () => {
           availability={availabilityWithExceptions}
           onAvailabilityUpdate={onAvailabilityUpdate}
           labels={dayLabels}
+          labelProps={dayLabelProps}
           headerChildren={weeklyCalendarHeaderChildren}
           scheduleGranularity={schedule.granularity}
         />

@@ -1,8 +1,9 @@
 /** @jsxImportSource @emotion/react */
 import React, { useEffect, useMemo, useState } from 'react';
+import _ from 'lodash';
 import { css } from '@emotion/react';
 import { ScheduleGranularity } from '@prisma/client';
-import { Box } from '@mui/material';
+import { Box, TypographyProps } from '@mui/material';
 import { DayView } from './DayView';
 import { HoursGuide } from './HoursGuide';
 import { DragContext, DragPosition } from './DragContext';
@@ -58,6 +59,7 @@ export const WeeklyCalendar: React.FC<{
     dragNewState: Availability,
   ) => Promise<void>;
   labels?: string[];
+  labelProps?: TypographyProps[];
   headerChildren?: React.ReactNode[];
   scheduleGranularity: ScheduleGranularity;
 }> = ({
@@ -72,6 +74,7 @@ export const WeeklyCalendar: React.FC<{
     'Friday',
     'Saturday',
   ],
+  labelProps = [],
   scheduleGranularity,
   headerChildren = [],
 }) => {
@@ -170,69 +173,18 @@ export const WeeklyCalendar: React.FC<{
           `}
         >
           <HoursGuide />
-          <DayView
-            day={0}
-            editable
-            availability={temporaryStates[0]}
-            setDayTo={(newAvailability) => setDayTo(0, newAvailability)}
-            label={labels[0]}
-            headerChild={headerChildren[0]}
-            granularity={scheduleGranularity}
-          />
-          <DayView
-            day={1}
-            editable
-            availability={temporaryStates[1]}
-            setDayTo={(newAvailability) => setDayTo(1, newAvailability)}
-            label={labels[1]}
-            headerChild={headerChildren[1]}
-            granularity={scheduleGranularity}
-          />
-          <DayView
-            day={2}
-            editable
-            availability={temporaryStates[2]}
-            setDayTo={(newAvailability) => setDayTo(2, newAvailability)}
-            label={labels[2]}
-            headerChild={headerChildren[2]}
-            granularity={scheduleGranularity}
-          />
-          <DayView
-            day={3}
-            editable
-            availability={temporaryStates[3]}
-            setDayTo={(newAvailability) => setDayTo(3, newAvailability)}
-            label={labels[3]}
-            headerChild={headerChildren[3]}
-            granularity={scheduleGranularity}
-          />
-          <DayView
-            day={4}
-            editable
-            availability={temporaryStates[4]}
-            setDayTo={(newAvailability) => setDayTo(4, newAvailability)}
-            label={labels[4]}
-            headerChild={headerChildren[4]}
-            granularity={scheduleGranularity}
-          />
-          <DayView
-            day={5}
-            editable
-            availability={temporaryStates[5]}
-            setDayTo={(newAvailability) => setDayTo(5, newAvailability)}
-            label={labels[5]}
-            headerChild={headerChildren[5]}
-            granularity={scheduleGranularity}
-          />
-          <DayView
-            day={6}
-            editable
-            availability={temporaryStates[6]}
-            setDayTo={(newAvailability) => setDayTo(6, newAvailability)}
-            label={labels[6]}
-            headerChild={headerChildren[6]}
-            granularity={scheduleGranularity}
-          />
+          {_.times(7, (index) => (
+            <DayView
+              day={index}
+              editable
+              availability={temporaryStates[index]}
+              setDayTo={(newAvailability) => setDayTo(index, newAvailability)}
+              label={labels[index]}
+              labelProps={labelProps[index]}
+              headerChild={headerChildren[index]}
+              granularity={scheduleGranularity}
+            />
+          ))}
           <HoursGuide />
         </div>
       </Box>

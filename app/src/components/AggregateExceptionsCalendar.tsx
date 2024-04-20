@@ -8,14 +8,18 @@ import {
   Button,
   FormControl,
   Stack,
+  Theme,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
+  TypographyProps,
 } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import dayjsTimezone from 'dayjs/plugin/timezone';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { useTheme } from '@mui/material/styles';
+import _ from 'lodash';
 import {
   getCurrentTimezone,
   getTimezoneOffset,
@@ -28,6 +32,7 @@ import { aggregateUserAvailabilities } from '../utils/aggregate';
 import { AggregationType } from '../../../common/types/aggregation-type';
 import { AggregateWeeklyCalendar } from './AggregateWeekyCalendar';
 import { ScheduleContext } from './ScheduleContainer';
+import { generateDayLabels } from '../utils/day-labels';
 
 dayjs.extend(utc);
 dayjs.extend(dayjsTimezone);
@@ -127,6 +132,8 @@ export const AggregateExceptionsCalendar: React.FC = () => {
     return aggregateUserAvailabilities(userAvailabilities, aggregationType);
   }, [schedule, week, aggregationType, timezone]);
 
+  const theme = useTheme();
+
   const dayLabels = useMemo(() => {
     return [
       week.day(0).format('ddd MMM D'),
@@ -138,6 +145,11 @@ export const AggregateExceptionsCalendar: React.FC = () => {
       week.day(6).format('ddd MMM D'),
     ];
   }, [week]);
+
+  const dayLabelProps = useMemo(
+    () => generateDayLabels(week, theme),
+    [week, theme],
+  );
 
   if (schedule == null || availabilityWithExceptions == null) {
     return <Suspense />;
@@ -190,6 +202,7 @@ export const AggregateExceptionsCalendar: React.FC = () => {
         <AggregateWeeklyCalendar
           availability={availabilityWithExceptions}
           labels={dayLabels}
+          labelProps={dayLabelProps}
           granularity={schedule.granularity}
         />
       </Stack>

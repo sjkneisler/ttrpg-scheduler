@@ -3,6 +3,7 @@ import React, { useContext, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import _ from 'lodash';
 import { ScheduleGranularity } from '@prisma/client';
+import { TypographyProps } from '@mui/material';
 import { DayView } from './DayView';
 import { HoursGuide } from './HoursGuide';
 import {
@@ -21,6 +22,7 @@ import {
 export const AggregateWeeklyCalendar: React.FC<{
   availability: AggregateAvailability;
   labels?: string[];
+  labelProps?: TypographyProps[];
   granularity: ScheduleGranularity;
 }> = ({
   availability,
@@ -33,6 +35,7 @@ export const AggregateWeeklyCalendar: React.FC<{
     'Friday',
     'Saturday',
   ],
+  labelProps = [],
   granularity,
 }) => {
   const [currentHover, setCurrentHover] = useState<DragPosition | null>(null);
@@ -123,6 +126,7 @@ export const AggregateWeeklyCalendar: React.FC<{
               availability={availability[index]}
               setDayTo={() => Promise.resolve()}
               label={labels[index]}
+              labelProps={labelProps[index]}
               granularity={granularity}
             />
           ))}

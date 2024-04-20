@@ -6,5 +6,9 @@ export const darkTheme = createTheme({
       primary: '#EEEEEE',
     },
     mode: 'dark',
+    background: {
+      paper: '#222',
+      default: '#1A1A1A',
+    },
   },
 });

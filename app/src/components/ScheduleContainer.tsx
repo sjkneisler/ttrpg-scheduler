@@ -1,6 +1,9 @@
 import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { Outlet, useParams } from 'react-router-dom';
-import { ScheduleWithIncludes } from '../../../common/types/user';
+import {
+  ScheduleWithIncludes,
+  UserWithIncludes,
+} from '../../../common/types/user';
 import { getScheduleByInviteCode } from '../api/client';
 
 export type ScheduleContextType = [
@@ -34,6 +37,10 @@ export const ScheduleContainer: React.FC = () => {
     },
     [scheduleInviteCode],
   );
+
+  // const setUser(user: UserWithIncludes) {
+  //
+  // }
 
   useEffect(() => {
     forceRefresh();
