@@ -2,6 +2,9 @@
 import React, { Suspense, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Button,
   FormControl,
   InputLabel,
@@ -12,6 +15,7 @@ import {
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { ScheduleGranularity } from '@prisma/client';
 import _ from 'lodash';
 import { AggregateWeeklyCalendar } from './AggregateWeekyCalendar';
@@ -90,41 +94,54 @@ export const CampaignView: React.FC = () => {
           <Button variant="outlined" onClick={gotoPlan}>
             Plan a date!
           </Button>
-          <FormControl fullWidth>
-            <Typography variant="h6">Aggregation Type</Typography>
-            <ToggleButtonGroup
-              value={aggregationType}
-              exclusive
-              onChange={(e, value) =>
-                setAggregationType(value as AggregationType)
-              }
-            >
-              <ToggleButton value={AggregationType.Shared}>Shared</ToggleButton>
-              <ToggleButton value={AggregationType.Average}>
-                Average
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </FormControl>
-          <TimezonePicker
-            timezone={timezone}
-            setTimezone={setTimezone}
-            label="Displayed Timezone"
-          />
-          <FormControl fullWidth>
-            <InputLabel id="granularity-select-label">
-              Schedule Granularity
-            </InputLabel>
-            <Select
-              value={schedule.granularity}
-              onChange={(event) => setGranularity(event.target.value)}
-              labelId="granularity-select-label"
-              label="Schedule Granularity"
-            >
-              {_.entries(granularityLabelMap).map(([granularity, label]) => (
-                <MenuItem value={granularity}>{label}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Accordion>
+            <AccordionSummary expandIcon={<ArrowDropDownIcon />}>
+              <Typography>Advanced Settings</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Stack spacing={2}>
+                <FormControl fullWidth>
+                  <Typography variant="h6">Aggregation Type</Typography>
+                  <ToggleButtonGroup
+                    value={aggregationType}
+                    exclusive
+                    onChange={(e, value) =>
+                      setAggregationType(value as AggregationType)
+                    }
+                  >
+                    <ToggleButton value={AggregationType.Shared}>
+                      Shared
+                    </ToggleButton>
+                    <ToggleButton value={AggregationType.Average}>
+                      Average
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                </FormControl>
+                <TimezonePicker
+                  timezone={timezone}
+                  setTimezone={setTimezone}
+                  label="Displayed Timezone"
+                />
+                <FormControl fullWidth>
+                  <InputLabel id="granularity-select-label">
+                    Schedule Granularity
+                  </InputLabel>
+                  <Select
+                    value={schedule.granularity}
+                    onChange={(event) => setGranularity(event.target.value)}
+                    labelId="granularity-select-label"
+                    label="Schedule Granularity"
+                  >
+                    {_.entries(granularityLabelMap).map(
+                      ([granularity, label]) => (
+                        <MenuItem value={granularity}>{label}</MenuItem>
+                      ),
+                    )}
+                  </Select>
+                </FormControl>
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
         </Stack>
         <AggregateWeeklyCalendar
           availability={showAvailability}

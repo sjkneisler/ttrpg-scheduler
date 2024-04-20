@@ -56,8 +56,14 @@ export const TopBar: React.FC = () => {
                 </ButtonBase>
               )}
             </Stack>
-            <Box alignContent="center">
-              <ButtonBase component={Link} to="/attributions">
+            <Box alignContent="center" justifyContent="center">
+              <ButtonBase
+                component={Link}
+                to="/attributions"
+                style={{
+                  height: '100%',
+                }}
+              >
                 <Typography variant="body2">Attributions</Typography>
               </ButtonBase>
             </Box>

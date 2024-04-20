@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '@mui/material/styles';
 import { createSchedule } from '../api/client';
 import { PageContainer } from './PageContainer';
 
@@ -21,6 +22,9 @@ export const Home: React.FC = () => {
     const schedule = await createSchedule(name);
     navigate(`/schedule/${schedule.inviteCode}`);
   };
+
+  const theme = useTheme();
+
   return (
     <PageContainer>
       <Container maxWidth="sm">
@@ -37,9 +41,18 @@ export const Home: React.FC = () => {
                   onChange={(e) => setName(e.target.value)}
                   inputProps={{
                     'data-lpignore': true,
+                    style: {
+                      borderColor: theme.palette.primary.main,
+                    },
+                  }}
+                  autoComplete="off"
+                  InputLabelProps={{
+                    style: {
+                      color: theme.palette.primary.main,
+                    },
                   }}
                 />
-                <Button variant="outlined" type="submit" disabled={!name}>
+                <Button variant="contained" type="submit" disabled={!name}>
                   Create Schedule
                 </Button>
               </FormControl>

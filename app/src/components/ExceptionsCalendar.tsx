@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import React, { Suspense, useContext, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button, Stack } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -194,7 +194,12 @@ function updateExceptions(
 }
 
 export const ExceptionsCalendar: React.FC = () => {
-  const [week, setWeek] = useState<Dayjs>(dayjs().startOf('week'));
+  const [searchParams, setSearchParams] = useSearchParams();
+  const paramsWeek = searchParams.get('week');
+  const initialWeekValue = paramsWeek
+    ? dayjs.unix(parseInt(paramsWeek, 10)).startOf('week')
+    : dayjs().startOf('week');
+  const [week, setWeek] = useState<Dayjs>(initialWeekValue);
   const [user, setUser] = useContext(ScheduleUserContext);
   const [schedule, setSchedule, forceScheduleRefresh] =
     useContext(ScheduleContext);
@@ -391,6 +396,7 @@ export const ExceptionsCalendar: React.FC = () => {
             setWeekValue={(newWeek) => {
               // setWeek(newWeek.tz(user.timezone!));
               setWeek(newWeek);
+              setSearchParams({ week: newWeek.unix().toString() });
             }}
             timezone={user.timezone!}
           />
