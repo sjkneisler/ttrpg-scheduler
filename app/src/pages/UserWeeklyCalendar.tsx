@@ -1,40 +1,27 @@
 /** @jsxImportSource @emotion/react */
-import React, { Suspense, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { Suspense, useContext, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Stack } from '@mui/material';
-import { WeeklyCalendar } from './WeekyCalendar';
-import { UserWithIncludes } from '../../../common/types/user';
-import { getUser, updateUser } from '../api/client';
+import { WeeklyCalendar } from '../components/WeekyCalendar';
+import { updateUser } from '../api/client';
 import { Availability } from '../../../common/types/availability-state';
 import {
   getCurrentTimezone,
   getTimezoneOffset,
   shiftAvailabilityByTimezone,
 } from '../../../common/util/timezones';
-import { PageContainer } from './PageContainer';
-import { TimezonePicker } from './TimezonePicker';
-import { useSchedule } from '../hooks/useSchedule';
-import { ScheduleInstructions } from './ScheduleInstructions';
+import { PageContainer } from '../components/PageContainer';
+import { TimezonePicker } from '../components/TimezonePicker';
+import { ScheduleInstructions } from '../components/ScheduleInstructions';
+import { ScheduleContext } from '../contexts/ScheduleContainer';
+import { ScheduleUserContext } from '../contexts/ScheduleUserContainer';
 
 export const UserWeeklyCalendar: React.FC = () => {
-  const [user, setUser] = useState<UserWithIncludes | null>(null);
-
-  const { userId } = useParams();
-  const schedule = useSchedule();
-
-  useEffect(() => {
-    if (!schedule || !userId) {
-      return;
-    }
-
-    // eslint-disable-next-line no-void
-    void getUser(schedule.id, parseInt(userId, 10)).then(setUser);
-  }, [schedule]);
+  const [schedule, setSchedule, forceScheduleRefresh] =
+    useContext(ScheduleContext);
+  const [user, setUser] = useContext(ScheduleUserContext);
 
   const onAvailabilityUpdate = async (availability: Availability[][]) => {
-    if (!user) {
-      return;
-    }
     const shiftedAvailability = shiftAvailabilityByTimezone(
       availability,
       -1 * getTimezoneOffset(user.timezone || getCurrentTimezone()),
@@ -46,11 +33,12 @@ export const UserWeeklyCalendar: React.FC = () => {
         weekly: shiftedAvailability,
       },
     };
-    setUser(updatedUser);
     await updateUser(updatedUser);
+    setUser(updatedUser);
+    await forceScheduleRefresh();
   };
 
-  const setTimezone = (newTimezone: string) => {
+  const setTimezone = async (newTimezone: string) => {
     if (!user) {
       return;
     }
@@ -70,9 +58,9 @@ export const UserWeeklyCalendar: React.FC = () => {
       timezone: newTimezone,
     };
 
-    // eslint-disable-next-line no-void
-    void updateUser(updatedUser);
+    await updateUser(updatedUser);
     setUser(updatedUser);
+    await forceScheduleRefresh();
   };
 
   const navigate = useNavigate();
@@ -82,7 +70,7 @@ export const UserWeeklyCalendar: React.FC = () => {
   };
 
   const gotoExceptions = () => {
-    navigate(`/schedule/${schedule?.inviteCode}/user/${userId}/exceptions`);
+    navigate(`/schedule/${schedule?.inviteCode}/user/${user.id}/exceptions`);
   };
 
   const shiftedWeeklyAvailability = useMemo(() => {
@@ -98,14 +86,15 @@ export const UserWeeklyCalendar: React.FC = () => {
   if (
     user == null ||
     user.availability == null ||
-    shiftedWeeklyAvailability == null
+    shiftedWeeklyAvailability == null ||
+    schedule == null
   ) {
     return <Suspense />;
   }
 
   return (
     <PageContainer>
-      <Stack direction="row">
+      <Stack direction="row" spacing={4}>
         <Stack spacing={2} maxWidth="sm">
           <Button variant="outlined" onClick={onBack}>
             Back To Schedule
@@ -119,6 +108,7 @@ export const UserWeeklyCalendar: React.FC = () => {
         <WeeklyCalendar
           availability={shiftedWeeklyAvailability}
           onAvailabilityUpdate={onAvailabilityUpdate}
+          scheduleGranularity={schedule.granularity}
         />
       </Stack>
     </PageContainer>

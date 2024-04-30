@@ -1,8 +1,5 @@
 import { Schedule } from '@prisma/client';
-import {
-  ScheduleWithIncludes,
-  UserWithIncludes,
-} from '../../../common/types/user';
+import { ScheduleWithIncludes } from 'common/types/user';
 
 const API_ROOT = process.env.REACT_APP_SERVER_URL || 'http://localhost:3001/';
 
@@ -42,16 +39,16 @@ function postJson<T, U>(path: string, body: T): Promise<U> {
   return post(path, body).then((res) => res.json()) as Promise<U>;
 }
 
-export async function getUser(
-  scheduleId: number,
-  userId: number,
-): Promise<UserWithIncludes> {
-  return getJson(`schedule/${scheduleId}/user/${userId}`);
-}
+// export async function getUser(
+//   scheduleId: number,
+//   userId: number,
+// ): Promise<ScheduleWithIncludes['users'][number]> {
+//   return getJson(`schedule/${scheduleId}/user/${userId}`);
+// }
 
 export async function updateUser(
-  user: UserWithIncludes,
-): Promise<UserWithIncludes> {
+  user: ScheduleWithIncludes['users'][number],
+): Promise<ScheduleWithIncludes['users'][number]> {
   return putJson(`schedule/${user.scheduleId}/user/${user.id}`, user);
 }
 
@@ -61,22 +58,28 @@ export async function createSchedule(name: string): Promise<Schedule> {
   });
 }
 
+export async function updateSchedule(
+  schedule: ScheduleWithIncludes,
+): Promise<ScheduleWithIncludes> {
+  return putJson(`schedule/${schedule.id}`, schedule);
+}
+
 export async function createUser(
   scheduleId: number,
   name: string,
   timezone: string,
-): Promise<UserWithIncludes> {
+): Promise<ScheduleWithIncludes['users'][number]> {
   return postJson(`schedule/${scheduleId}/user`, {
     name,
     timezone,
   });
 }
 
-export async function getSchedule(
-  scheduleId: number,
-): Promise<ScheduleWithIncludes> {
-  return getJson(`schedule/${scheduleId}`);
-}
+// export async function getSchedule(
+//   scheduleId: number,
+// ): Promise<ScheduleWithIncludes> {
+//   return getJson(`schedule/${scheduleId}`);
+// }
 
 export async function getScheduleByInviteCode(
   inviteCode: string,

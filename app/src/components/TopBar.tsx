@@ -2,7 +2,6 @@
 import {
   AppBar,
   Box,
-  Button,
   ButtonBase,
   Container,
   Stack,
@@ -10,14 +9,14 @@ import {
   Typography,
 } from '@mui/material';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { useSchedule } from '../hooks/useSchedule';
-import { useScheduleUser } from '../hooks/useScheduleUser';
+import { ScheduleContext } from '../contexts/ScheduleContainer';
+import { ScheduleUserContext } from '../contexts/ScheduleUserContainer';
 
 export const TopBar: React.FC = () => {
-  const schedule = useSchedule();
-  const user = useScheduleUser();
+  const [schedule] = useContext(ScheduleContext);
+  const [user] = useContext(ScheduleUserContext);
 
   return (
     <AppBar
@@ -57,8 +56,14 @@ export const TopBar: React.FC = () => {
                 </ButtonBase>
               )}
             </Stack>
-            <Box alignContent="center">
-              <ButtonBase component={Link} to="/attributions">
+            <Box alignContent="center" justifyContent="center">
+              <ButtonBase
+                component={Link}
+                to="/attributions"
+                style={{
+                  height: '100%',
+                }}
+              >
                 <Typography variant="body2">Attributions</Typography>
               </ButtonBase>
             </Box>

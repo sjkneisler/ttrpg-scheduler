@@ -10,16 +10,18 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '@mui/material/styles';
 import { createUser } from '../api/client';
 import { getCurrentTimezone } from '../../../common/util/timezones';
-import { useSchedule } from '../hooks/useSchedule';
 import { CopyToClipboardButton } from './CopyToClipboardButton';
+import { ScheduleContext } from '../contexts/ScheduleContainer';
 
 export const UsersTable: React.FC = () => {
   const [name, setName] = useState('');
-  const schedule = useSchedule();
+  const [schedule, setSchedule, forceScheduleRefresh] =
+    useContext(ScheduleContext);
   const navigate = useNavigate();
 
   const onCreateUserClicked = async (
@@ -30,6 +32,7 @@ export const UsersTable: React.FC = () => {
       return;
     }
     const user = await createUser(schedule.id, name, getCurrentTimezone());
+    await forceScheduleRefresh();
     navigate(`/schedule/${schedule.inviteCode}/user/${user.id}`);
   };
 
@@ -44,6 +47,8 @@ export const UsersTable: React.FC = () => {
     return <Suspense />;
   }
 
+  const theme = useTheme();
+
   return (
     <Card>
       <Stack spacing={2} padding={2}>
@@ -57,6 +62,12 @@ export const UsersTable: React.FC = () => {
               OR
             </Typography>
             <TextField
+              variant="filled"
+              InputLabelProps={{
+                style: {
+                  color: theme.palette.primary.main,
+                },
+              }}
               label="Add New Person"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -65,7 +76,7 @@ export const UsersTable: React.FC = () => {
               }}
             />
             {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
-            <Button variant="outlined" type="submit" disabled={!name}>
+            <Button variant="contained" type="submit" disabled={!name}>
               Create
             </Button>
           </FormControl>

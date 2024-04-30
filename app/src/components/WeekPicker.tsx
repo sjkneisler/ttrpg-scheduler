@@ -7,6 +7,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
 import { useMemo } from 'react';
+import { Box, Button, Stack } from '@mui/material';
 
 dayjs.extend(isBetweenPlugin);
 
@@ -90,23 +91,32 @@ export const WeekPicker: React.FC<{
     setWeekValue(firstDayOfWeek);
   };
 
+  const gotoToday = () => {
+    setWeekValue(dayjs());
+  };
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <DateCalendar
-        value={weekValue}
-        onChange={setDay}
-        timezone="UTC"
-        showDaysOutsideCurrentMonth
-        slots={{ day: Day }}
-        slotProps={{
-          day: (ownerState) => ({
-            selectedDay: weekValue,
-            hoveredDay,
-            onPointerEnter: () => setHoveredDay(ownerState.day),
-            onPointerLeave: () => setHoveredDay(null),
-          }),
-        }}
-      />
+      <Stack direction="row">
+        <DateCalendar
+          value={weekValue}
+          onChange={setDay}
+          timezone="UTC"
+          showDaysOutsideCurrentMonth
+          slots={{ day: Day }}
+          slotProps={{
+            day: (ownerState) => ({
+              selectedDay: weekValue,
+              hoveredDay,
+              onPointerEnter: () => setHoveredDay(ownerState.day),
+              onPointerLeave: () => setHoveredDay(null),
+            }),
+          }}
+        />
+        <Box>
+          <Button onClick={gotoToday}>Today</Button>
+        </Box>
+      </Stack>
     </LocalizationProvider>
   );
 };

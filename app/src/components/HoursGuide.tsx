@@ -10,7 +10,7 @@ export const HoursGuide: React.FC = () => (
       <div
         css={css`
           text-align: right;
-          color: #777777;
+          color: #aaaaaa;
           margin-top: -10px;
           width: 80px;
           padding: 0 5px;

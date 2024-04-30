@@ -1,14 +1,18 @@
 /** @jsxImportSource @emotion/react */
-import React, { Suspense, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import _ from 'lodash';
+import React, { Suspense, useContext, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button, Stack } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import { WeeklyCalendar } from './WeekyCalendar';
-import { UserWithIncludes } from '../../../common/types/user';
-import { getUser, updateUser } from '../api/client';
+import _ from 'lodash';
+import { useTheme } from '@mui/material/styles';
+import { WeeklyCalendar } from '../components/WeekyCalendar';
+import {
+  ScheduleWithIncludes,
+  UserWithIncludes,
+} from '../../../common/types/user';
+import { updateUser } from '../api/client';
 import {
   Availability,
   AvailabilityException,
@@ -18,12 +22,14 @@ import {
   getTimezoneOffset,
   shiftAvailabilityByTimezone,
 } from '../../../common/util/timezones';
-import { WeekPicker } from './WeekPicker';
-import { DragPosition } from './DragContext';
-import { PageContainer } from './PageContainer';
-import { TimezonePicker } from './TimezonePicker';
-import { useSchedule } from '../hooks/useSchedule';
-import { ScheduleInstructions } from './ScheduleInstructions';
+import { WeekPicker } from '../components/WeekPicker';
+import { DragPosition } from '../contexts/DragContext';
+import { PageContainer } from '../components/PageContainer';
+import { TimezonePicker } from '../components/TimezonePicker';
+import { ScheduleInstructions } from '../components/ScheduleInstructions';
+import { ScheduleContext } from '../contexts/ScheduleContainer';
+import { ScheduleUserContext } from '../contexts/ScheduleUserContainer';
+import { generateDayLabels } from '../utils/day-labels';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -193,23 +199,15 @@ function updateExceptions(
 }
 
 export const ExceptionsCalendar: React.FC = () => {
-  const [user, setUser] = useState<UserWithIncludes | null>(null);
-  const [week, setWeek] = useState<Dayjs>(dayjs().startOf('week'));
-
-  const { userId } = useParams();
-  const schedule = useSchedule();
-
-  useEffect(() => {
-    if (!schedule || !userId) {
-      return;
-    }
-
-    // eslint-disable-next-line no-void
-    void getUser(schedule.id, parseInt(userId, 10)).then((newUser) => {
-      setUser(newUser);
-      setWeek(dayjs().tz(newUser.timezone!).startOf('week'));
-    });
-  }, [schedule]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const paramsWeek = searchParams.get('week');
+  const initialWeekValue = paramsWeek
+    ? dayjs.unix(parseInt(paramsWeek, 10)).startOf('week')
+    : dayjs().startOf('week');
+  const [week, setWeek] = useState<Dayjs>(initialWeekValue);
+  const [user, setUser] = useContext(ScheduleUserContext);
+  const [schedule, setSchedule, forceScheduleRefresh] =
+    useContext(ScheduleContext);
 
   const onAvailabilityUpdate = async (
     availability: Availability[][],
@@ -239,6 +237,7 @@ export const ExceptionsCalendar: React.FC = () => {
     };
     setUser(updatedUser);
     await updateUser(updatedUser);
+    await forceScheduleRefresh();
   };
 
   const setTimezone = async (newTimezone: string) => {
@@ -252,7 +251,7 @@ export const ExceptionsCalendar: React.FC = () => {
       user.availability.weekly,
       -1 * offsetDifference,
     );
-    const updatedUser = {
+    const updatedUser: ScheduleWithIncludes['users'][number] = {
       ...user,
       availability: {
         ...user.availability,
@@ -263,13 +262,18 @@ export const ExceptionsCalendar: React.FC = () => {
 
     setUser(updatedUser);
     await updateUser(updatedUser);
-    setWeek(dayjs().tz(updatedUser.timezone).startOf('week')); // Update week value to respect new timezone
+    setWeek(
+      dayjs()
+        .tz(updatedUser.timezone || undefined)
+        .startOf('week'),
+    ); // Update week value to respect new timezone
+    await forceScheduleRefresh();
   };
 
   const navigate = useNavigate();
 
   const onBack = () => {
-    navigate(`/schedule/${schedule?.inviteCode}/user/${userId}`);
+    navigate(`/schedule/${schedule?.inviteCode}/user/${user.id}`);
   };
 
   const availabilityWithExceptions = useMemo(() => {
@@ -344,6 +348,13 @@ export const ExceptionsCalendar: React.FC = () => {
     ];
   }, [week]);
 
+  const theme = useTheme();
+
+  const dayLabelProps = useMemo(
+    () => generateDayLabels(week, theme),
+    [week, theme],
+  );
+
   const weeklyCalendarHeaderChildren = _.times(7, (index) => {
     if (
       !user ||
@@ -353,11 +364,11 @@ export const ExceptionsCalendar: React.FC = () => {
     }
     return (
       <Button
-        onClick={() => {
+        onClick={async () => {
           if (!user) {
             return;
           }
-          const updatedUser: UserWithIncludes = {
+          const updatedUser: ScheduleWithIncludes['users'][number] = {
             ...user,
             availability: {
               ...user.availability,
@@ -371,7 +382,8 @@ export const ExceptionsCalendar: React.FC = () => {
 
           setUser(updatedUser);
           // eslint-disable-next-line no-void
-          void updateUser(updatedUser);
+          await updateUser(updatedUser);
+          await forceScheduleRefresh();
         }}
       >
         Reset Day
@@ -382,14 +394,15 @@ export const ExceptionsCalendar: React.FC = () => {
   if (
     user == null ||
     user.availability == null ||
-    availabilityWithExceptions == null
+    availabilityWithExceptions == null ||
+    schedule == null
   ) {
     return <Suspense />;
   }
 
   return (
     <PageContainer>
-      <Stack direction="row">
+      <Stack direction="row" spacing={4}>
         <Stack spacing={1} maxWidth="sm">
           <Button variant="outlined" onClick={onBack}>
             Back To User
@@ -399,6 +412,7 @@ export const ExceptionsCalendar: React.FC = () => {
             setWeekValue={(newWeek) => {
               // setWeek(newWeek.tz(user.timezone!));
               setWeek(newWeek);
+              setSearchParams({ week: newWeek.unix().toString() });
             }}
             timezone={user.timezone!}
           />
@@ -409,7 +423,9 @@ export const ExceptionsCalendar: React.FC = () => {
           availability={availabilityWithExceptions}
           onAvailabilityUpdate={onAvailabilityUpdate}
           labels={dayLabels}
+          labelProps={dayLabelProps}
           headerChildren={weeklyCalendarHeaderChildren}
+          scheduleGranularity={schedule.granularity}
         />
       </Stack>
     </PageContainer>

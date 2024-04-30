@@ -1,30 +1,38 @@
 /** @jsxImportSource @emotion/react */
-import React, { Suspense, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { Suspense, useContext, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Button,
   FormControl,
   Stack,
+  Theme,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
+  TypographyProps,
 } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import dayjsTimezone from 'dayjs/plugin/timezone';
-import { AvailabilityException } from '../../../common/types/availability-state';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { useTheme } from '@mui/material/styles';
+import _ from 'lodash';
 import {
   getCurrentTimezone,
   getTimezoneOffset,
   shiftAvailabilityByTimezone,
 } from '../../../common/util/timezones';
-import { WeekPicker } from './WeekPicker';
-import { PageContainer } from './PageContainer';
-import { TimezonePicker } from './TimezonePicker';
-import { useSchedule } from '../hooks/useSchedule';
+import { WeekPicker } from '../components/WeekPicker';
+import { PageContainer } from '../components/PageContainer';
+import { TimezonePicker } from '../components/TimezonePicker';
 import { aggregateUserAvailabilities } from '../utils/aggregate';
 import { AggregationType } from '../../../common/types/aggregation-type';
-import { AggregateWeeklyCalendar } from './AggregateWeekyCalendar';
+import { AggregateWeeklyCalendar } from '../components/AggregateWeekyCalendar';
+import { ScheduleContext } from '../contexts/ScheduleContainer';
+import { generateDayLabels } from '../utils/day-labels';
 
 dayjs.extend(utc);
 dayjs.extend(dayjsTimezone);
@@ -33,10 +41,14 @@ const msPerInterval = 1000 * 60 * 15; // milliseconds in 15 minutes
 const intervalsPerDay = (24 * 60) / 15; // count of intervals per day
 
 export const AggregateExceptionsCalendar: React.FC = () => {
-  const [week, setWeek] = useState<Dayjs>(dayjs().startOf('week'));
+  const [searchParams, setSearchParams] = useSearchParams();
+  const paramsWeek = searchParams.get('week');
+  const initialWeekValue = paramsWeek
+    ? dayjs.unix(parseInt(paramsWeek, 10)).startOf('week')
+    : dayjs().startOf('week');
+  const [week, setWeek] = useState<Dayjs>(initialWeekValue);
 
-  const schedule = useSchedule();
-
+  const [schedule] = useContext(ScheduleContext);
   const navigate = useNavigate();
 
   const [aggregationType, setAggregationType] = useState<AggregationType>(
@@ -120,6 +132,8 @@ export const AggregateExceptionsCalendar: React.FC = () => {
     return aggregateUserAvailabilities(userAvailabilities, aggregationType);
   }, [schedule, week, aggregationType, timezone]);
 
+  const theme = useTheme();
+
   const dayLabels = useMemo(() => {
     return [
       week.day(0).format('ddd MMM D'),
@@ -132,13 +146,18 @@ export const AggregateExceptionsCalendar: React.FC = () => {
     ];
   }, [week]);
 
+  const dayLabelProps = useMemo(
+    () => generateDayLabels(week, theme),
+    [week, theme],
+  );
+
   if (schedule == null || availabilityWithExceptions == null) {
     return <Suspense />;
   }
 
   return (
     <PageContainer>
-      <Stack direction="row">
+      <Stack direction="row" spacing={4}>
         <Stack spacing={2}>
           <Button variant="outlined" onClick={onBack}>
             Back To Schedule
@@ -148,29 +167,43 @@ export const AggregateExceptionsCalendar: React.FC = () => {
             setWeekValue={(newWeek) => {
               // setWeek(newWeek.tz(user.timezone!));
               setWeek(newWeek);
+              setSearchParams({ week: newWeek.unix().toString() });
             }}
             timezone={timezone}
           />
-          <FormControl fullWidth>
-            <Typography variant="h6">Aggregation Type</Typography>
-            <ToggleButtonGroup
-              value={aggregationType}
-              exclusive
-              onChange={(e, value) =>
-                setAggregationType(value as AggregationType)
-              }
-            >
-              <ToggleButton value={AggregationType.Shared}>Shared</ToggleButton>
-              <ToggleButton value={AggregationType.Average}>
-                Average
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </FormControl>
-          <TimezonePicker timezone={timezone} setTimezone={setTimezone} />
+          <Accordion>
+            <AccordionSummary expandIcon={<ArrowDropDownIcon />}>
+              <Typography>Advanced Settings</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Stack spacing={2}>
+                <FormControl fullWidth>
+                  <Typography variant="h6">Aggregation Type</Typography>
+                  <ToggleButtonGroup
+                    value={aggregationType}
+                    exclusive
+                    onChange={(e, value) =>
+                      setAggregationType(value as AggregationType)
+                    }
+                  >
+                    <ToggleButton value={AggregationType.Shared}>
+                      Shared
+                    </ToggleButton>
+                    <ToggleButton value={AggregationType.Average}>
+                      Average
+                    </ToggleButton>
+                  </ToggleButtonGroup>
+                </FormControl>
+                <TimezonePicker timezone={timezone} setTimezone={setTimezone} />
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
         </Stack>
         <AggregateWeeklyCalendar
           availability={availabilityWithExceptions}
           labels={dayLabels}
+          labelProps={dayLabelProps}
+          granularity={schedule.granularity}
         />
       </Stack>
     </PageContainer>

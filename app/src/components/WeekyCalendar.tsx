@@ -1,9 +1,12 @@
 /** @jsxImportSource @emotion/react */
 import React, { useEffect, useMemo, useState } from 'react';
+import _ from 'lodash';
 import { css } from '@emotion/react';
+import { ScheduleGranularity } from '@prisma/client';
+import { Box, TypographyProps } from '@mui/material';
 import { DayView } from './DayView';
 import { HoursGuide } from './HoursGuide';
-import { DragContext, DragPosition } from './DragContext';
+import { DragContext, DragPosition } from '../contexts/DragContext';
 import { Nullable } from '../../../common/types/nullable';
 import { Availability } from '../../../common/types/availability-state';
 
@@ -56,7 +59,9 @@ export const WeeklyCalendar: React.FC<{
     dragNewState: Availability,
   ) => Promise<void>;
   labels?: string[];
+  labelProps?: TypographyProps[];
   headerChildren?: React.ReactNode[];
+  scheduleGranularity: ScheduleGranularity;
 }> = ({
   availability,
   onAvailabilityUpdate,
@@ -69,12 +74,16 @@ export const WeeklyCalendar: React.FC<{
     'Friday',
     'Saturday',
   ],
+  labelProps = [],
+  scheduleGranularity,
   headerChildren = [],
 }) => {
   const [dragging, setDragging] = useState<boolean>(false);
   const [dragNewState, setDragNewState] =
     useState<Nullable<Availability>>(null);
   const [dragStart, setDragStart] = useState<Nullable<DragPosition>>(null);
+  const [dragTempLocation, setDragTempLocation] =
+    useState<Nullable<DragPosition>>(null);
   const [temporaryStates, setTemporaryStates] = useState(availability);
 
   useEffect(() => {
@@ -84,6 +93,7 @@ export const WeeklyCalendar: React.FC<{
   const onDragStart = (e: React.MouseEvent, pos: DragPosition) => {
     setDragging(true);
     setDragStart(pos);
+    setDragTempLocation(pos);
     const initialValue: Availability = availability[pos.day][pos.time];
     const newState = getNewAvailabilityValue(initialValue, e.button);
     setDragNewState(newState);
@@ -105,11 +115,14 @@ export const WeeklyCalendar: React.FC<{
     }
     return false;
   };
-  const onMouseOut = () => {
-    setDragging(false);
+  const onMouseOut = async (e: React.MouseEvent) => {
+    if (dragTempLocation) {
+      await onDragEnd(e, dragTempLocation);
+    }
   };
   const onDrag = (e: React.MouseEvent, pos: DragPosition) => {
     if (dragging) {
+      setDragTempLocation(pos);
       setTemporaryStates(
         updateAvailabilityBox(availability, dragStart!, pos, dragNewState!),
       );
@@ -142,7 +155,7 @@ export const WeeklyCalendar: React.FC<{
 
   return (
     <DragContext.Provider value={dragContextValue}>
-      <div
+      <Box
         css={css`
           display: flex;
           flex-direction: row;
@@ -160,65 +173,21 @@ export const WeeklyCalendar: React.FC<{
           `}
         >
           <HoursGuide />
-          <DayView
-            day={0}
-            editable
-            availability={temporaryStates[0]}
-            setDayTo={(newAvailability) => setDayTo(0, newAvailability)}
-            label={labels[0]}
-            headerChild={headerChildren[0]}
-          />
-          <DayView
-            day={1}
-            editable
-            availability={temporaryStates[1]}
-            setDayTo={(newAvailability) => setDayTo(1, newAvailability)}
-            label={labels[1]}
-            headerChild={headerChildren[1]}
-          />
-          <DayView
-            day={2}
-            editable
-            availability={temporaryStates[2]}
-            setDayTo={(newAvailability) => setDayTo(2, newAvailability)}
-            label={labels[2]}
-            headerChild={headerChildren[2]}
-          />
-          <DayView
-            day={3}
-            editable
-            availability={temporaryStates[3]}
-            setDayTo={(newAvailability) => setDayTo(3, newAvailability)}
-            label={labels[3]}
-            headerChild={headerChildren[3]}
-          />
-          <DayView
-            day={4}
-            editable
-            availability={temporaryStates[4]}
-            setDayTo={(newAvailability) => setDayTo(4, newAvailability)}
-            label={labels[4]}
-            headerChild={headerChildren[4]}
-          />
-          <DayView
-            day={5}
-            editable
-            availability={temporaryStates[5]}
-            setDayTo={(newAvailability) => setDayTo(5, newAvailability)}
-            label={labels[5]}
-            headerChild={headerChildren[5]}
-          />
-          <DayView
-            day={6}
-            editable
-            availability={temporaryStates[6]}
-            setDayTo={(newAvailability) => setDayTo(6, newAvailability)}
-            label={labels[6]}
-            headerChild={headerChildren[6]}
-          />
+          {_.times(7, (index) => (
+            <DayView
+              day={index}
+              editable
+              availability={temporaryStates[index]}
+              setDayTo={(newAvailability) => setDayTo(index, newAvailability)}
+              label={labels[index]}
+              labelProps={labelProps[index]}
+              headerChild={headerChildren[index]}
+              granularity={scheduleGranularity}
+            />
+          ))}
           <HoursGuide />
         </div>
-      </div>
+      </Box>
     </DragContext.Provider>
   );
 };

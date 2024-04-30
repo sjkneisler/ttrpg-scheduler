@@ -2,20 +2,56 @@
 import React, { useContext } from 'react';
 import { css } from '@emotion/react';
 import _ from 'lodash';
-import { IconButton } from '@mui/material';
+import { Box, IconButton, Typography, TypographyProps } from '@mui/material';
+import { ScheduleGranularity } from '@prisma/client';
 import { getColorFromAvailabilityState } from '../utils/availbility-states';
-import { DragContext } from './DragContext';
+import { DragContext } from '../contexts/DragContext';
 import { Availability } from '../../../common/types/availability-state';
 import { getDayText } from '../utils/day';
+import { HoverContext } from '../contexts/HoverContext';
 
-function getBorderForTimeSegment(intervalNum: number): string {
+function getBorderForTimeSegment(
+  intervalNum: number,
+  granularity: ScheduleGranularity,
+): string {
+  if (intervalNum === 0 && granularity === ScheduleGranularity.ONEHOUR) {
+    return '2px 1px 2px 1px';
+  }
   if (intervalNum === 0) {
     return '2px 1px 1px 1px';
   }
-  if (intervalNum === 3) {
+  if (
+    (intervalNum === 3 && granularity === ScheduleGranularity.FIFTEENMINUTES) ||
+    (intervalNum === 1 && granularity === ScheduleGranularity.THIRTYMINUTES)
+  ) {
     return '1px 1px 2px 1px';
   }
   return '1px';
+}
+
+const granularityToDragStartMap: Record<ScheduleGranularity, number> = {
+  ONEHOUR: 4, // This value won't ever matter
+  THIRTYMINUTES: 2,
+  FIFTEENMINUTES: 1,
+};
+
+function getDragStart(
+  hourCount: number,
+  segment: number,
+  granularity: ScheduleGranularity,
+): number {
+  return hourCount * 4 + segment * granularityToDragStartMap[granularity];
+}
+
+function getDragEnd(
+  hourCount: number,
+  segment: number,
+  granularity: ScheduleGranularity,
+): number {
+  return (
+    getDragStart(hourCount, segment, granularity) +
+    (granularityToDragStartMap[granularity] - 1)
+  );
 }
 
 const ColorButton: React.FC<{
@@ -36,7 +72,21 @@ export type DayViewProps = {
   setDayTo: (availability: Availability) => Promise<void>;
   editable: boolean;
   label?: string;
+  labelProps?: TypographyProps;
   headerChild?: React.ReactNode;
+  granularity: ScheduleGranularity;
+};
+
+const granularityToCellsPerHourMap: Record<ScheduleGranularity, number> = {
+  ONEHOUR: 1,
+  THIRTYMINUTES: 2,
+  FIFTEENMINUTES: 4,
+};
+
+const granularityToCellHeightMap: Record<ScheduleGranularity, number> = {
+  ONEHOUR: 26,
+  THIRTYMINUTES: 12,
+  FIFTEENMINUTES: 5,
 };
 
 export const DayView: React.FC<DayViewProps> = ({
@@ -46,19 +96,24 @@ export const DayView: React.FC<DayViewProps> = ({
   editable,
   label = getDayText(day),
   headerChild,
+  granularity,
+  labelProps,
 }) => {
   const { onDragStart, onDragEnd, onDrag } = useContext(DragContext);
+  const { onMouseEnter, onMouseLeave } = useContext(HoverContext);
+
   return (
     <>
-      <div>
-        <div
+      <Box>
+        <Typography
           css={css`
             text-align: center;
             margin: 10px 0;
           `}
+          {...labelProps}
         >
           {label}
-        </div>
+        </Typography>
         {editable && (
           <div>
             Set day to:
@@ -81,7 +136,7 @@ export const DayView: React.FC<DayViewProps> = ({
           </div>
         )}
         {headerChild}
-      </div>
+      </Box>
       {_.times(24, (hourCount) => (
         <div
           key={hourCount}
@@ -91,31 +146,54 @@ export const DayView: React.FC<DayViewProps> = ({
             flex-direction: column;
           `}
         >
-          {_.times(4, (num) => (
+          {_.times(granularityToCellsPerHourMap[granularity], (num) => (
             <div
               key={num}
               css={css`
                 flex: 1 1 auto;
                 width: 100px;
-                height: 5px;
-                border-color: #000000ff;
+                height: ${granularityToCellHeightMap[granularity]}px;
+                border-color: #444;
                 border-style: solid;
-                border-width: ${getBorderForTimeSegment(num)};
+                border-width: ${getBorderForTimeSegment(num, granularity)};
                 background-color: ${getColorFromAvailabilityState(
-                  availability[hourCount * 4 + num],
+                  availability[getDragStart(hourCount, num, granularity)],
                 )};
                 cursor: ${editable ? 'pointer' : 'default'};
               `}
-              onMouseMove={(e) => onDrag(e, { day, time: hourCount * 4 + num })}
+              onMouseMove={(e) =>
+                onDrag(e, {
+                  day,
+                  time: getDragEnd(hourCount, num, granularity),
+                })
+              }
               onMouseDown={(e) =>
-                onDragStart(e, { day, time: hourCount * 4 + num })
+                onDragStart(e, {
+                  day,
+                  time: getDragStart(hourCount, num, granularity),
+                })
               }
               onMouseUp={(e) =>
-                onDragEnd(e, { day, time: hourCount * 4 + num })
+                onDragEnd(e, {
+                  day,
+                  time: getDragEnd(hourCount, num, granularity),
+                })
               }
               onContextMenu={(e) => {
                 e.preventDefault();
               }}
+              onMouseEnter={(e) =>
+                onMouseEnter(e, {
+                  day,
+                  time: getDragStart(hourCount, num, granularity),
+                })
+              }
+              onMouseLeave={(e) =>
+                onMouseLeave(e, {
+                  day,
+                  time: getDragStart(hourCount, num, granularity),
+                })
+              }
             />
           ))}
         </div>

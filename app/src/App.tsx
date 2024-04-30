@@ -1,14 +1,18 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
+import { CssBaseline, ThemeProvider } from '@mui/material';
 import './App.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { UserWeeklyCalendar } from './components/UserWeeklyCalendar';
-import { Home } from './components/Home';
-import { CampaignView } from './components/CampaignView';
-import { ExceptionsCalendar } from './components/ExceptionsCalendar';
-import { AggregateExceptionsCalendar } from './components/AggregateExceptionsCalendar';
-import { NewUserPage } from './components/NewUserPage';
-import { AttributionsPage } from './components/AttributionsPage';
+import { UserWeeklyCalendar } from './pages/UserWeeklyCalendar';
+import { Home } from './pages/Home';
+import { CampaignView } from './pages/CampaignView';
+import { ExceptionsCalendar } from './pages/ExceptionsCalendar';
+import { AggregateExceptionsCalendar } from './pages/AggregateExceptionsCalendar';
+import { NewUserPage } from './pages/NewUserPage';
+import { AttributionsPage } from './pages/AttributionsPage';
+import { ScheduleContainer } from './contexts/ScheduleContainer';
+import { ScheduleUserContainer } from './contexts/ScheduleUserContainer';
+import { darkTheme } from './themes/dark';
 
 const router = createBrowserRouter([
   {
@@ -17,23 +21,35 @@ const router = createBrowserRouter([
   },
   {
     path: '/schedule/:scheduleInviteCode',
-    element: <CampaignView />,
-  },
-  {
-    path: '/schedule/:scheduleInviteCode/invite',
-    element: <NewUserPage />,
-  },
-  {
-    path: '/schedule/:scheduleInviteCode/plan',
-    element: <AggregateExceptionsCalendar />,
-  },
-  {
-    path: '/schedule/:scheduleInviteCode/user/:userId',
-    element: <UserWeeklyCalendar />,
-  },
-  {
-    path: '/schedule/:scheduleInviteCode/user/:userId/exceptions',
-    element: <ExceptionsCalendar />,
+    element: <ScheduleContainer />,
+    children: [
+      {
+        path: '',
+        element: <CampaignView />,
+      },
+      {
+        path: 'invite',
+        element: <NewUserPage />,
+      },
+      {
+        path: 'plan',
+        element: <AggregateExceptionsCalendar />,
+      },
+      {
+        path: 'user/:userId',
+        element: <ScheduleUserContainer />,
+        children: [
+          {
+            path: '',
+            element: <UserWeeklyCalendar />,
+          },
+          {
+            path: 'exceptions',
+            element: <ExceptionsCalendar />,
+          },
+        ],
+      },
+    ],
   },
   {
     path: '/attributions',
@@ -42,7 +58,12 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <RouterProvider router={router} />
+    </ThemeProvider>
+  );
 }
 
 export default App;

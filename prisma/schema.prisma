@@ -1,32 +1,40 @@
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 generator client {
   provider = "prisma-client-js"
 }
+
 generator json {
   provider = "prisma-json-types-generator"
 }
 
+enum ScheduleGranularity {
+  FIFTEENMINUTES
+  THIRTYMINUTES
+  ONEHOUR
+}
+
 model Schedule {
-  id Int @id @default(autoincrement())
-  name String
-  inviteCode String // Invite code to make it a bit more secure (should this be a separate table?)
-  users ScheduleUser[]
+  id          Int                 @id @default(autoincrement())
+  name        String
+  inviteCode  String // Invite code to make it a bit more secure (should this be a separate table?)
+  users       ScheduleUser[]
+  granularity ScheduleGranularity @default(THIRTYMINUTES)
 }
 
 // A temporary user local to each schedule
 model ScheduleUser {
-  id Int @id @default(autoincrement())
-  name String
-  schedule Schedule @relation(fields: [scheduleId], references: [id])
-  scheduleId Int
+  id                     Int      @id @default(autoincrement())
+  name                   String
+  schedule               Schedule @relation(fields: [scheduleId], references: [id])
+  scheduleId             Int
   /// [UserAvailability]
-  availability Json
-  timezone String?
-  passwordHash String?
-  passwordSalt String?
+  availability           Json
+  timezone               String?
+  passwordHash           String?
+  passwordSalt           String?
   passwordSaltIterations Int?
 }
