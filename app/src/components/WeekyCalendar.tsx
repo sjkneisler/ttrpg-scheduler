@@ -159,12 +159,15 @@ export const WeeklyCalendar: React.FC<{
         css={css`
           display: flex;
           flex-direction: row;
+          flex: 0 0 auto;
         `}
         onMouseLeave={onMouseOut}
       >
         <div
           css={css`
             display: grid;
+            align-self: start;
+            justify-self: start;
             grid-auto-flow: column;
             grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
             grid-template-rows: auto 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;

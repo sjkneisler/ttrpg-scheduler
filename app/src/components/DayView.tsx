@@ -150,7 +150,7 @@ export const DayView: React.FC<DayViewProps> = ({
             <div
               key={num}
               css={css`
-                flex: 1 1 auto;
+                flex: 0 0 auto;
                 width: 100px;
                 height: ${granularityToCellHeightMap[granularity]}px;
                 border-color: #444;

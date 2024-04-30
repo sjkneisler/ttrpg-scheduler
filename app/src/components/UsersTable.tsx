@@ -1,6 +1,7 @@
 import {
   Button,
   Card,
+  Checkbox,
   FormControl,
   Stack,
   Table,
@@ -42,6 +43,9 @@ export const UsersTable: React.FC = () => {
     }
     navigate(`/schedule/${schedule.inviteCode}/user/${userId}`);
   };
+
+  const handleCheckUser =
+    (userId: number) => (event: React.ChangeEvent<HTMLInputElement>) => {};
 
   if (!schedule) {
     return <Suspense />;
@@ -95,6 +99,12 @@ export const UsersTable: React.FC = () => {
                   <Button variant="outlined" onClick={() => goToUser(user.id)}>
                     Goto
                   </Button>
+                </TableCell>
+                <TableCell>
+                  <Checkbox
+                    defaultChecked
+                    onChange={handleCheckUser(user.id)}
+                  />
                 </TableCell>
               </TableRow>
             ))}
