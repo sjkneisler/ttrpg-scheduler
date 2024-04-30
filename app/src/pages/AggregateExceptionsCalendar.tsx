@@ -204,6 +204,7 @@ export const AggregateExceptionsCalendar: React.FC = () => {
           labels={dayLabels}
           labelProps={dayLabelProps}
           granularity={schedule.granularity}
+          timezone={timezone}
         />
       </Stack>
     </PageContainer>

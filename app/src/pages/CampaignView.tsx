@@ -146,6 +146,7 @@ export const CampaignView: React.FC = () => {
         <AggregateWeeklyCalendar
           availability={showAvailability}
           granularity={schedule.granularity}
+          timezone={timezone}
         />
       </Stack>
     </PageContainer>

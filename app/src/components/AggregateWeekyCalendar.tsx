@@ -24,6 +24,7 @@ export const AggregateWeeklyCalendar: React.FC<{
   labels?: string[];
   labelProps?: TypographyProps[];
   granularity: ScheduleGranularity;
+  timezone: string;
 }> = ({
   availability,
   labels = [
@@ -37,6 +38,7 @@ export const AggregateWeeklyCalendar: React.FC<{
   ],
   labelProps = [],
   granularity,
+  timezone,
 }) => {
   const [currentHover, setCurrentHover] = useState<DragPosition | null>(null);
   const [schedule] = useContext(ScheduleContext);
@@ -72,7 +74,7 @@ export const AggregateWeeklyCalendar: React.FC<{
           return (
             shiftAvailabilityByTimezone(
               user.availability.weekly,
-              getTimezoneOffset(user.timezone || getCurrentTimezone()),
+              getTimezoneOffset(timezone || getCurrentTimezone()),
             )[currentHover.day][currentHover.time] === Availability.Green
           );
         })
@@ -82,7 +84,7 @@ export const AggregateWeeklyCalendar: React.FC<{
           return (
             shiftAvailabilityByTimezone(
               user.availability.weekly,
-              getTimezoneOffset(user.timezone || getCurrentTimezone()),
+              getTimezoneOffset(timezone || getCurrentTimezone()),
             )[currentHover.day][currentHover.time] === Availability.Yellow
           );
         })
@@ -92,7 +94,7 @@ export const AggregateWeeklyCalendar: React.FC<{
           return (
             shiftAvailabilityByTimezone(
               user.availability.weekly,
-              getTimezoneOffset(user.timezone || getCurrentTimezone()),
+              getTimezoneOffset(timezone || getCurrentTimezone()),
             )[currentHover.day][currentHover.time] === Availability.Red
           );
         })
@@ -133,7 +135,7 @@ export const AggregateWeeklyCalendar: React.FC<{
           <HoursGuide />
         </div>
       </div>
-      {currentHover && userAvailabilities && (
+      {currentHover && userAvailabilities && schedule.users.length > 0 && (
         <TimeDetailOverlay
           startTime={currentHover}
           userAvailabilities={userAvailabilities}
