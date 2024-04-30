@@ -144,5 +144,6 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  }
+  },
+  "license": "AGPL-3.0-only"
 }
