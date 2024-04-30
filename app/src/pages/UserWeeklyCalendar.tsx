@@ -33,12 +33,12 @@ export const UserWeeklyCalendar: React.FC = () => {
         weekly: shiftedAvailability,
       },
     };
-    setUser(updatedUser);
     await updateUser(updatedUser);
-    forceScheduleRefresh();
+    setUser(updatedUser);
+    await forceScheduleRefresh();
   };
 
-  const setTimezone = (newTimezone: string) => {
+  const setTimezone = async (newTimezone: string) => {
     if (!user) {
       return;
     }
@@ -58,10 +58,9 @@ export const UserWeeklyCalendar: React.FC = () => {
       timezone: newTimezone,
     };
 
-    // eslint-disable-next-line no-void
-    void updateUser(updatedUser);
+    await updateUser(updatedUser);
     setUser(updatedUser);
-    forceScheduleRefresh();
+    await forceScheduleRefresh();
   };
 
   const navigate = useNavigate();
@@ -95,7 +94,7 @@ export const UserWeeklyCalendar: React.FC = () => {
 
   return (
     <PageContainer>
-      <Stack direction="row">
+      <Stack direction="row" spacing={4}>
         <Stack spacing={2} maxWidth="sm">
           <Button variant="outlined" onClick={onBack}>
             Back To Schedule

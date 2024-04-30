@@ -88,7 +88,7 @@ export const CampaignView: React.FC = () => {
 
   return (
     <PageContainer>
-      <Stack direction="row">
+      <Stack direction="row" spacing={4}>
         <Stack spacing={2}>
           <UsersTable />
           <Button variant="outlined" onClick={gotoPlan}>

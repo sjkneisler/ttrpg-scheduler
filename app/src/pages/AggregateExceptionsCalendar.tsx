@@ -157,7 +157,7 @@ export const AggregateExceptionsCalendar: React.FC = () => {
 
   return (
     <PageContainer>
-      <Stack direction="row">
+      <Stack direction="row" spacing={4}>
         <Stack spacing={2}>
           <Button variant="outlined" onClick={onBack}>
             Back To Schedule

@@ -237,7 +237,7 @@ export const ExceptionsCalendar: React.FC = () => {
     };
     setUser(updatedUser);
     await updateUser(updatedUser);
-    forceScheduleRefresh();
+    await forceScheduleRefresh();
   };
 
   const setTimezone = async (newTimezone: string) => {
@@ -267,7 +267,7 @@ export const ExceptionsCalendar: React.FC = () => {
         .tz(updatedUser.timezone || undefined)
         .startOf('week'),
     ); // Update week value to respect new timezone
-    forceScheduleRefresh();
+    await forceScheduleRefresh();
   };
 
   const navigate = useNavigate();
@@ -383,7 +383,7 @@ export const ExceptionsCalendar: React.FC = () => {
           setUser(updatedUser);
           // eslint-disable-next-line no-void
           await updateUser(updatedUser);
-          forceScheduleRefresh();
+          await forceScheduleRefresh();
         }}
       >
         Reset Day
@@ -402,7 +402,7 @@ export const ExceptionsCalendar: React.FC = () => {
 
   return (
     <PageContainer>
-      <Stack direction="row">
+      <Stack direction="row" spacing={4}>
         <Stack spacing={1} maxWidth="sm">
           <Button variant="outlined" onClick={onBack}>
             Back To User
