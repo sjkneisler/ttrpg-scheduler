@@ -37,4 +37,5 @@ model ScheduleUser {
   passwordHash           String?
   passwordSalt           String?
   passwordSaltIterations Int?
+  shown                  Boolean @default(true)
 }

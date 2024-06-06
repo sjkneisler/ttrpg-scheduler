@@ -64,12 +64,17 @@ export const AggregateWeeklyCalendar: React.FC<{
     };
   }, [onMouseEnter, onMouseLeave]);
 
+  const shownUsers = useMemo(
+    () => schedule.users.filter((user) => user.shown),
+    [schedule],
+  );
+
   const userAvailabilities = useMemo(() => {
     if (currentHover === null) {
       return null;
     }
     return {
-      [Availability.Green]: schedule.users
+      [Availability.Green]: shownUsers
         .filter((user) => {
           return (
             shiftAvailabilityByTimezone(
@@ -79,7 +84,7 @@ export const AggregateWeeklyCalendar: React.FC<{
           );
         })
         .map((user) => user.name),
-      [Availability.Yellow]: schedule.users
+      [Availability.Yellow]: shownUsers
         .filter((user) => {
           return (
             shiftAvailabilityByTimezone(
@@ -89,7 +94,7 @@ export const AggregateWeeklyCalendar: React.FC<{
           );
         })
         .map((user) => user.name),
-      [Availability.Red]: schedule.users
+      [Availability.Red]: shownUsers
         .filter((user) => {
           return (
             shiftAvailabilityByTimezone(
@@ -135,7 +140,7 @@ export const AggregateWeeklyCalendar: React.FC<{
           <HoursGuide />
         </div>
       </div>
-      {currentHover && userAvailabilities && schedule.users.length > 0 && (
+      {currentHover && userAvailabilities && shownUsers.length > 0 && (
         <TimeDetailOverlay
           startTime={currentHover}
           userAvailabilities={userAvailabilities}

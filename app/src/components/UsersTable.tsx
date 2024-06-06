@@ -1,6 +1,7 @@
 import {
   Button,
   Card,
+  Checkbox,
   FormControl,
   Stack,
   Table,
@@ -13,7 +14,8 @@ import {
 import React, { Suspense, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
-import { createUser } from '../api/client';
+import { sortBy } from 'lodash';
+import { createUser, updateSchedule, updateUser } from '../api/client';
 import { getCurrentTimezone } from '../../../common/util/timezones';
 import { CopyToClipboardButton } from './CopyToClipboardButton';
 import { ScheduleContext } from '../contexts/ScheduleContainer';
@@ -46,6 +48,32 @@ export const UsersTable: React.FC = () => {
   if (!schedule) {
     return <Suspense />;
   }
+
+  const setUserShown =
+    (userId: number) => async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const shown = event.target.checked;
+      const user = schedule.users.find(
+        (scheduleUser) => scheduleUser.id === userId,
+      )!;
+      const updatedUser = {
+        ...user,
+        shown,
+      };
+      const reconstructedUsers = schedule.users.map((scheduleUser) => {
+        if (scheduleUser.id === userId) {
+          return updatedUser;
+        }
+        return scheduleUser;
+      });
+
+      const newSchedule = {
+        ...schedule,
+        users: reconstructedUsers,
+      };
+
+      setSchedule(newSchedule);
+      await updateUser(updatedUser);
+    };
 
   const theme = useTheme();
 
@@ -88,13 +116,19 @@ export const UsersTable: React.FC = () => {
                 <TableCell>People</TableCell>
               </TableRow>
             </TableHead>
-            {schedule.users.map((user) => (
+            {sortBy(schedule.users, ['name']).map((user) => (
               <TableRow>
                 <TableCell>{user.name}</TableCell>
                 <TableCell>
                   <Button variant="outlined" onClick={() => goToUser(user.id)}>
                     Goto
                   </Button>
+                </TableCell>
+                <TableCell>
+                  <Checkbox
+                    checked={user.shown}
+                    onChange={setUserShown(user.id)}
+                  />
                 </TableCell>
               </TableRow>
             ))}

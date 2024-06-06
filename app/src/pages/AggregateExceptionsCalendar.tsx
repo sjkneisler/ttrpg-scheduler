@@ -68,66 +68,69 @@ export const AggregateExceptionsCalendar: React.FC = () => {
     if (!schedule) {
       return null;
     }
-    const userAvailabilities = schedule.users.map((user) => {
-      const shiftedWeeklyAvailability = shiftAvailabilityByTimezone(
-        user.availability.weekly,
-        getTimezoneOffset(timezone),
-      );
-      user.availability.exceptions
-        .map((exception) => ({
-          ...exception,
-          startTime: dayjs(exception.startTime).tz(user.timezone!),
-          endTime: dayjs(exception.endTime).tz(user.timezone!),
-        }))
-        .filter(({ startTime, endTime }) => {
-          const endWeek = week.endOf('week');
-          return (
-            startTime.isBetween(week, endWeek) ||
-            endTime.isBetween(week, endWeek)
-          );
-        })
-        .forEach(({ startTime, endTime, availability }) => {
-          const startDayIndex = startTime.day();
-          const endDayIndex = endTime.day();
-          const startTimeMs = startTime.diff(
-            startTime.startOf('day'),
-            'milliseconds',
-          );
-          const endTimeMs = endTime.diff(
-            endTime.startOf('day'),
-            'milliseconds',
-          );
+    const userAvailabilities = schedule.users
+      .filter((user) => user.shown)
+      .map((user) => {
+        const shiftedWeeklyAvailability = shiftAvailabilityByTimezone(
+          user.availability.weekly,
+          getTimezoneOffset(timezone),
+        );
+        user.availability.exceptions
+          .map((exception) => ({
+            ...exception,
+            startTime: dayjs(exception.startTime).tz(user.timezone!),
+            endTime: dayjs(exception.endTime).tz(user.timezone!),
+          }))
+          .filter(({ startTime, endTime }) => {
+            const endWeek = week.endOf('week');
+            return (
+              startTime.isBetween(week, endWeek) ||
+              endTime.isBetween(week, endWeek)
+            );
+          })
+          .forEach(({ startTime, endTime, availability }) => {
+            const startDayIndex = startTime.day();
+            const endDayIndex = endTime.day();
+            const startTimeMs = startTime.diff(
+              startTime.startOf('day'),
+              'milliseconds',
+            );
+            const endTimeMs = endTime.diff(
+              endTime.startOf('day'),
+              'milliseconds',
+            );
 
-          // Calculate the start and end intervals in the week
-          const startIntervalIndex = Math.floor(
-            (startTimeMs % 86400000) / msPerInterval,
-          );
-          const endIntervalIndex = Math.floor(
-            (endTimeMs % 86400000) / msPerInterval,
-          );
+            // Calculate the start and end intervals in the week
+            const startIntervalIndex = Math.floor(
+              (startTimeMs % 86400000) / msPerInterval,
+            );
+            const endIntervalIndex = Math.floor(
+              (endTimeMs % 86400000) / msPerInterval,
+            );
 
-          // If the availability spans multiple days, handle accordingly
-          let currentDayIndex = startDayIndex;
-          let currentIntervalIndex = startIntervalIndex;
+            // If the availability spans multiple days, handle accordingly
+            let currentDayIndex = startDayIndex;
+            let currentIntervalIndex = startIntervalIndex;
 
-          while (currentDayIndex <= endDayIndex) {
-            while (
-              (currentDayIndex < endDayIndex &&
-                currentIntervalIndex < intervalsPerDay) ||
-              (currentDayIndex === endDayIndex &&
-                currentIntervalIndex <= endIntervalIndex)
-            ) {
-              shiftedWeeklyAvailability[currentDayIndex][currentIntervalIndex] =
-                availability;
-              currentIntervalIndex++;
+            while (currentDayIndex <= endDayIndex) {
+              while (
+                (currentDayIndex < endDayIndex &&
+                  currentIntervalIndex < intervalsPerDay) ||
+                (currentDayIndex === endDayIndex &&
+                  currentIntervalIndex <= endIntervalIndex)
+              ) {
+                shiftedWeeklyAvailability[currentDayIndex][
+                  currentIntervalIndex
+                ] = availability;
+                currentIntervalIndex++;
+              }
+              currentIntervalIndex = 0;
+              currentDayIndex++;
             }
-            currentIntervalIndex = 0;
-            currentDayIndex++;
-          }
-        });
+          });
 
-      return shiftedWeeklyAvailability;
-    });
+        return shiftedWeeklyAvailability;
+      });
 
     return aggregateUserAvailabilities(userAvailabilities, aggregationType);
   }, [schedule, week, aggregationType, timezone]);

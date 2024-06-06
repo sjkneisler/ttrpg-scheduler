@@ -61,6 +61,7 @@ export function aggregateAvailability(
   timezoneOffset: number,
 ): AggregateAvailability {
   const userAvailabilities = schedule.users
+    .filter((user) => user.shown)
     .map((user) => user.availability.weekly)
     .map((weeklyAvailability) =>
       shiftAvailabilityByTimezone(weeklyAvailability, timezoneOffset),
