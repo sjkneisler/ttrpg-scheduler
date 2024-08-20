@@ -74,8 +74,10 @@ export const ScheduleContainer: React.FC = () => {
   >('recentSchedules', { defaultValue: [] });
 
   useEffect(() => {
+    if (schedule === null) {
+      return;
+    }
     if (
-      schedule !== null &&
       !recentScheduleData.some(
         ([recentScheduleInviteCode]) =>
           recentScheduleInviteCode === schedule.inviteCode,
@@ -85,6 +87,16 @@ export const ScheduleContainer: React.FC = () => {
         [schedule.inviteCode, schedule.name],
         ...recentScheduleData,
       ];
+      setRecentScheduleData(newData);
+    } else {
+      const newData: [string, string][] = [
+        [schedule.inviteCode, schedule.name],
+        ...recentScheduleData.filter(
+          ([recentScheduleInviteCode]) =>
+            recentScheduleInviteCode !== schedule.inviteCode,
+        ),
+      ];
+
       setRecentScheduleData(newData);
     }
   }, [schedule, recentScheduleData, setRecentScheduleData]);
