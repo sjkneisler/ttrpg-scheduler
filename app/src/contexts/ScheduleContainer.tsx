@@ -1,9 +1,7 @@
 import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { Outlet, useParams } from 'react-router-dom';
-import {
-  ScheduleWithIncludes,
-  UserWithIncludes,
-} from '../../../common/types/user';
+import useLocalStorageState from 'use-local-storage-state';
+import { ScheduleWithIncludes } from '../../../common/types/user';
 import { getScheduleByInviteCode } from '../api/client';
 
 export type ScheduleContextType = [
@@ -70,6 +68,26 @@ export const ScheduleContainer: React.FC = () => {
       setUser,
     ];
   }, [schedule]);
+
+  const [recentScheduleData, setRecentScheduleData] = useLocalStorageState<
+    [string, string][]
+  >('recentSchedules', { defaultValue: [] });
+
+  useEffect(() => {
+    if (
+      schedule !== null &&
+      !recentScheduleData.some(
+        ([recentScheduleInviteCode]) =>
+          recentScheduleInviteCode === schedule.inviteCode,
+      )
+    ) {
+      const newData: [string, string][] = [
+        [schedule.inviteCode, schedule.name],
+        ...recentScheduleData,
+      ];
+      setRecentScheduleData(newData);
+    }
+  }, [schedule, recentScheduleData, setRecentScheduleData]);
 
   if (!schedule) {
     return <Suspense />;
